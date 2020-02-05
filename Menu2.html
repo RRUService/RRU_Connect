@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <title>ระบบจัดการข้อมูลแช็ตบ็อตสำหรับสนับสนุนงานวิชาการและงานทะเบียน</title>
+  <meta charset="UTF-8">
+
+  <!--===============================================================================================-->
+  <link rel="icon" type="image/png" href="images/icons/favicon.ico" />
+
+  <link rel="stylesheet" type="text/css" href="css/util.css">
+  <link rel="stylesheet" type="text/css" href="css/main.css">
+
+  <link rel="stylesheet" href="tablecaa.css">
+
+  <link rel="stylesheet" href="https://www.w3schools.com/w3css/4/w3.css">
+
+
+  <!--===============================================================================================-->
+
+</head>
+<style>
+  .tend {
+    white-space: nowrap;
+  }
+
+  .wrapper {
+    margin: 0 auto;
+    padding: 50px;
+    max-width: 1300px;
+  }
+
+  body {
+    margin: 0;
+    font-family: Arial, Helvetica, sans-serif;
+  }
+
+  .top-container {
+    background-color: #f1f1f1;
+    padding: 30px;
+    text-align: center;
+  }
+
+  .header {
+    padding: 18px 16px;
+    background: #e9e9e9;
+    color: #f1f1f1;
+    position: relative;
+    top: -5px;
+
+  }
+
+  .content {
+    padding: 16px;
+  }
+
+  .sticky {
+    position: fixed;
+    top: 0;
+    width: 100%;
+    background: #488b45;
+  }
+
+  .sticky+.content {
+    padding-top: 102px;
+  }
+
+  .button {
+  background-color: #555555; 
+  border: none;
+  color: white;
+  padding: 12px 28px;
+  text-align: center;
+  text-decoration: none;
+  display: inline-block;
+  font-size: 16px;
+  margin: 4px 2px;
+  cursor: pointer;
+}
+
+</style>
+
+<body>
+
+  <img src="images/Capture.PNG" style="width: 100%; height: 30%;">
+
+
+
+  <div class="header" id="myHeader">
+
+    <a href="#home"><b>BR</b> Architects</a>
+    <!-- Float links to the right. Hide them on small screens -->
+
+    <a href="#projects">Projects</a>
+    <a href="#about">About</a>
+    <a href="#contact">Contact</a>
+
+  </div>
+
+
+  <div style="margin-left: 40%;margin-top: 5%;">
+    <h5>หมวดหมู่</h5>
+    <select name="category" id="category" onchange="ChangeCarList()" style="
+              margin: 0px;
+              height: 48px;
+              width: 282px;
+              padding: 8px 15px;
+              font-size: 17px;
+          ">
+      <option value="">กรุณาเลือกหมวดหัวข้อ</option>
+      <option value="Registration">การลงทะเบียน</option>
+      <option value="Education">ปฏิทินการศึกษา</option>
+      <option value="Books">การขอรับเอกสารการศึกษา</option>
+      <option value="">การสำเร็จการศึกษา</option>
+      <option value="">บัตรนักศึกษา</option>
+      <option value="">การสมัครเรียน</option>
+      <option value="">ค่าธรรมเนียมการศึกษา</option>
+      <option value="">การลาออก</option>
+      <option value="">การลา</option>
+      <option value="">การลาพักการศึกษา</option>
+      <option value="">การพ้นสภาพการเป็นนักศึกษา</option>
+      <option value="">การวัดและประเมินผล</option>
+      <option value="">อื่น ๆ</option>
+    </select>
+
+
+
+    <h5>หัวข้อ</h5>
+
+
+    <select name="subcategory" id="subcategory" 
+      style="margin: 0px;height: 48px;width: 282px;padding: 8px 15px;font-size: 17px;">
+
+    </select>
+
+  </div>
+
+  
+  <input class="button button5" type="button" value="แสดง" id="submit" onclick="myFunction1()" >
+
+
+</body>
+
+<script>
+
+
+  window.onscroll = function () { myFunction() };
+
+  var header = document.getElementById("myHeader");
+  var sticky = header.offsetTop;
+
+  function myFunction() {
+    if (window.pageYOffset > sticky) {
+      header.classList.add("sticky");
+    } else {
+      header.classList.remove("sticky");
+    }
+  }
+</script>
+</script>
+</script>
+<!-- TODO: Add SDKs for Firebase products that you want to use
+     https://firebase.google.com/docs/web/setup#available-libraries -->
+<script src="https://www.gstatic.com/firebasejs/7.7.0/firebase-app.js"></script>
+<script src="https://www.gstatic.com/firebasejs/7.7.0/firebase-auth.js"></script>
+<script src="https://www.gstatic.com/firebasejs/7.7.0/firebase-firestore.js"></script>
+<script>
+  // Your web app's Firebase configuration
+  var firebaseConfig = {
+    apiKey: "AIzaSyA5KFIcemUtm1_i64TUyifV0WfKjbm9irk",
+    authDomain: "rru-connect-epeevr.firebaseapp.com",
+    databaseURL: "https://rru-connect-epeevr.firebaseio.com",
+    projectId: "rru-connect-epeevr",
+    storageBucket: "rru-connect-epeevr.appspot.com",
+    messagingSenderId: "898597223567",
+    appId: "1:898597223567:web:8cd2b5064e8edbaf20c4fa"
+  };
+  // Initialize Firebase
+  firebase.initializeApp(firebaseConfig);
+</script>
+<script src="app.js" charset="utf-8"></script>
+
+</html>
