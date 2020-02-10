@@ -16,8 +16,7 @@ let first = db.collection('Registration').doc('Topic').collection('Additional_Cr
 // 	});
 // });
 
-
-
+let Noti = db.collection('Count');
 
 var carsAndModels = {};
 carsAndModels['Registration'] = ['กรุณาเลือกหมวดหมู่', 'การเพิ่มรายวิชา', 'การถอนรายวิชา', 'การรักษาสภาพการเป็นนักศึกษา'];
@@ -187,6 +186,54 @@ function showData(doc) {
 		location.href = "Copy.html?id=" + id_copy;
 	});
 
+	Noti.get().then((snapshot) => {
+		let pp = snapshot.docs[snapshot.docs.length-1];
+		let noti = pp.data().count;
+		myFunction(noti);
+
+		console.log(pp.data().count);
+			
+	
+		
+	});
 }
 
+
+function myFunction(noti) {
+
+	// LINE Notify Token
+	var key = "rwHEtj1TyUMegZ5sJdDYCxBfTk0INwpKGxz6HVACxN5";
+	var url = "https://notify-api.line.me/api/notify";
+
+	// LINE Notify เพื่อส่งไปยัง
+	var msg = "Admin Powermeterline : ";
+
+	if(noti == 1){
+		msg = "ppppppppppppppp";
+		console.log("pk");
+	}
+
+
+
+	// เมื่อไม่มีกิจกรรมที่เกิดขึ้น
+	// if (todayEvent.length === 0) {
+	// 	msg = Utilities.formatDate(today, "JST", "dd/MM/yyyy") + "\n ในวันพรุ้งนี้ไม่มีแจ้งเตือนเก็บค่าบริการ cloud...\n ในวันดังกล่าว (*^▽^*)";
+	// }
+	// // 123456
+	// else {
+	// 	msg += Utilities.formatDate(today, "JST", "dd/MM/yyyy") + "\n" + "แจ้งเตือนค่าบริการ cloud วันพรุ้งนี้ มี「" + String(todayEvent.length) + "」บริษัท \nดังนี้（*^^*)\n";
+	// 	msg += allPlanToMsg(todayEvent);
+	// }
+	var jsonData = {
+		message: msg
+	}
+	var options =
+	{
+		"method": "post",
+		"contentType": "application/x-www-form-urlencoded",
+		"payload": jsonData,
+		"headers": { "Authorization": "Bearer " + key }
+	};
+	 UrlFetchApp.fetch(url, options);
+}
 
