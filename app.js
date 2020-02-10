@@ -4,10 +4,10 @@ let ploy2;
 const db = firebase.firestore();
 
 const table = document.querySelector('#retable');
-const ss = db.collection('Registration').doc('Topic').collection('Additional_Credit_Registration');
+// const ss = db.collection('Registration').doc('Topic').collection('Additional_Credit_Registration');
 
-let first = db.collection('Registration').doc('Topic').collection('Additional_Credit_Registration')
-	.orderBy('date');
+// let first = db.collection('Registration').doc('Topic').collection('Additional_Credit_Registration')
+// 	.orderBy('date');
 
 // let result = ss.orderBy("date", "desc").get().then((snapshot) => {
 // 	snapshot.forEach(doc => {
@@ -16,10 +16,12 @@ let first = db.collection('Registration').doc('Topic').collection('Additional_Cr
 // 	});
 // });
 
-let Noti = db.collection('Count');
+
 
 var carsAndModels = {};
-carsAndModels['Registration'] = ['กรุณาเลือกหมวดหมู่', 'การเพิ่มรายวิชา', 'การถอนรายวิชา', 'การรักษาสภาพการเป็นนักศึกษา'];
+carsAndModels['Registration'] = ['กรุณาเลือกหมวดหมู่', 'การเพิ่มรายวิชา', 'การถอนรายวิชา', 'การรักษาสภาพการเป็นนักศึกษา', 'การยกเลิกรายวิชา', 'การลืมรหัสผ่าน', 'ลงทะเบียนไม่ได้', 'หน่วยกิตที่ต้องสะสม', 
+'การขอเปิดรายวิชาเพิ่ม', 'การลงทะเบียนซ้ำ', 'การลงทะเบียนเรียน'];
+
 carsAndModels['Education'] = ['Golf', 'Polo', 'Scirocco', 'Touareg'];
 carsAndModels['BMW'] = ['M6', 'X5', 'Z3'];
 
@@ -59,8 +61,9 @@ function myFunction1() {
 
 	var it = x.selectedIndex;
 	var it2 = y.selectedIndex;
+	
 	ploy = x.options[it].value;
-	ploy2 = y.options[it].value;
+	ploy2 = y.options[it2].value;
 	console.log(ploy2);
 	if (it > 0 && it2 > 0) {
 		location.href = "Showtable.html?id1=" + ploy + "&id2=" + ploy2;
@@ -93,7 +96,8 @@ var data2 = carsAndModels[number1][number];
 console.log(data2);
 console.log(number1);
 
-db.collection(number1).doc('Topic').collection('Additional_Credit_Registration').orderBy("date", "desc").get().then((snapshot) => {
+
+db.collection(number1).doc('Topic').collection(data2).orderBy("date", "desc").get().then((snapshot) => {
 	snapshot.forEach(doc => {
 		showData(doc);
 
@@ -126,7 +130,8 @@ function showData(doc) {
 	cell4.innerHTML = doc.data().description;
 
 
-	first.get().then((snapshot) => {
+	db.collection(number1).doc('Topic').collection(data2)
+	.orderBy('date').get().then((snapshot) => {
 		let last = snapshot.docs[snapshot.docs.length - 1];
 		if (last.data().date.toDate().toDateString() == d) {
 			cell5.innerHTML = "กำลังใช้งาน";
@@ -186,54 +191,5 @@ function showData(doc) {
 		location.href = "Copy.html?id=" + id_copy;
 	});
 
-	Noti.get().then((snapshot) => {
-		let pp = snapshot.docs[snapshot.docs.length-1];
-		let noti = pp.data().count;
-		myFunction(noti);
 
-		console.log(pp.data().count);
-			
-	
-		
-	});
 }
-
-
-function myFunction(noti) {
-
-	// LINE Notify Token
-	var key = "rwHEtj1TyUMegZ5sJdDYCxBfTk0INwpKGxz6HVACxN5";
-	var url = "https://notify-api.line.me/api/notify";
-
-	// LINE Notify เพื่อส่งไปยัง
-	var msg = "Admin Powermeterline : ";
-
-	if(noti == 1){
-		msg = "ppppppppppppppp";
-		console.log("pk");
-	}
-
-
-
-	// เมื่อไม่มีกิจกรรมที่เกิดขึ้น
-	// if (todayEvent.length === 0) {
-	// 	msg = Utilities.formatDate(today, "JST", "dd/MM/yyyy") + "\n ในวันพรุ้งนี้ไม่มีแจ้งเตือนเก็บค่าบริการ cloud...\n ในวันดังกล่าว (*^▽^*)";
-	// }
-	// // 123456
-	// else {
-	// 	msg += Utilities.formatDate(today, "JST", "dd/MM/yyyy") + "\n" + "แจ้งเตือนค่าบริการ cloud วันพรุ้งนี้ มี「" + String(todayEvent.length) + "」บริษัท \nดังนี้（*^^*)\n";
-	// 	msg += allPlanToMsg(todayEvent);
-	// }
-	var jsonData = {
-		message: msg
-	}
-	var options =
-	{
-		"method": "post",
-		"contentType": "application/x-www-form-urlencoded",
-		"payload": jsonData,
-		"headers": { "Authorization": "Bearer " + key }
-	};
-	 UrlFetchApp.fetch(url, options);
-}
-
