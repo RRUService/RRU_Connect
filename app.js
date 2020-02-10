@@ -1,6 +1,6 @@
 
-let ploy;
-let ploy2;
+let Value_Category;
+let Value_SubCategory;
 const db = firebase.firestore();
 
 const table = document.querySelector('#retable');
@@ -18,28 +18,28 @@ const table = document.querySelector('#retable');
 
 
 
-var carsAndModels = {};
-carsAndModels['Registration'] = ['กรุณาเลือกหมวดหมู่', 'การเพิ่มรายวิชา', 'การถอนรายวิชา', 'การรักษาสภาพการเป็นนักศึกษา', 'การยกเลิกรายวิชา', 'การลืมรหัสผ่าน', 'ลงทะเบียนไม่ได้', 'หน่วยกิตที่ต้องสะสม', 
-'การขอเปิดรายวิชาเพิ่ม', 'การลงทะเบียนซ้ำ', 'การลงทะเบียนเรียน'];
+var TopicData = {};
+TopicData['Registration'] = ['กรุณาเลือกหมวดหมู่', 'การเพิ่มรายวิชา', 'การถอนรายวิชา',  'การยกเลิกรายวิชา', 'การลืมรหัสผ่าน', 'ลงทะเบียนไม่ได้', 'หน่วยกิตที่ต้องสะสม',
+	'การขอเปิดรายวิชาเพิ่ม', 'การลงทะเบียนซ้ำ', 'การลงทะเบียนเรียน'];
 
-carsAndModels['Education'] = ['Golf', 'Polo', 'Scirocco', 'Touareg'];
-carsAndModels['BMW'] = ['M6', 'X5', 'Z3'];
+TopicData['Education'] = ['Golf', 'Polo', 'Scirocco', 'Touareg'];
+TopicData['BMW'] = ['M6', 'X5', 'Z3'];
 
-function ChangeCarList() {
-	var carList = document.getElementById("category");
-	var modelList = document.getElementById("subcategory");
-	var selCar = carList.options[carList.selectedIndex].value;
-
-	while (modelList.options.length) {
-		modelList.remove(0);
+function ChangeSelectList() {
+	var DataList = document.getElementById("category");// get id value
+	var SubDataList = document.getElementById("subcategory");//get id value
+	var DataCategory = DataList.options[DataList.selectedIndex].value; //ดึงค่าของ value หมวดหมู
+	console.log(DataCategory);
+	while (SubDataList.options.length) {
+		SubDataList.remove(0);
 	}
 
-	var cars = carsAndModels[selCar];
-	if (cars) {
+	var Head = TopicData[DataCategory];
+	if (Head) {
 		var i;
-		for (i = 0; i < cars.length; i++) {
-			var car = new Option(cars[i], i);
-			modelList.options.add(car);
+		for (i = 0; i < Head.length; i++) {
+			var Add_Sub = new Option(Head[i], i);// เพิ่มข้อมูลลงใน id subcategory
+			SubDataList.options.add(Add_Sub);
 
 
 		}
@@ -56,17 +56,18 @@ function ChangeCarList() {
 }
 
 function myFunction1() {
-	var x = document.getElementById("subcategory");
-	var y = document.getElementById("category");
+	var x = document.getElementById("category"); //get id
+	var y = document.getElementById("subcategory");//get id
 
-	var it = x.selectedIndex;
-	var it2 = y.selectedIndex;
-	
-	ploy = x.options[it].value;
-	ploy2 = y.options[it2].value;
-	console.log(ploy2);
-	if (it > 0 && it2 > 0) {
-		location.href = "Showtable.html?id1=" + ploy + "&id2=" + ploy2;
+	var Index_Category = x.selectedIndex;
+	var Index_Subcategoy = y.selectedIndex;
+
+	Value_Category = x[Index_Category].value;
+	Value_SubCategory = y.options[Index_Subcategoy].value;
+
+	console.log(Value_SubCategory);
+	if (Index_Subcategoy > 0 && Index_Category > 0) {
+		location.href = "Showtable.html?id1=" + Value_SubCategory + "&id2=" + Value_Category;
 
 	}
 
@@ -88,16 +89,16 @@ function getUrlVars() {
 }
 
 
-var number = getUrlVars()["id1"];
-var number1 = getUrlVars()["id2"];
+var SubCategory_URL = getUrlVars()["id1"];
+var Category_URL = getUrlVars()["id2"];
 
 
-var data2 = carsAndModels[number1][number];
-console.log(data2);
-console.log(number1);
+var Data_Subcategory = TopicData[Category_URL][SubCategory_URL];
+console.log(Data_Subcategory);
+console.log(Category_URL);
 
 
-db.collection(number1).doc('Topic').collection(data2).orderBy("date", "desc").get().then((snapshot) => {
+db.collection(Category_URL).doc('Topic').collection(Data_Subcategory).orderBy("date", "desc").get().then((snapshot) => {
 	snapshot.forEach(doc => {
 		showData(doc);
 
@@ -125,13 +126,12 @@ function showData(doc) {
 
 	cell1.innerHTML = d;
 	cell1.setAttribute('class', 'tend');
-	cell2.innerHTML = data2;
+	cell2.innerHTML = Data_Subcategory;
 	cell2.setAttribute('class', 'tend');
 	cell4.innerHTML = doc.data().description;
 
 
-	db.collection(number1).doc('Topic').collection(data2)
-	.orderBy('date').get().then((snapshot) => {
+	db.collection(Category_URL).doc('Topic').collection(Data_Subcategory).orderBy('date').get().then((snapshot) => {
 		let last = snapshot.docs[snapshot.docs.length - 1];
 		if (last.data().date.toDate().toDateString() == d) {
 			cell5.innerHTML = "กำลังใช้งาน";
