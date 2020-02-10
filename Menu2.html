@@ -66,18 +66,20 @@
   }
 
   .button {
-  background-color: #555555; 
-  border: none;
-  color: white;
-  padding: 12px 28px;
-  text-align: center;
-  text-decoration: none;
-  display: inline-block;
-  font-size: 16px;
-  margin: 4px 2px;
-  cursor: pointer;
-}
-
+    background-color: #555555;
+    border: none;
+    color: white;
+    padding: 12px 28px;
+    text-align: center;
+    text-decoration: none;
+    display: inline-block;
+    font-size: 16px;
+    margin: 4px 2px;
+    cursor: pointer;
+  }
+  .hidden{
+    display: none;
+  }
 </style>
 
 <body>
@@ -128,15 +130,22 @@
     <h5>หัวข้อ</h5>
 
 
-    <select name="subcategory" id="subcategory" 
-      style="margin: 0px;height: 48px;width: 282px;padding: 8px 15px;font-size: 17px;">
+    <select name="subcategory" id="subcategory"
+      style="height: 48px;width: 282px;padding: 8px 15px;font-size: 17px;">
 
     </select>
 
+
+  </div>
+  <div class="hidden" style="margin-left: 40%;margin-top: 5%;">
+    <select name="subcategory" id="subcategory"
+    style="height: 48px;width: 282px;font-size: 17px;">
+
+  </select>
+
   </div>
 
-  
-  <input class="button button5" type="button" value="แสดง" id="submit" onclick="myFunction1()" >
+  <input class="button button5" type="button" value="แสดง" id="submit" onclick="myFunction1()">
 
 
 </body>

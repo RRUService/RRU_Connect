@@ -22,8 +22,8 @@ var TopicData = {};
 TopicData['Registration'] = ['กรุณาเลือกหมวดหมู่', 'การเพิ่มรายวิชา', 'การถอนรายวิชา',  'การยกเลิกรายวิชา', 'การลืมรหัสผ่าน', 'ลงทะเบียนไม่ได้', 'หน่วยกิตที่ต้องสะสม',
 	'การขอเปิดรายวิชาเพิ่ม', 'การลงทะเบียนซ้ำ', 'การลงทะเบียนเรียน'];
 
-TopicData['Education'] = ['Golf', 'Polo', 'Scirocco', 'Touareg'];
-TopicData['BMW'] = ['M6', 'X5', 'Z3'];
+// TopicData['Education'] = ['Golf', 'Polo', 'Scirocco', 'Touareg'];
+// TopicData['BMW'] = ['M6', 'X5', 'Z3'];
 
 function ChangeSelectList() {
 	var DataList = document.getElementById("category");// get id value
