@@ -129,10 +129,10 @@ function myFunction1() {
 	console.log(Value_Category);
 	console.log(Value_SubCategory);
 	console.log(Index_Subcategoy_1); //Topic 1
-	if (Index_Subcategoy > 0 && Index_Category > 0) {
+	if (Index_Subcategoy > 0 && Index_Category > 0 ) {
 		location.href = "Showtable.html?id1=" + Value_SubCategory + "&id2=" + Value_Category + "&id3=" + Index_Subcategoy_1 ;
 
-	}
+	} 
 
 
 
@@ -156,23 +156,35 @@ var SubCategory_URL = getUrlVars()["id1"];
 var Category_URL = getUrlVars()["id2"];
 var SubCategory_1_URL = getUrlVars()["id3"];
 
+if(SubCategory_1_URL == -1){
 
-var Data_Subcategory = TopicData[Category_URL][SubCategory_URL];
+	var Data_Subcategory = TopicData[Category_URL][SubCategory_URL];
+	db.collection(Category_URL).doc('Topic').collection(Data_Subcategory).orderBy("date", "desc").get().then((snapshot) => {
+		snapshot.forEach(doc => {
+			showData(doc);
+	
+		});
+	});
 
-//ค่าธรรมเนียมการศึกษา
+
+}else{
+	//ค่าธรรมเนียมการศึกษา
 var Tuition_fee = TopicData[Category_URL][SubCategory_URL];
+
 var Faculty_of_Education = TopicData1[Tuition_fee][SubCategory_1_URL]; //คณะครุศาสตร์
 
 console.log(Faculty_of_Education);
-// console.log(Category_URL);
+console.log("....." + Category_URL);
 
 
-db.collection(Category_URL).doc('Topic').collection(Data_Subcategory).orderBy("date", "desc").get().then((snapshot) => {
-	snapshot.forEach(doc => {
-		showData(doc);
+}
 
-	});
-});
+
+
+
+
+
+
 
 
 
