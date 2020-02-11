@@ -114,9 +114,9 @@
       <option value="Education">ปฏิทินการศึกษา</option>
       <option value="Books">การขอรับเอกสารการศึกษา</option>
       <option value="">การสำเร็จการศึกษา</option>
-      <option value="">บัตรนักศึกษา</option>
+      <option value="Student_Card">บัตรนักศึกษา</option>
       <option value="">การสมัครเรียน</option>
-      <option value="">ค่าธรรมเนียมการศึกษา</option>
+      <option value="Tuition_fee">ค่าธรรมเนียมการศึกษา</option>
       <option value="">การลาออก</option>
       <option value="">การลา</option>
       <option value="">การลาพักการศึกษา</option>
@@ -130,15 +130,15 @@
     <h5>หัวข้อ</h5>
 
 
-    <select name="subcategory" id="subcategory"
+    <select name="subcategory" id="subcategory" onchange="ChangeSelectList_1()"
       style="height: 48px;width: 282px;padding: 8px 15px;font-size: 17px;">
 
     </select>
 
 
   </div>
-  <div class="hidden" style="margin-left: 40%;margin-top: 5%;">
-    <select name="subcategory" id="subcategory"
+  <div id="display" style="display:none; margin-left: 40%;margin-top: 5%;">
+    <select name="subcategory_1" id="subcategory_1"  
     style="height: 48px;width: 282px;font-size: 17px;">
 
   </select>

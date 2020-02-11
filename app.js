@@ -15,59 +15,122 @@ const table = document.querySelector('#retable');
 
 // 	});
 // });
-
+// document.getElementById('display').style.display = 'block';
+// var ds = document.getElementById("display");//get id
 
 
 var TopicData = {};
-TopicData['Registration'] = ['กรุณาเลือกหมวดหมู่', 'การเพิ่มรายวิชา', 'การถอนรายวิชา',  'การยกเลิกรายวิชา', 'การลืมรหัสผ่าน', 'ลงทะเบียนไม่ได้', 'หน่วยกิตที่ต้องสะสม',
-	'การขอเปิดรายวิชาเพิ่ม', 'การลงทะเบียนซ้ำ', 'การลงทะเบียนเรียน'];
+var TopicData1 = {};
+TopicData['Registration'] = ['กรุณาเลือกหมวดหมู่', 'การเพิ่มรายวิชา', 'การถอนรายวิชา', 'การยกเลิกรายวิชา', 'การลืมรหัสผ่าน', 'ลงทะเบียนไม่ได้', 'หน่วยกิตที่ต้องสะสม',
+	'การขอเปิดรายวิชาเพิ่ม', 'การลงทะเบียนซ้ำ', 'การลงทะเบียนเรียน', 'ระยะเวลาการศึกษาระดับปริญญาตรี'];
 
-// TopicData['Education'] = ['Golf', 'Polo', 'Scirocco', 'Touareg'];
-// TopicData['BMW'] = ['M6', 'X5', 'Z3'];
+TopicData['Student_Card'] = ['-', 'd[d'];
+TopicData['Tuition_fee'] = ['เลือกหมู่', 'คณะครุศาสตร์'];
+
+
+TopicData1['คณะครุศาสตร์'] = ['M6', 'X5', 'Z3'];
+var DataList = document.getElementById("category");// get id value
+var SubDataList = document.getElementById("subcategory");//get id value
+var SubDataList_1 = document.getElementById("subcategory_1");
+
+
 
 function ChangeSelectList() {
-	var DataList = document.getElementById("category");// get id value
-	var SubDataList = document.getElementById("subcategory");//get id value
+
+	document.getElementById('display').style.display = 'none';
 	var DataCategory = DataList.options[DataList.selectedIndex].value; //ดึงค่าของ value หมวดหมู
+
 	console.log(DataCategory);
 	while (SubDataList.options.length) {
 		SubDataList.remove(0);
 	}
 
 	var Head = TopicData[DataCategory];
+
+	console.log(Head);
 	if (Head) {
+
 		var i;
 		for (i = 0; i < Head.length; i++) {
 			var Add_Sub = new Option(Head[i], i);// เพิ่มข้อมูลลงใน id subcategory
 			SubDataList.options.add(Add_Sub);
 
-
 		}
-
-		// document.getElementById("demo").innerHTML = cars[i].options[i].text;
-
-
 
 	}
 
 
 
 
+
+
+
+
+
 }
+
+function ChangeSelectList_1() {
+
+
+
+
+	var y = document.getElementById("subcategory");//get id
+	var Index_Subcategoy = y.selectedIndex;
+
+	Value_SubCategory = y.options[Index_Subcategoy].value;
+
+	var DataCategory = DataList.options[DataList.selectedIndex].value;
+
+	console.log(Value_SubCategory);
+	while (SubDataList_1.options.length) {
+		SubDataList_1.remove(0);
+	}
+	var x1 = document.getElementById("category"); //get id
+	var Index_Category1 = x1.selectedIndex;
+	Value_Category1 = x1[Index_Category1].value;
+	console.log(Value_Category1);
+//ค่าธรรมเนียมการศึกษา
+if(Value_Category1 === 'Tuition_fee'){
+	if (TopicData['Tuition_fee'][Value_SubCategory] === "คณะครุศาสตร์") {
+		document.getElementById('display').style.display = 'block';
+
+		for (i = 0; i < TopicData1['คณะครุศาสตร์'].length; i++) {
+			var Add_Sub1 = new Option(TopicData1['คณะครุศาสตร์'][i], i);// เพิ่มข้อมูลลงใน id subcategory
+			SubDataList_1.options.add(Add_Sub1);
+
+		}
+
+	}
+}
+	
+	
+}
+
+
+
+
+
 
 function myFunction1() {
 	var x = document.getElementById("category"); //get id
 	var y = document.getElementById("subcategory");//get id
 
+	var z = document.getElementById("subcategory_1");
 	var Index_Category = x.selectedIndex;
 	var Index_Subcategoy = y.selectedIndex;
+	var Index_Subcategoy_1 = z.selectedIndex;
 
 	Value_Category = x[Index_Category].value;
 	Value_SubCategory = y.options[Index_Subcategoy].value;
+	// Value_SubCategory_1 = z[Index_Subcategoy_1];
 
+
+
+	console.log(Value_Category);
 	console.log(Value_SubCategory);
+	console.log(Index_Subcategoy_1); //Topic 1
 	if (Index_Subcategoy > 0 && Index_Category > 0) {
-		location.href = "Showtable.html?id1=" + Value_SubCategory + "&id2=" + Value_Category;
+		location.href = "Showtable.html?id1=" + Value_SubCategory + "&id2=" + Value_Category + "&id3=" + Index_Subcategoy_1 ;
 
 	}
 
@@ -91,11 +154,17 @@ function getUrlVars() {
 
 var SubCategory_URL = getUrlVars()["id1"];
 var Category_URL = getUrlVars()["id2"];
+var SubCategory_1_URL = getUrlVars()["id3"];
 
 
 var Data_Subcategory = TopicData[Category_URL][SubCategory_URL];
-console.log(Data_Subcategory);
-console.log(Category_URL);
+
+//ค่าธรรมเนียมการศึกษา
+var Tuition_fee = TopicData[Category_URL][SubCategory_URL];
+var Faculty_of_Education = TopicData1[Tuition_fee][SubCategory_1_URL]; //คณะครุศาสตร์
+
+console.log(Faculty_of_Education);
+// console.log(Category_URL);
 
 
 db.collection(Category_URL).doc('Topic').collection(Data_Subcategory).orderBy("date", "desc").get().then((snapshot) => {
@@ -179,7 +248,6 @@ function showData(doc) {
 
 	});
 
-
 	//คัดลอกข้อมูล
 	let btn_copy = document.createElement('button');
 	btn_copy.textContent = 'คัดลอกข้อมูล';
@@ -190,6 +258,4 @@ function showData(doc) {
 		let id_copy = e.target.getAttribute('id-data');
 		location.href = "Copy.html?id=" + id_copy;
 	});
-
-
 }
