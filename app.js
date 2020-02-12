@@ -25,10 +25,15 @@ TopicData['Registration'] = ['กรุณาเลือกหมวดหม�
 	'การขอเปิดรายวิชาเพิ่ม', 'การลงทะเบียนซ้ำ', 'การลงทะเบียนเรียน', 'ระยะเวลาการศึกษาระดับปริญญาตรี'];
 
 TopicData['Student_Card'] = ['-', 'd[d'];
-TopicData['Tuition_fee'] = ['เลือกหมู่', 'คณะครุศาสตร์'];
+TopicData['Tuition_fee'] = ['กรุณาเลือกคณะ', 'คณะครุศาสตร์'];
 
 
-TopicData1['คณะครุศาสตร์'] = ['M6', 'X5', 'Z3'];
+
+//การลงทะเบียนเรียน
+TopicData1['ระยะเวลาการศึกษาระดับปริญญาตรี'] = ['กรุณาเลือกหลักสูตร','หลักสูตรปริญญาตรี 4 ปี', 'หลักสูตรปริญญาตรี 5 ปี', 'หลักสูตรปริญญาต่อเนื่อง'];
+
+
+TopicData1['คณะครุศาสตร์'] = ['การศึกษาปฐมวัย', 'การสอนภาษาจีน', 'การสอนภาษาอังกฤษ', 'การสอนภาษาไทย', 'การสอนวิทยาศาสตร์ทั่วไป', 'การสอนสังคมศึกษา', 'คณิตศาสตร์', 'คอมพิวเตอร์ศึกษา', 'จิตวิทยาการปรึกษาและแนะแนว-การสอนภาษาไทย' ,'เทคโนโลยีสารสนเทศทางการศึกษา-การสอนภาษาไทย'];
 var DataList = document.getElementById("category");// get id value
 var SubDataList = document.getElementById("subcategory");//get id value
 var SubDataList_1 = document.getElementById("subcategory_1");
@@ -54,7 +59,7 @@ function ChangeSelectList() {
 		for (i = 0; i < Head.length; i++) {
 			var Add_Sub = new Option(Head[i], i);// เพิ่มข้อมูลลงใน id subcategory
 			SubDataList.options.add(Add_Sub);
-
+			
 		}
 
 	}
@@ -89,21 +94,38 @@ function ChangeSelectList_1() {
 	var Index_Category1 = x1.selectedIndex;
 	Value_Category1 = x1[Index_Category1].value;
 	console.log(Value_Category1);
-//ค่าธรรมเนียมการศึกษา
-if(Value_Category1 === 'Tuition_fee'){
-	if (TopicData['Tuition_fee'][Value_SubCategory] === "คณะครุศาสตร์") {
-		document.getElementById('display').style.display = 'block';
+	//ค่าธรรมเนียมการศึกษา
+	if (Value_Category1 === 'Tuition_fee') {
+		if (TopicData['Tuition_fee'][Value_SubCategory] === "คณะครุศาสตร์") {
+			document.getElementById('display').style.display = 'block';
 
-		for (i = 0; i < TopicData1['คณะครุศาสตร์'].length; i++) {
-			var Add_Sub1 = new Option(TopicData1['คณะครุศาสตร์'][i], i);// เพิ่มข้อมูลลงใน id subcategory
-			SubDataList_1.options.add(Add_Sub1);
+			for (i = 0; i < TopicData1['คณะครุศาสตร์'].length; i++) {
+				var Add_Sub1 = new Option(TopicData1['คณะครุศาสตร์'][i], i);// เพิ่มข้อมูลลงใน id subcategory
+				SubDataList_1.options.add(Add_Sub1);
 
-		}
+			}
 
+		}else{document.getElementById('display').style.display = 'none';}
 	}
-}
+
+
+	//การลงทะเบียน
+	if (Value_Category1 === 'Registration') {
+		if (TopicData['Registration'][Value_SubCategory] === "ระยะเวลาการศึกษาระดับปริญญาตรี") {
+			document.getElementById('display').style.display = 'block';
+
+			for (i = 0; i < TopicData1['ระยะเวลาการศึกษาระดับปริญญาตรี'].length; i++) {
+				var Add_Sub1 = new Option(TopicData1['ระยะเวลาการศึกษาระดับปริญญาตรี'][i], i);// เพิ่มข้อมูลลงใน id subcategory
+				SubDataList_1.options.add(Add_Sub1);
+
+			}
+
+		}else{document.getElementById('display').style.display = 'none';}
+	}
 	
-	
+
+
+
 }
 
 
@@ -129,10 +151,10 @@ function myFunction1() {
 	console.log(Value_Category);
 	console.log(Value_SubCategory);
 	console.log(Index_Subcategoy_1); //Topic 1
-	if (Index_Subcategoy > 0 && Index_Category > 0 ) {
-		location.href = "Showtable.html?id1=" + Value_SubCategory + "&id2=" + Value_Category + "&id3=" + Index_Subcategoy_1 ;
+	if (Index_Subcategoy > 0 && Index_Category > 0) {
+		location.href = "Showtable.html?id1=" + Value_SubCategory + "&id2=" + Value_Category + "&id3=" + Index_Subcategoy_1;
 
-	} 
+	}
 
 
 
@@ -156,25 +178,36 @@ var SubCategory_URL = getUrlVars()["id1"];
 var Category_URL = getUrlVars()["id2"];
 var SubCategory_1_URL = getUrlVars()["id3"];
 
-if(SubCategory_1_URL == -1){
+if (SubCategory_1_URL == -1) {
 
 	var Data_Subcategory = TopicData[Category_URL][SubCategory_URL];
 	db.collection(Category_URL).doc('Topic').collection(Data_Subcategory).orderBy("date", "desc").get().then((snapshot) => {
 		snapshot.forEach(doc => {
 			showData(doc);
-	
+
 		});
 	});
 
 
-}else{
-	//ค่าธรรมเนียมการศึกษา
-var Tuition_fee = TopicData[Category_URL][SubCategory_URL];
+} else {
+	//กรณีที่มี collection หลายๆๆ
+	var Tuition_fee = TopicData[Category_URL][SubCategory_URL];
 
-var Faculty_of_Education = TopicData1[Tuition_fee][SubCategory_1_URL]; //คณะครุศาสตร์
+	var Faculty_of_Education = TopicData1[Tuition_fee][SubCategory_1_URL]; 
 
-console.log(Faculty_of_Education);
-console.log("....." + Category_URL);
+	db.collection(Category_URL).doc('Topic').collection(Tuition_fee).doc(Tuition_fee).collection(Faculty_of_Education).orderBy("date", "desc").get().then((snapshot) => {
+		snapshot.forEach(doc => {
+			showData(doc);
+
+		});
+	});
+
+
+
+
+	console.log(Faculty_of_Education);
+	console.log("....." + Category_URL);
+	console.log(Tuition_fee + "11");
 
 
 }
@@ -212,18 +245,18 @@ function showData(doc) {
 	cell4.innerHTML = doc.data().description;
 
 
-	db.collection(Category_URL).doc('Topic').collection(Data_Subcategory).orderBy('date').get().then((snapshot) => {
-		let last = snapshot.docs[snapshot.docs.length - 1];
-		if (last.data().date.toDate().toDateString() == d) {
-			cell5.innerHTML = "กำลังใช้งาน";
-		} else {
-			cell5.innerHTML = "ไม่ถูกใช้งาน";
-		}
+	// db.collection(Category_URL).doc('Topic').collection(Data_Subcategory).orderBy('date').get().then((snapshot) => {
+	// 	let last = snapshot.docs[snapshot.docs.length - 1];
+	// 	if (last.data().date.toDate().toDateString() == d) {
+	// 		cell5.innerHTML = "กำลังใช้งาน";
+	// 	} else {
+	// 		cell5.innerHTML = "ไม่ถูกใช้งาน";
+	// 	}
 
-		console.log(last.data().date.toDate() + "dtaddd" + d);
+	// 	console.log(last.data().date.toDate() + "dtaddd" + d);
 
-	});
-	cell5.setAttribute('class', 'tend');
+	// });
+	// cell5.setAttribute('class', 'tend');
 
 	//ลบข้อมูล
 	let btn_delete = document.createElement('button');
