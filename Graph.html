@@ -24,22 +24,67 @@
 <script src="https://cdn.jsdelivr.net/npm/vue-apexcharts"></script>
 
 <body>
-    <label for="start">Start date:</label>
+  
 
-<input type="date" id="start" name="trip-start" 
+<div style="margin-left: 40%;margin-top: 5%;">
+  <h5>หมวดหมู่</h5>
+  <select name="category" id="category" onchange="ChangeSelectList()" style="
+            margin: 0px;
+            height: 48px;
+            width: 282px;
+            padding: 8px 15px;
+            font-size: 17px;
+        ">
+    <option value="">กรุณาเลือกหมวดหมู่</option>
+    <option value="การลงทะเบียน">การลงทะเบียน</option>
+    <option value="ปฏิทินการศึกษา">ปฏิทินการศึกษา</option>
+    <option value="การขอรับเอกสารการศึกษา">การขอรับเอกสารการศึกษา</option>
+    <option value="การสำเร็จการศึกษา">การสำเร็จการศึกษา</option>
+    <option value="บัตรนักศึกษา">บัตรนักศึกษา</option>
+    <option value="การสมัครเรียน">การสมัครเรียน</option>
+    <option value="ค่าธรรมเนียมการศึกษา">ค่าธรรมเนียมการศึกษา</option>
+    <option value="การลาออก">การลาออก</option>
+    <option value="การลา">การลา</option>
+    <option value="การลาพักการศึกษา">การลาพักการศึกษา</option>
+    <option value="การพ้นสภาพการเป็นนักศึกษา">การพ้นสภาพการเป็นนักศึกษา</option>
+    <option value="การวัดและประเมินผล">การวัดและประเมินผล</option>
+    <option value="">อื่น ๆ</option>
+  </select>
+
+
+
+  <div id="display" style="display:none; margin-left: 40%;margin-top: 5%;">
+  <h5>หัวข้อ</h5>
+
+
+  <select name="subcategory" id="subcategory"
+    style="height: 48px;width: 282px;padding: 8px 15px;font-size: 17px;">
+
+  </select>
+
+</div>
+</div>
+
+
+<div style="margin-left: 40%;margin-top: 5%;">
+<label for="start">Start date:</label>
+
+<input type="date" id="start" name="trip-start"  style="height: 48px;width: 282px;font-size: 17px;"
        value="yyyy-mm-dd"
-       min="2020-01-01" max="3000-12-31">
-
-<button onclick="myFunction()">Try it</button>
-
-
-  <div id="chart">
+       min="2020-01-01" max="3000-12-31"> </n>
+    
+<input class="button button5" type="button" value="แสดง" id="submit" onclick="myFunction()">
 
 </div>
 
 
 
 
+
+
+  <div id="chart" style="display:none;">
+
+</div>
 
 </body>
 

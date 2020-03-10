@@ -32,13 +32,14 @@ TopicData['Measurement'] = ['กรุณาเลือกหัวข้อ', 
 TopicData['Education_Documentary'] = ['กรุณาเลือกหัวข้อ', 'ปัญหาในการขอรับเอกสารการศึกษา', 'ระยะเวลาการขอเอกสาร', 'การแจ้งขอสำเร็จการศึกษา', 'ใบขอรับปริญญาย้อนหลัง', 'ใบรับรองการเป็นนักศึกษา', 'ใบรับรองผลการเรียน'];
 TopicData['Calendar'] = ['กรุณาเลือกหัวข้อ', 'ภาคการศึกษาปกติ', 'ภาคการศึกษาพิเศษ', 'ภาคการศึกษาฤดูร้อน'];
 TopicData['Application_study'] = ['กรุณาเลือกหัวข้อ', 'ภาคการศึกษาปกติ', 'ภาคการศึกษาพิเศษ', 'ภาคการศึกษาฤดูร้อน'];
+TopicData['Leave'] = ['กรุณาเลือกหัวข้อ', 'ลากิจ', 'ลาป่วย'];
 
 
 
 
 
 
-TopicData['Tuition_fee'] = ['กรุณาเลือกคณะ', 'คณะครุศาสตร์'];
+TopicData['Tuition_fee'] = ['กรุณาเลือกคณะ', 'คณะครุศาสตร์','คณะเทคโนโลยีอุตสาหกรรม', 'คณะมนุษยศาสตร์และสังคมศาสตร์', 'คณะวิทยาการจัดการ', 'คณะวิทยาศาสตร์และเทคโนโลยี'];
 
 
 
@@ -51,7 +52,15 @@ TopicData1['เกรดเฉลี่ยขั้นต่ำ'] = ['กรุ�
 
 
 
-TopicData1['คณะครุศาสตร์'] = ['การศึกษาปฐมวัย', 'การสอนภาษาจีน', 'การสอนภาษาอังกฤษ', 'การสอนภาษาไทย', 'การสอนวิทยาศาสตร์ทั่วไป', 'การสอนสังคมศึกษา', 'คณิตศาสตร์', 'คอมพิวเตอร์ศึกษา', 'จิตวิทยาการปรึกษาและแนะแนว-การสอนภาษาไทย', 'เทคโนโลยีสารสนเทศทางการศึกษา-การสอนภาษาไทย'];
+TopicData1['คณะครุศาสตร์'] = ['กรุณาเลือกสาขา','การศึกษาปฐมวัย', 'การสอนภาษาจีน', 'การสอนภาษาอังกฤษ', 'การสอนภาษาไทย', 'การสอนวิทยาศาสตร์ทั่วไป', 'การสอนสังคมศึกษา', 'คณิตศาสตร์', 'คอมพิวเตอร์ศึกษา', 'จิตวิทยาการปรึกษาและแนะแนว-การสอนภาษาไทย', 'เทคโนโลยีสารสนเทศทางการศึกษา-การสอนภาษาไทย'];
+TopicData1['คณะเทคโนโลยีอุตสาหกรรม'] = ['กรุณาเลือกสาขา','เทคโนโลยีอุตสาหกรรม', 'วิศวกรรมการจัดการอุตสาหกรรม', 'วิศวกรรมเครื่องกลยานยนต์', 'วิศวกรรมไฟฟ้า', 'ออกแบบผลิตภัณฑ์'];
+TopicData1['คณะมนุษยศาสตร์และสังคมศาสตร์'] = ['กรุณาเลือกสาขา','การพัฒนาสังคม', 'ภาษาอังกฤษ', 'ดนตรีสากล', 'ทัศนศิลป์', 'รัฐศาสตร์', 'รัฐประศาสนศาสตร์', 'นิติศาสตร์บัณฑิต', 'ภาษาญี่ปุ่น', 'ศิลปกรรม', 'สารสนเทศศาสตร์และบรรณารักษศาสตร์','นาฎดุริยางคศิลป์ไทย'];
+TopicData1['คณะวิทยาการจัดการ'] = ['กรุณาเลือกสาขา','การบัญชี', 'การจัดการทรัพยากรมนุษย์', 'การตลาด', 'คอมพิวเตอร์ธุรกิจ', 'การจัดการ', 'นิเทศศาสตร์', 'การท่องเที่ยว'];
+TopicData1['คณะวิทยาศาสตร์และเทคโนโลยี'] = ['กรุณาเลือกสาขา','อาชีวอนามัยและความปลอดภัย', 'วิทยาศาสตร์สิ่งแวดล้อม', 'เทคโนโลยีสารสนเทศ', 'การอาหารและธุรกิจบริการ', 'เทคโนโลยีการเกษตร', 'วิชาเคมี', 'ชีววิทยาประยุกต์', 'ฟิสิกส์ประยุกต์', 'วิทยาการคอมพิวเตอร์', 'สาธารณสุขศาสตร์','คณิตศาสตร์และสถิติประยุกต์'];
+
+
+
+
 var DataList = document.getElementById("category");// get id value
 var SubDataList = document.getElementById("subcategory");//get id value
 var SubDataList_1 = document.getElementById("subcategory_1");
@@ -82,20 +91,9 @@ function ChangeSelectList() {
 
 	}
 
-
-
-
-
-
-
-
-
 }
 
 function ChangeSelectList_1() {
-
-
-
 
 	var y = document.getElementById("subcategory");//get id
 	var Index_Subcategoy = y.selectedIndex;
@@ -124,7 +122,50 @@ function ChangeSelectList_1() {
 
 			}
 
-		} else { document.getElementById('display').style.display = 'none'; }
+		} 
+		else if(TopicData['Tuition_fee'][Value_SubCategory] === "คณะเทคโนโลยีอุตสาหกรรม"){
+			document.getElementById('display').style.display = 'block';
+			for (i = 0; i < TopicData1['คณะเทคโนโลยีอุตสาหกรรม'].length; i++) {
+				var Add_Sub1 = new Option(TopicData1['คณะเทคโนโลยีอุตสาหกรรม'][i], i);// เพิ่มข้อมูลลงใน id subcategory
+				SubDataList_1.options.add(Add_Sub1);
+
+			}
+
+
+		}
+		else if(TopicData['Tuition_fee'][Value_SubCategory] === "คณะมนุษยศาสตร์และสังคมศาสตร์"){
+			document.getElementById('display').style.display = 'block';
+			for (i = 0; i < TopicData1['คณะมนุษยศาสตร์และสังคมศาสตร์'].length; i++) {
+				var Add_Sub1 = new Option(TopicData1['คณะมนุษยศาสตร์และสังคมศาสตร์'][i], i);// เพิ่มข้อมูลลงใน id subcategory
+				SubDataList_1.options.add(Add_Sub1);
+
+			}
+
+
+		}
+		else if(TopicData['Tuition_fee'][Value_SubCategory] === "คณะวิทยาการจัดการ"){
+			document.getElementById('display').style.display = 'block';
+			for (i = 0; i < TopicData1['คณะวิทยาการจัดการ'].length; i++) {
+				var Add_Sub1 = new Option(TopicData1['คณะวิทยาการจัดการ'][i], i);// เพิ่มข้อมูลลงใน id subcategory
+				SubDataList_1.options.add(Add_Sub1);
+
+			}
+
+
+		}
+		else if(TopicData['Tuition_fee'][Value_SubCategory] === "คณะวิทยาศาสตร์และเทคโนโลยี"){
+			document.getElementById('display').style.display = 'block';
+			for (i = 0; i < TopicData1['คณะวิทยาศาสตร์และเทคโนโลยี'].length; i++) {
+				var Add_Sub1 = new Option(TopicData1['คณะวิทยาศาสตร์และเทคโนโลยี'][i], i);// เพิ่มข้อมูลลงใน id subcategory
+				SubDataList_1.options.add(Add_Sub1);
+
+			}
+
+
+		}
+
+
+		else { document.getElementById('display').style.display = 'none'; }
 	}
 
 
@@ -209,7 +250,7 @@ function getUrlVars() {
 }
 
 
-var SubCategory_URL = getUrlVars()["id1"];
+var SubCategory_URL = getUrlVars()["id1"];// เลข index
 var Category_URL = getUrlVars()["id2"];
 var SubCategory_1_URL = getUrlVars()["id3"];
 var Data_Subcategory = TopicData[Category_URL][SubCategory_URL];
@@ -251,7 +292,7 @@ if (SubCategory_1_URL == -1) {
 
 
 
-	console.log(Data_Head);
+	console.log(Data_Head); //หัวข้อย่อยๆ
 	console.log("....." + Category_URL);
 	console.log(head_1 + "11");
 	console.log(Data_Subcategory);
@@ -280,17 +321,23 @@ function showData(doc) {
 	var cell6 = row.insertCell(5);
 	var cell7 = row.insertCell(6);
 
+	var today = new Date(doc.data().date.toDate());
+	var dd = today.getDate();
+	var mm = today.getMonth() + 1; //January is 0!
+	var yyyy = today.getFullYear();
+	var today = dd + '/' + mm + '/' + yyyy;
+	
+	
 
-
-	var d = doc.data().date.toDate().toDateString();
 
 	console.log(Data_Head + "33");
-	cell1.innerHTML = d;
+	cell1.innerHTML = today;
 	cell1.setAttribute('class', 'tend');
+	console.log(Data_Subcategory + "1234");
+	
 
 
-
-	cell2.innerHTML = Data_Subcategory;
+	cell2.innerHTML = Data_Subcategory; //หัวข้อ
 	cell2.setAttribute('class', 'tend');
 	if (Data_Head != undefined) {
 		cell3.innerHTML = Data_Head
@@ -306,41 +353,61 @@ function showData(doc) {
 	cell4.innerHTML = doc.data().description;
 
 
+	var Date_compare = new Date(doc.data().date.toDate());
 
 	if (Category_URL == 'Tuition_fee') {
-		db.collection(Category_URL).doc('Topic').collection(Data_Subcategory).doc(Data_Subcategory).collection(Data_Head).orderBy("date", "desc").get().then
-			((snapshot) => {
+		db.collection(Category_URL).doc(Data_Subcategory).collection(Data_Head).orderBy('date').get().then((snapshot) => {
 				let last = snapshot.docs[snapshot.docs.length - 1];
-				if (last.data().date.toDate().toDateString() == d) {
+				var DateLast_compare = new Date(last.data().date.toDate());//get Time ออกมา
+				if (Date_compare.getTime() == DateLast_compare.getTime()) {
 					cell5.innerHTML = "กำลังใช้งาน";
 				} else {
 					cell5.innerHTML = "ไม่ถูกใช้งาน";
 				}
 
-				console.log(last.data().date.toDate() + "dtaddd" + d);
+				
 
 			});
 
 
 
-	}else{
+	}
+	else if(head_1 == "ระยะเวลาการศึกษาระดับปริญญาตรี" || head_1 == "เกรดเฉลี่ยขั้นต่ำ"){
+		db.collection(Category_URL).doc("Topic").collection(head_1).doc(head_1).collection(Data_Head).orderBy('date').get().then((snapshot) => {
+			let last = snapshot.docs[snapshot.docs.length - 1];
+			var DateLast_compare = new Date(last.data().date.toDate());//get Time ออกมา
+			if (Date_compare.getTime() == DateLast_compare.getTime()) {
+				cell5.innerHTML = "กำลังใช้งาน";
+			} else {
+				cell5.innerHTML = "ไม่ถูกใช้งาน";
+			}
 
+			
 
+		});
+
+	}
+	
+	
+	else{
+		db.collection(Category_URL).doc('Topic').collection(Data_Subcategory).orderBy('date').get().then((snapshot) => {
+			let last = snapshot.docs[snapshot.docs.length - 1];
+			var DateLast_compare = new Date(last.data().date.toDate());//get Time ออกมา
+			if (DateLast_compare.getTime() === Date_compare.getTime()) {
+				cell5.innerHTML = "กำลังใช้งาน";
+			} else {
+				cell5.innerHTML = "ไม่ถูกใช้งาน";
+			}
+	
+			console.log(DateLast_compare.getTime()+ "rjv" +">>>>>" + Date_compare.getTime());  //ดึงเวลาออกมาเปรียบเทียบ ต้องเอาวันที่ และเวลามาด้วย
+	
+		});
 
 		
 	}
 
-	db.collection(Category_URL).doc('Topic').collection(Data_Subcategory).orderBy('date').get().then((snapshot) => {
-		let last = snapshot.docs[snapshot.docs.length - 1];
-		if (last.data().date.toDate().toDateString() == d) {
-			cell5.innerHTML = "กำลังใช้งาน";
-		} else {
-			cell5.innerHTML = "ไม่ถูกใช้งาน";
-		}
 
-		console.log(last.data().date.toDate() + "dtaddd" + d);
 
-	});
 	cell5.setAttribute('class', 'tend');
 
 	//ลบข้อมูล
@@ -356,17 +423,45 @@ function showData(doc) {
 		var r = confirm("คุณยืนยันที่จะลบข้อมูล?");
 		let a = 0;
 		if (r == true) {
-
-
 			let id = e.target.getAttribute('data-id');
-			//  db.collection('Registration').doc('Topic').collection('Additional_Credit_Registration').doc(id);
-			db.collection('Registration').doc('Topic').collection('Additional_Credit_Registration').doc(id).delete().then(function () {
+			if (Category_URL == 'Tuition_fee') {
+				//db.collection(Category_URL).doc(Data_Subcategory).collection(Data_Head)
+				db.collection(Category_URL).doc(Data_Subcategory).collection(Data_Head).doc(id).delete().then(function () {
+
+					console.log("Document successfully deleted!");
+					window.location.reload();
+				}).catch(function (error) {
+					console.error("Error removing document: ", error);
+				});
+
+			}
+
+			else if(head_1 == "ระยะเวลาการศึกษาระดับปริญญาตรี" || head_1 == "เกรดเฉลี่ยขั้นต่ำ"){
+				db.collection(Category_URL).doc("Topic").collection(head_1).doc(head_1).collection(Data_Head).doc(id).delete().then(function () {
+
+					console.log("Document successfully deleted!");
+					window.location.reload();
+				}).catch(function (error) {
+					console.error("Error removing document: ", error);
+				});
+
+			}
+			else{
+
+				//  db.collection('Registration').doc('Topic').collection('Additional_Credit_Registration').doc(id);
+			db.collection(Category_URL).doc('Topic').collection(Data_Subcategory).doc(id).delete().then(function () {
 
 				console.log("Document successfully deleted!");
 				window.location.reload();
 			}).catch(function (error) {
 				console.error("Error removing document: ", error);
 			});
+
+			}
+
+
+
+			
 
 		}
 
@@ -386,6 +481,25 @@ function showData(doc) {
 	cell6.appendChild(btn_copy);
 	btn_copy.addEventListener('click', (e) => {
 		let id_copy = e.target.getAttribute('id-data');
-		location.href = "Copy.html?id=" + id_copy;
+		if(head_1 == "ระยะเวลาการศึกษาระดับปริญญาตรี" || head_1 == "เกรดเฉลี่ยขั้นต่ำ"){
+			location.href = "Copy.html?id1=" + id_copy + "&id2=" + Category_URL + "&id3=" + SubCategory_URL + "&id4=" + SubCategory_1_URL ;
+
+
+		}
+		else if(Category_URL == 'Tuition_fee'){
+
+			location.href = "Copy.html?id1=" + id_copy + "&id2=" + Category_URL + "&id3=" + SubCategory_URL + "&id4=" + SubCategory_1_URL ;
+
+		}
+		
+		
+		else{
+
+			location.href = "Copy.html?id1=" + id_copy + "&id2=" + Category_URL + "&id3=" + SubCategory_URL;
+		
+
+		}
+	
 	});
 }
+

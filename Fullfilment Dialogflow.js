@@ -5179,251 +5179,8 @@ exports.dialogflowFirebaseFulfillment = functions.https.onRequest((request, resp
     }
 
 
-        //ภาคการศึกษาพิเศษ
-        function Spacial_application(agent) {
-            let payload = {
-                "type": "template",
-                "altText": "this is a confirm template",
-                "template": {
-                    "type": "confirm",
-                    "actions": [
-                        {
-                            "type": "message",
-                            "label": "ถูก",
-                            "text": "ได้รับคำตอบถูกต้องในเรื่องการสมัครเรียนภาคการศึกษาพิเศษ"
-                        },
-                        {
-                            "type": "message",
-                            "label": "ไม่ถูก",
-                            "text": "ได้รับคำตอบไม่ถูกต้องในเรื่องการสมัครเรียนภาคการศึกษาพิเศษ"
-                        }
-                    ],
-                    "text": "คุณได้รับคำตอบถูกต้องไหมคะ?"
-                }
-            };
-    
-            //ประกาศตัวแปร payload เพื่อแสดงออกหน้าจอ
-            let payload่json = new Payload(`LINE`, payload, { sendAsMessage: true });
-            let text = request.body.queryResult.queryText;
-            let c = 'ได้รับคำตอบถูกต้องในเรื่องการสมัครเรียนภาคการศึกษาพิเศษ';
-            let b = 'ได้รับคำตอบไม่ถูกต้องในเรื่องการสมัครเรียนภาคการศึกษาพิเศษ';
-    
-            //Count_Accuracy
-            let Count_Accuracy = admin.firestore().collection("Count_Accuracy").doc(date.toLocaleDateString()).collection("การสมัครเรียน").doc("ภาคการศึกษาพิเศษ");
-            Count_Accuracy.get().then(function (docs) {
-                if (!docs.exists) {
-                    Count_Accuracy.set({
-                        ถูก: 0,
-                        ไม่ถูก: 0
-                    });
-                }
-    
-            });
-    
-    
-            if (text === c) {
-                agent.add("ขอบคุณค่ะ");
-                db.runTransaction(t => {
-                    return t.get(Count_Accuracy).then(doc => {
-                        let newcount = doc.data().ถูก + 1;
-    
-                        t.update(Count_Accuracy, {
-                            ถูก: newcount,
-    
-                        });
-                    });
-                });
-    
-    
-    
-            }
-    
-            else if (text === b) {
-    
-                agent.add("กรุณากดปุ่มติดต่อเจ้าหน้าที่");
-                db.runTransaction(t => {
-                    return t.get(Count_Accuracy).then(doc => {
-                        let newcount = doc.data().ไม่ถูก + 1;
-    
-                        t.update(Count_Accuracy, {
-                            ไม่ถูก: newcount,
-    
-                        });
-                    });
-                });
-    
-            }
-    
-            else {
-                //เชคว่ามี ตัว doc อยู๋ไหม ถ้าไม่ ก็ set ค่า 
-                // count_intent 
-                Count_Intent.get().then(function (docs) {
-                    if (!docs.exists) {
-                        Count_Intent.set({
-                            การสมัครเรียน: 1
-                        });
-                    }
-    
-                    else {
-                        //เลขcount เวลามีคนเข้ามาสอบถาม
-    
-                        db.runTransaction(t => {
-                            return t.get(Count_Intent).then(doc => {
-                                if (doc.data().การสมัครเรียน > 0) {
-                                    let newcount = doc.data().การสมัครเรียน + 1;
-    
-                                    t.update(Count_Intent, {
-                                        การสมัครเรียน: newcount
-    
-                                    });
-                                } else {
-                                    t.update(Count_Intent, {
-                                        การสมัครเรียน: 1
-                                    });
-    
-                                }
-    
-                            });
-                        });
-                    }
-                });
-    
-                //return ข้อมูลคำตอบ 
-                return admin.firestore().collection('Application_study').doc('Topic').collection('ภาคการศึกษาพิเศษ').orderBy("date", "desc").limit(1).get().then((snapshot) => {
-                    snapshot.forEach(doc => {
-                        agent.add(doc.data().description);
-                        agent.add(payload่json); //แสดง paylaod
-                    });
-                });
-            }
-    
-        }
-
-
-                //ภาคการศึกษาฤดูร้อน
-                function Summer_application(agent) {
-                    let payload = {
-                        "type": "template",
-                        "altText": "this is a confirm template",
-                        "template": {
-                            "type": "confirm",
-                            "actions": [
-                                {
-                                    "type": "message",
-                                    "label": "ถูก",
-                                    "text": "ได้รับคำตอบถูกต้องในเรื่องการสมัครเรียนภาคการศึกษาฤดูร้อน"
-                                },
-                                {
-                                    "type": "message",
-                                    "label": "ไม่ถูก",
-                                    "text": "ได้รับคำตอบไม่ถูกต้องในเรื่องการสมัครเรียนภาคการศึกษาฤดูร้อน"
-                                }
-                            ],
-                            "text": "คุณได้รับคำตอบถูกต้องไหมคะ?"
-                        }
-                    };
-            
-                    //ประกาศตัวแปร payload เพื่อแสดงออกหน้าจอ
-                    let payload่json = new Payload(`LINE`, payload, { sendAsMessage: true });
-                    let text = request.body.queryResult.queryText;
-                    let c = 'ได้รับคำตอบถูกต้องในเรื่องการสมัครเรียนภาคการศึกษาฤดูร้อน';
-                    let b = 'ได้รับคำตอบไม่ถูกต้องในเรื่องการสมัครเรียนภาคการศึกษาฤดูร้อน';
-            
-                    //Count_Accuracy
-                    let Count_Accuracy = admin.firestore().collection("Count_Accuracy").doc(date.toLocaleDateString()).collection("การสมัครเรียน").doc("ภาคการศึกษาฤดูร้อน");
-                    Count_Accuracy.get().then(function (docs) {
-                        if (!docs.exists) {
-                            Count_Accuracy.set({
-                                ถูก: 0,
-                                ไม่ถูก: 0
-                            });
-                        }
-            
-                    });
-            
-            
-                    if (text === c) {
-                        agent.add("ขอบคุณค่ะ");
-                        db.runTransaction(t => {
-                            return t.get(Count_Accuracy).then(doc => {
-                                let newcount = doc.data().ถูก + 1;
-            
-                                t.update(Count_Accuracy, {
-                                    ถูก: newcount,
-            
-                                });
-                            });
-                        });
-            
-            
-            
-                    }
-            
-                    else if (text === b) {
-            
-                        agent.add("กรุณากดปุ่มติดต่อเจ้าหน้าที่");
-                        db.runTransaction(t => {
-                            return t.get(Count_Accuracy).then(doc => {
-                                let newcount = doc.data().ไม่ถูก + 1;
-            
-                                t.update(Count_Accuracy, {
-                                    ไม่ถูก: newcount,
-            
-                                });
-                            });
-                        });
-            
-                    }
-            
-                    else {
-                        //เชคว่ามี ตัว doc อยู๋ไหม ถ้าไม่ ก็ set ค่า 
-                        // count_intent 
-                        Count_Intent.get().then(function (docs) {
-                            if (!docs.exists) {
-                                Count_Intent.set({
-                                    การสมัครเรียน: 1
-                                });
-                            }
-            
-                            else {
-                                //เลขcount เวลามีคนเข้ามาสอบถาม
-            
-                                db.runTransaction(t => {
-                                    return t.get(Count_Intent).then(doc => {
-                                        if (doc.data().การสมัครเรียน > 0) {
-                                            let newcount = doc.data().การสมัครเรียน + 1;
-            
-                                            t.update(Count_Intent, {
-                                                การสมัครเรียน: newcount
-            
-                                            });
-                                        } else {
-                                            t.update(Count_Intent, {
-                                                การสมัครเรียน: 1
-                                            });
-            
-                                        }
-            
-                                    });
-                                });
-                            }
-                        });
-            
-                        //return ข้อมูลคำตอบ 
-                        return admin.firestore().collection('Application_study').doc('Topic').collection('ภาคการศึกษาฤดูร้อน').orderBy("date", "desc").limit(1).get().then((snapshot) => {
-                            snapshot.forEach(doc => {
-                                agent.add(doc.data().description);
-                                agent.add(payload่json); //แสดง paylaod
-                            });
-                        });
-                    }
-            
-                }
-
-    //ค่าธรรมเนียมการศึกษา Tuition_fee
-    //คณะครุศาสตร์
-    // สาขาคณิตศาสตร์
-    function Mathematics(agent) {
+    //ภาคการศึกษาพิเศษ
+    function Spacial_application(agent) {
         let payload = {
             "type": "template",
             "altText": "this is a confirm template",
@@ -5433,12 +5190,12 @@ exports.dialogflowFirebaseFulfillment = functions.https.onRequest((request, resp
                     {
                         "type": "message",
                         "label": "ถูก",
-                        "text": "ได้รับคำตอบถูกต้องในเรื่องสาขาคณิตศาสตร์"
+                        "text": "ได้รับคำตอบถูกต้องในเรื่องการสมัครเรียนภาคการศึกษาพิเศษ"
                     },
                     {
                         "type": "message",
                         "label": "ไม่ถูก",
-                        "text": "ได้รับคำตอบไม่ถูกต้องในเรื่องสาขาคณิตศาสตร์"
+                        "text": "ได้รับคำตอบไม่ถูกต้องในเรื่องการสมัครเรียนภาคการศึกษาพิเศษ"
                     }
                 ],
                 "text": "คุณได้รับคำตอบถูกต้องไหมคะ?"
@@ -5448,11 +5205,11 @@ exports.dialogflowFirebaseFulfillment = functions.https.onRequest((request, resp
         //ประกาศตัวแปร payload เพื่อแสดงออกหน้าจอ
         let payload่json = new Payload(`LINE`, payload, { sendAsMessage: true });
         let text = request.body.queryResult.queryText;
-        let c = 'ได้รับคำตอบถูกต้องในเรื่องสาขาคณิตศาสตร์';
-        let b = 'ได้รับคำตอบไม่ถูกต้องในเรื่องสาขาคณิตศาสตร์';
+        let c = 'ได้รับคำตอบถูกต้องในเรื่องการสมัครเรียนภาคการศึกษาพิเศษ';
+        let b = 'ได้รับคำตอบไม่ถูกต้องในเรื่องการสมัครเรียนภาคการศึกษาพิเศษ';
 
         //Count_Accuracy
-        let Count_Accuracy = admin.firestore().collection("Count_Accuracy").doc(date.toLocaleDateString()).collection("ค่าธรรมเนียมการศึกษา").doc("");
+        let Count_Accuracy = admin.firestore().collection("Count_Accuracy").doc(date.toLocaleDateString()).collection("การสมัครเรียน").doc("ภาคการศึกษาพิเศษ");
         Count_Accuracy.get().then(function (docs) {
             if (!docs.exists) {
                 Count_Accuracy.set({
@@ -5503,7 +5260,7 @@ exports.dialogflowFirebaseFulfillment = functions.https.onRequest((request, resp
             Count_Intent.get().then(function (docs) {
                 if (!docs.exists) {
                     Count_Intent.set({
-                        การพ้นสภาพการเป็นนักศึกษา: 1
+                        การสมัครเรียน: 1
                     });
                 }
 
@@ -5512,16 +5269,16 @@ exports.dialogflowFirebaseFulfillment = functions.https.onRequest((request, resp
 
                     db.runTransaction(t => {
                         return t.get(Count_Intent).then(doc => {
-                            if (doc.data().การพ้นสภาพการเป็นนักศึกษา > 0) {
-                                let newcount = doc.data().การพ้นสภาพการเป็นนักศึกษา + 1;
+                            if (doc.data().การสมัครเรียน > 0) {
+                                let newcount = doc.data().การสมัครเรียน + 1;
 
                                 t.update(Count_Intent, {
-                                    การพ้นสภาพการเป็นนักศึกษา: newcount
+                                    การสมัครเรียน: newcount
 
                                 });
                             } else {
                                 t.update(Count_Intent, {
-                                    การพ้นสภาพการเป็นนักศึกษา: 1
+                                    การสมัครเรียน: 1
                                 });
 
                             }
@@ -5532,7 +5289,371 @@ exports.dialogflowFirebaseFulfillment = functions.https.onRequest((request, resp
             });
 
             //return ข้อมูลคำตอบ 
-            return admin.firestore().collection('Student_Retirement').doc('Topic').collection('การดำเนินการเมื่อพ้นสภาพการเป็นนักศึกษา').orderBy("date", "desc").limit(1).get().then((snapshot) => {
+            return admin.firestore().collection('Application_study').doc('Topic').collection('ภาคการศึกษาพิเศษ').orderBy("date", "desc").limit(1).get().then((snapshot) => {
+                snapshot.forEach(doc => {
+                    agent.add(doc.data().description);
+                    agent.add(payload่json); //แสดง paylaod
+                });
+            });
+        }
+
+    }
+
+
+    //ภาคการศึกษาฤดูร้อน
+    function Summer_application(agent) {
+        let payload = {
+            "type": "template",
+            "altText": "this is a confirm template",
+            "template": {
+                "type": "confirm",
+                "actions": [
+                    {
+                        "type": "message",
+                        "label": "ถูก",
+                        "text": "ได้รับคำตอบถูกต้องในเรื่องการสมัครเรียนภาคการศึกษาฤดูร้อน"
+                    },
+                    {
+                        "type": "message",
+                        "label": "ไม่ถูก",
+                        "text": "ได้รับคำตอบไม่ถูกต้องในเรื่องการสมัครเรียนภาคการศึกษาฤดูร้อน"
+                    }
+                ],
+                "text": "คุณได้รับคำตอบถูกต้องไหมคะ?"
+            }
+        };
+
+        //ประกาศตัวแปร payload เพื่อแสดงออกหน้าจอ
+        let payload่json = new Payload(`LINE`, payload, { sendAsMessage: true });
+        let text = request.body.queryResult.queryText;
+        let c = 'ได้รับคำตอบถูกต้องในเรื่องการสมัครเรียนภาคการศึกษาฤดูร้อน';
+        let b = 'ได้รับคำตอบไม่ถูกต้องในเรื่องการสมัครเรียนภาคการศึกษาฤดูร้อน';
+
+        //Count_Accuracy
+        let Count_Accuracy = admin.firestore().collection("Count_Accuracy").doc(date.toLocaleDateString()).collection("การสมัครเรียน").doc("ภาคการศึกษาฤดูร้อน");
+        Count_Accuracy.get().then(function (docs) {
+            if (!docs.exists) {
+                Count_Accuracy.set({
+                    ถูก: 0,
+                    ไม่ถูก: 0
+                });
+            }
+
+        });
+
+
+        if (text === c) {
+            agent.add("ขอบคุณค่ะ");
+            db.runTransaction(t => {
+                return t.get(Count_Accuracy).then(doc => {
+                    let newcount = doc.data().ถูก + 1;
+
+                    t.update(Count_Accuracy, {
+                        ถูก: newcount,
+
+                    });
+                });
+            });
+
+
+
+        }
+
+        else if (text === b) {
+
+            agent.add("กรุณากดปุ่มติดต่อเจ้าหน้าที่");
+            db.runTransaction(t => {
+                return t.get(Count_Accuracy).then(doc => {
+                    let newcount = doc.data().ไม่ถูก + 1;
+
+                    t.update(Count_Accuracy, {
+                        ไม่ถูก: newcount,
+
+                    });
+                });
+            });
+
+        }
+
+        else {
+            //เชคว่ามี ตัว doc อยู๋ไหม ถ้าไม่ ก็ set ค่า 
+            // count_intent 
+            Count_Intent.get().then(function (docs) {
+                if (!docs.exists) {
+                    Count_Intent.set({
+                        การสมัครเรียน: 1
+                    });
+                }
+
+                else {
+                    //เลขcount เวลามีคนเข้ามาสอบถาม
+
+                    db.runTransaction(t => {
+                        return t.get(Count_Intent).then(doc => {
+                            if (doc.data().การสมัครเรียน > 0) {
+                                let newcount = doc.data().การสมัครเรียน + 1;
+
+                                t.update(Count_Intent, {
+                                    การสมัครเรียน: newcount
+
+                                });
+                            } else {
+                                t.update(Count_Intent, {
+                                    การสมัครเรียน: 1
+                                });
+
+                            }
+
+                        });
+                    });
+                }
+            });
+
+            //return ข้อมูลคำตอบ 
+            return admin.firestore().collection('Application_study').doc('Topic').collection('ภาคการศึกษาฤดูร้อน').orderBy("date", "desc").limit(1).get().then((snapshot) => {
+                snapshot.forEach(doc => {
+                    agent.add(doc.data().description);
+                    agent.add(payload่json); //แสดง paylaod
+                });
+            });
+        }
+
+    }
+
+    //ค่าธรรมเนียมการศึกษา Tuition_fee
+    //คณะครุศาสตร์
+    // สาขาคณิตศาสตร์
+    function Mathematics(agent) {
+        let payload = {
+            "type": "template",
+            "altText": "this is a confirm template",
+            "template": {
+                "type": "confirm",
+                "actions": [
+                    {
+                        "type": "message",
+                        "label": "ถูก",
+                        "text": "ได้รับคำตอบถูกต้องในเรื่องค่าธรรมเนียมการศึกษาสาขาคณิตศาสตร์"
+                    },
+                    {
+                        "type": "message",
+                        "label": "ไม่ถูก",
+                        "text": "ได้รับคำตอบไม่ถูกต้องในเรื่องค่าธรรมเนียมการศึกษาสาขาคณิตศาสตร์"
+                    }
+                ],
+                "text": "คุณได้รับคำตอบถูกต้องไหมคะ?"
+            }
+        };
+
+        //ประกาศตัวแปร payload เพื่อแสดงออกหน้าจอ
+        let payload่json = new Payload(`LINE`, payload, { sendAsMessage: true });
+        let text = request.body.queryResult.queryText;
+        let c = 'ได้รับคำตอบถูกต้องในเรื่องค่าธรรมเนียมการศึกษาสาขาคณิตศาสตร์';
+        let b = 'ได้รับคำตอบไม่ถูกต้องในเรื่องค่าธรรมเนียมการศึกษาสาขาคณิตศาสตร์';
+
+        //Count_Accuracy
+        let Count_Accuracy = admin.firestore().collection("Count_Accuracy").doc(date.toLocaleDateString()).collection("ค่าธรรมเนียมการศึกษา").doc("คณะครุศาสตร์").collection("Subject").doc("คณิตศาสตร์");
+        Count_Accuracy.get().then(function (docs) {
+            if (!docs.exists) {
+                Count_Accuracy.set({
+                    ถูก: 0,
+                    ไม่ถูก: 0
+                });
+            }
+
+        });
+
+
+        if (text === c) {
+            agent.add("ขอบคุณค่ะ");
+            db.runTransaction(t => {
+                return t.get(Count_Accuracy).then(doc => {
+                    let newcount = doc.data().ถูก + 1;
+
+                    t.update(Count_Accuracy, {
+                        ถูก: newcount,
+
+                    });
+                });
+            });
+
+
+
+        }
+
+        else if (text === b) {
+
+            agent.add("กรุณากดปุ่มติดต่อเจ้าหน้าที่");
+            db.runTransaction(t => {
+                return t.get(Count_Accuracy).then(doc => {
+                    let newcount = doc.data().ไม่ถูก + 1;
+
+                    t.update(Count_Accuracy, {
+                        ไม่ถูก: newcount,
+
+                    });
+                });
+            });
+
+        }
+
+        else {
+            //เชคว่ามี ตัว doc อยู๋ไหม ถ้าไม่ ก็ set ค่า 
+            // count_intent 
+            Count_Intent.get().then(function (docs) {
+                if (!docs.exists) {
+                    Count_Intent.set({
+                        ค่าธรรมเนียมการศึกษา: 1
+                    });
+                }
+
+                else {
+                    //เลขcount เวลามีคนเข้ามาสอบถาม
+
+                    db.runTransaction(t => {
+                        return t.get(Count_Intent).then(doc => {
+                            if (doc.data().ค่าธรรมเนียมการศึกษา > 0) {
+                                let newcount = doc.data().ค่าธรรมเนียมการศึกษา + 1;
+
+                                t.update(Count_Intent, {
+                                    ค่าธรรมเนียมการศึกษา: newcount
+
+                                });
+                            } else {
+                                t.update(Count_Intent, {
+                                    ค่าธรรมเนียมการศึกษา: 1
+                                });
+
+                            }
+
+                        });
+                    });
+                }
+            });
+
+            //return ข้อมูลคำตอบ 
+            return admin.firestore().collection('Tuition_fee').doc('คณะครุศาสตร์').collection('คณิตศาสตร์').orderBy("date", "desc").limit(1).get().then((snapshot) => {
+                snapshot.forEach(doc => {
+                    agent.add(doc.data().description);
+                    agent.add(payload่json); //แสดง paylaod
+                });
+            });
+        }
+
+    }
+
+
+    //การสอนวิทยาศาสตร์ทั่วไป
+    function Teaching_General_Science(agent) {
+        let payload = {
+            "type": "template",
+            "altText": "this is a confirm template",
+            "template": {
+                "type": "confirm",
+                "actions": [
+                    {
+                        "type": "message",
+                        "label": "ถูก",
+                        "text": "ได้รับคำตอบถูกต้องในเรื่องค่าธรรมเนียมการศึกษาสาขาการสอนวิทยาศาสตร์ทั่วไป"
+                    },
+                    {
+                        "type": "message",
+                        "label": "ไม่ถูก",
+                        "text": "ได้รับคำตอบไม่ถูกต้องในเรื่องค่าธรรมเนียมการศึกษาสาขาการสอนวิทยาศาสตร์ทั่วไป"
+                    }
+                ],
+                "text": "คุณได้รับคำตอบถูกต้องไหมคะ?"
+            }
+        };
+
+        //ประกาศตัวแปร payload เพื่อแสดงออกหน้าจอ
+        let payload่json = new Payload(`LINE`, payload, { sendAsMessage: true });
+        let text = request.body.queryResult.queryText;
+        let c = 'ได้รับคำตอบถูกต้องในเรื่องค่าธรรมเนียมการศึกษาสาขาการสอนวิทยาศาสตร์ทั่วไป';
+        let b = 'ได้รับคำตอบไม่ถูกต้องในเรื่องค่าธรรมเนียมการศึกษาสาขาการสอนวิทยาศาสตร์ทั่วไป';
+
+        //Count_Accuracy
+        let Count_Accuracy = admin.firestore().collection("Count_Accuracy").doc(date.toLocaleDateString()).collection("ค่าธรรมเนียมการศึกษา").doc("คณะครุศาสตร์").collection("Subject").doc("การสอนวิทยาศาสตร์ทั่วไป");
+        Count_Accuracy.get().then(function (docs) {
+            if (!docs.exists) {
+                Count_Accuracy.set({
+                    ถูก: 0,
+                    ไม่ถูก: 0
+                });
+            }
+
+        });
+
+
+        if (text === c) {
+            agent.add("ขอบคุณค่ะ");
+            db.runTransaction(t => {
+                return t.get(Count_Accuracy).then(doc => {
+                    let newcount = doc.data().ถูก + 1;
+
+                    t.update(Count_Accuracy, {
+                        ถูก: newcount,
+
+                    });
+                });
+            });
+
+
+
+        }
+
+        else if (text === b) {
+
+            agent.add("กรุณากดปุ่มติดต่อเจ้าหน้าที่");
+            db.runTransaction(t => {
+                return t.get(Count_Accuracy).then(doc => {
+                    let newcount = doc.data().ไม่ถูก + 1;
+
+                    t.update(Count_Accuracy, {
+                        ไม่ถูก: newcount,
+
+                    });
+                });
+            });
+
+        }
+
+        else {
+            //เชคว่ามี ตัว doc อยู๋ไหม ถ้าไม่ ก็ set ค่า 
+            // count_intent 
+            Count_Intent.get().then(function (docs) {
+                if (!docs.exists) {
+                    Count_Intent.set({
+                        ค่าธรรมเนียมการศึกษา: 1
+                    });
+                }
+
+                else {
+                    //เลขcount เวลามีคนเข้ามาสอบถาม
+
+                    db.runTransaction(t => {
+                        return t.get(Count_Intent).then(doc => {
+                            if (doc.data().ค่าธรรมเนียมการศึกษา > 0) {
+                                let newcount = doc.data().ค่าธรรมเนียมการศึกษา + 1;
+
+                                t.update(Count_Intent, {
+                                    ค่าธรรมเนียมการศึกษา: newcount
+
+                                });
+                            } else {
+                                t.update(Count_Intent, {
+                                    ค่าธรรมเนียมการศึกษา: 1
+                                });
+
+                            }
+
+                        });
+                    });
+                }
+            });
+
+            //return ข้อมูลคำตอบ 
+            return admin.firestore().collection('Tuition_fee').doc('คณะครุศาสตร์').collection('การสอนวิทยาศาสตร์ทั่วไป').orderBy("date", "desc").limit(1).get().then((snapshot) => {
                 snapshot.forEach(doc => {
                     agent.add(doc.data().description);
                     agent.add(payload่json); //แสดง paylaod
@@ -5544,6 +5665,5096 @@ exports.dialogflowFirebaseFulfillment = functions.https.onRequest((request, resp
 
 
 
+    //คอมพิวเตอร์ศึกษา
+    function Computer_Education(agent) {
+        let payload = {
+            "type": "template",
+            "altText": "this is a confirm template",
+            "template": {
+                "type": "confirm",
+                "actions": [
+                    {
+                        "type": "message",
+                        "label": "ถูก",
+                        "text": "ได้รับคำตอบถูกต้องในเรื่องค่าธรรมเนียมการศึกษาสาขาคอมพิวเตอร์ศึกษา"
+                    },
+                    {
+                        "type": "message",
+                        "label": "ไม่ถูก",
+                        "text": "ได้รับคำตอบไม่ถูกต้องในเรื่องค่าธรรมเนียมการศึกษาสาขาคอมพิวเตอร์ศึกษา"
+                    }
+                ],
+                "text": "คุณได้รับคำตอบถูกต้องไหมคะ?"
+            }
+        };
+
+        //ประกาศตัวแปร payload เพื่อแสดงออกหน้าจอ
+        let payload่json = new Payload(`LINE`, payload, { sendAsMessage: true });
+        let text = request.body.queryResult.queryText;
+        let c = 'ได้รับคำตอบถูกต้องในเรื่องค่าธรรมเนียมการศึกษาสาขาคอมพิวเตอร์ศึกษา';
+        let b = 'ได้รับคำตอบไม่ถูกต้องในเรื่องค่าธรรมเนียมการศึกษาสาขาคอมพิวเตอร์ศึกษา';
+
+        //Count_Accuracy
+        let Count_Accuracy = admin.firestore().collection("Count_Accuracy").doc(date.toLocaleDateString()).collection("ค่าธรรมเนียมการศึกษา").doc("คณะครุศาสตร์").collection("Subject").doc("คอมพิวเตอร์ศึกษา");
+        Count_Accuracy.get().then(function (docs) {
+            if (!docs.exists) {
+                Count_Accuracy.set({
+                    ถูก: 0,
+                    ไม่ถูก: 0
+                });
+            }
+
+        });
+
+
+        if (text === c) {
+            agent.add("ขอบคุณค่ะ");
+            db.runTransaction(t => {
+                return t.get(Count_Accuracy).then(doc => {
+                    let newcount = doc.data().ถูก + 1;
+
+                    t.update(Count_Accuracy, {
+                        ถูก: newcount,
+
+                    });
+                });
+            });
+
+
+
+        }
+
+        else if (text === b) {
+
+            agent.add("กรุณากดปุ่มติดต่อเจ้าหน้าที่");
+            db.runTransaction(t => {
+                return t.get(Count_Accuracy).then(doc => {
+                    let newcount = doc.data().ไม่ถูก + 1;
+
+                    t.update(Count_Accuracy, {
+                        ไม่ถูก: newcount,
+
+                    });
+                });
+            });
+
+        }
+
+        else {
+            //เชคว่ามี ตัว doc อยู๋ไหม ถ้าไม่ ก็ set ค่า 
+            // count_intent 
+            Count_Intent.get().then(function (docs) {
+                if (!docs.exists) {
+                    Count_Intent.set({
+                        ค่าธรรมเนียมการศึกษา: 1
+                    });
+                }
+
+                else {
+                    //เลขcount เวลามีคนเข้ามาสอบถาม
+
+                    db.runTransaction(t => {
+                        return t.get(Count_Intent).then(doc => {
+                            if (doc.data().ค่าธรรมเนียมการศึกษา > 0) {
+                                let newcount = doc.data().ค่าธรรมเนียมการศึกษา + 1;
+
+                                t.update(Count_Intent, {
+                                    ค่าธรรมเนียมการศึกษา: newcount
+
+                                });
+                            } else {
+                                t.update(Count_Intent, {
+                                    ค่าธรรมเนียมการศึกษา: 1
+                                });
+
+                            }
+
+                        });
+                    });
+                }
+            });
+
+            //return ข้อมูลคำตอบ 
+            return admin.firestore().collection('Tuition_fee').doc('คณะครุศาสตร์').collection('คอมพิวเตอร์ศึกษา').orderBy("date", "desc").limit(1).get().then((snapshot) => {
+                snapshot.forEach(doc => {
+                    agent.add(doc.data().description);
+                    agent.add(payload่json); //แสดง paylaod
+                });
+            });
+        }
+
+    }
+
+
+    //การสอนภาษาไทย
+    function Thai_Teaching(agent) {
+        let payload = {
+            "type": "template",
+            "altText": "this is a confirm template",
+            "template": {
+                "type": "confirm",
+                "actions": [
+                    {
+                        "type": "message",
+                        "label": "ถูก",
+                        "text": "ได้รับคำตอบถูกต้องในเรื่องค่าธรรมเนียมการศึกษาสาขาการสอนภาษาไทย"
+                    },
+                    {
+                        "type": "message",
+                        "label": "ไม่ถูก",
+                        "text": "ได้รับคำตอบไม่ถูกต้องในเรื่องค่าธรรมเนียมการศึกษาสาขาการสอนภาษาไทย"
+                    }
+                ],
+                "text": "คุณได้รับคำตอบถูกต้องไหมคะ?"
+            }
+        };
+
+        //ประกาศตัวแปร payload เพื่อแสดงออกหน้าจอ
+        let payload่json = new Payload(`LINE`, payload, { sendAsMessage: true });
+        let text = request.body.queryResult.queryText;
+        let c = 'ได้รับคำตอบถูกต้องในเรื่องค่าธรรมเนียมการศึกษาสาขาการสอนภาษาไทย';
+        let b = 'ได้รับคำตอบไม่ถูกต้องในเรื่องค่าธรรมเนียมการศึกษาสาขาการสอนภาษาไทย';
+
+        //Count_Accuracy
+        let Count_Accuracy = admin.firestore().collection("Count_Accuracy").doc(date.toLocaleDateString()).collection("ค่าธรรมเนียมการศึกษา").doc("คณะครุศาสตร์").collection("Subject").doc("การสอนภาษาไทย");
+        Count_Accuracy.get().then(function (docs) {
+            if (!docs.exists) {
+                Count_Accuracy.set({
+                    ถูก: 0,
+                    ไม่ถูก: 0
+                });
+            }
+
+        });
+
+
+        if (text === c) {
+            agent.add("ขอบคุณค่ะ");
+            db.runTransaction(t => {
+                return t.get(Count_Accuracy).then(doc => {
+                    let newcount = doc.data().ถูก + 1;
+
+                    t.update(Count_Accuracy, {
+                        ถูก: newcount,
+
+                    });
+                });
+            });
+
+
+
+        }
+
+        else if (text === b) {
+
+            agent.add("กรุณากดปุ่มติดต่อเจ้าหน้าที่");
+            db.runTransaction(t => {
+                return t.get(Count_Accuracy).then(doc => {
+                    let newcount = doc.data().ไม่ถูก + 1;
+
+                    t.update(Count_Accuracy, {
+                        ไม่ถูก: newcount,
+
+                    });
+                });
+            });
+
+        }
+
+        else {
+            //เชคว่ามี ตัว doc อยู๋ไหม ถ้าไม่ ก็ set ค่า 
+            // count_intent 
+            Count_Intent.get().then(function (docs) {
+                if (!docs.exists) {
+                    Count_Intent.set({
+                        ค่าธรรมเนียมการศึกษา: 1
+                    });
+                }
+
+                else {
+                    //เลขcount เวลามีคนเข้ามาสอบถาม
+
+                    db.runTransaction(t => {
+                        return t.get(Count_Intent).then(doc => {
+                            if (doc.data().ค่าธรรมเนียมการศึกษา > 0) {
+                                let newcount = doc.data().ค่าธรรมเนียมการศึกษา + 1;
+
+                                t.update(Count_Intent, {
+                                    ค่าธรรมเนียมการศึกษา: newcount
+
+                                });
+                            } else {
+                                t.update(Count_Intent, {
+                                    ค่าธรรมเนียมการศึกษา: 1
+                                });
+
+                            }
+
+                        });
+                    });
+                }
+            });
+
+            //return ข้อมูลคำตอบ 
+            return admin.firestore().collection('Tuition_fee').doc('คณะครุศาสตร์').collection('การสอนภาษาไทย').orderBy("date", "desc").limit(1).get().then((snapshot) => {
+                snapshot.forEach(doc => {
+                    agent.add(doc.data().description);
+                    agent.add(payload่json); //แสดง paylaod
+                });
+            });
+        }
+
+    }
+
+
+    //การสอนภาษาอังกฤษ
+    function English_Teaching(agent) {
+        let payload = {
+            "type": "template",
+            "altText": "this is a confirm template",
+            "template": {
+                "type": "confirm",
+                "actions": [
+                    {
+                        "type": "message",
+                        "label": "ถูก",
+                        "text": "ได้รับคำตอบถูกต้องในเรื่องค่าธรรมเนียมการศึกษาสาขาการสอนภาษาอังกฤษ"
+                    },
+                    {
+                        "type": "message",
+                        "label": "ไม่ถูก",
+                        "text": "ได้รับคำตอบไม่ถูกต้องในเรื่องค่าธรรมเนียมการศึกษาสาขาการสอนภาษาอังกฤษ"
+                    }
+                ],
+                "text": "คุณได้รับคำตอบถูกต้องไหมคะ?"
+            }
+        };
+
+        //ประกาศตัวแปร payload เพื่อแสดงออกหน้าจอ
+        let payload่json = new Payload(`LINE`, payload, { sendAsMessage: true });
+        let text = request.body.queryResult.queryText;
+        let c = 'ได้รับคำตอบถูกต้องในเรื่องค่าธรรมเนียมการศึกษาสาขาการสอนภาษาอังกฤษ';
+        let b = 'ได้รับคำตอบไม่ถูกต้องในเรื่องค่าธรรมเนียมการศึกษาสาขาการสอนภาษาอังกฤษ';
+
+        //Count_Accuracy
+        let Count_Accuracy = admin.firestore().collection("Count_Accuracy").doc(date.toLocaleDateString()).collection("ค่าธรรมเนียมการศึกษา").doc("คณะครุศาสตร์").collection("Subject").doc("การสอนภาษาอังกฤษ");
+        Count_Accuracy.get().then(function (docs) {
+            if (!docs.exists) {
+                Count_Accuracy.set({
+                    ถูก: 0,
+                    ไม่ถูก: 0
+                });
+            }
+
+        });
+
+
+        if (text === c) {
+            agent.add("ขอบคุณค่ะ");
+            db.runTransaction(t => {
+                return t.get(Count_Accuracy).then(doc => {
+                    let newcount = doc.data().ถูก + 1;
+
+                    t.update(Count_Accuracy, {
+                        ถูก: newcount,
+
+                    });
+                });
+            });
+
+
+
+        }
+
+        else if (text === b) {
+
+            agent.add("กรุณากดปุ่มติดต่อเจ้าหน้าที่");
+            db.runTransaction(t => {
+                return t.get(Count_Accuracy).then(doc => {
+                    let newcount = doc.data().ไม่ถูก + 1;
+
+                    t.update(Count_Accuracy, {
+                        ไม่ถูก: newcount,
+
+                    });
+                });
+            });
+
+        }
+
+        else {
+            //เชคว่ามี ตัว doc อยู๋ไหม ถ้าไม่ ก็ set ค่า 
+            // count_intent 
+            Count_Intent.get().then(function (docs) {
+                if (!docs.exists) {
+                    Count_Intent.set({
+                        ค่าธรรมเนียมการศึกษา: 1
+                    });
+                }
+
+                else {
+                    //เลขcount เวลามีคนเข้ามาสอบถาม
+
+                    db.runTransaction(t => {
+                        return t.get(Count_Intent).then(doc => {
+                            if (doc.data().ค่าธรรมเนียมการศึกษา > 0) {
+                                let newcount = doc.data().ค่าธรรมเนียมการศึกษา + 1;
+
+                                t.update(Count_Intent, {
+                                    ค่าธรรมเนียมการศึกษา: newcount
+
+                                });
+                            } else {
+                                t.update(Count_Intent, {
+                                    ค่าธรรมเนียมการศึกษา: 1
+                                });
+
+                            }
+
+                        });
+                    });
+                }
+            });
+
+            //return ข้อมูลคำตอบ 
+            return admin.firestore().collection('Tuition_fee').doc('คณะครุศาสตร์').collection('การสอนภาษาอังกฤษ').orderBy("date", "desc").limit(1).get().then((snapshot) => {
+                snapshot.forEach(doc => {
+                    agent.add(doc.data().description);
+                    agent.add(payload่json); //แสดง paylaod
+                });
+            });
+        }
+
+    }
+
+
+
+
+    //การศึกษาปฐมวัย
+    function Early_Childhood_Education(agent) {
+        let payload = {
+            "type": "template",
+            "altText": "this is a confirm template",
+            "template": {
+                "type": "confirm",
+                "actions": [
+                    {
+                        "type": "message",
+                        "label": "ถูก",
+                        "text": "ได้รับคำตอบถูกต้องในเรื่องค่าธรรมเนียมการศึกษาสาขาการศึกษาปฐมวัย"
+                    },
+                    {
+                        "type": "message",
+                        "label": "ไม่ถูก",
+                        "text": "ได้รับคำตอบไม่ถูกต้องในเรื่องค่าธรรมเนียมการศึกษาสาขาการศึกษาปฐมวัย"
+                    }
+                ],
+                "text": "คุณได้รับคำตอบถูกต้องไหมคะ?"
+            }
+        };
+
+        //ประกาศตัวแปร payload เพื่อแสดงออกหน้าจอ
+        let payload่json = new Payload(`LINE`, payload, { sendAsMessage: true });
+        let text = request.body.queryResult.queryText;
+        let c = 'ได้รับคำตอบถูกต้องในเรื่องค่าธรรมเนียมการศึกษาสาขาการศึกษาปฐมวัย';
+        let b = 'ได้รับคำตอบไม่ถูกต้องในเรื่องค่าธรรมเนียมการศึกษาสาขาการศึกษาปฐมวัย';
+
+        //Count_Accuracy
+        let Count_Accuracy = admin.firestore().collection("Count_Accuracy").doc(date.toLocaleDateString()).collection("ค่าธรรมเนียมการศึกษา").doc("คณะครุศาสตร์").collection("Subject").doc("การศึกษาปฐมวัย");
+        Count_Accuracy.get().then(function (docs) {
+            if (!docs.exists) {
+                Count_Accuracy.set({
+                    ถูก: 0,
+                    ไม่ถูก: 0
+                });
+            }
+
+        });
+
+
+        if (text === c) {
+            agent.add("ขอบคุณค่ะ");
+            db.runTransaction(t => {
+                return t.get(Count_Accuracy).then(doc => {
+                    let newcount = doc.data().ถูก + 1;
+
+                    t.update(Count_Accuracy, {
+                        ถูก: newcount,
+
+                    });
+                });
+            });
+
+
+
+        }
+
+        else if (text === b) {
+
+            agent.add("กรุณากดปุ่มติดต่อเจ้าหน้าที่");
+            db.runTransaction(t => {
+                return t.get(Count_Accuracy).then(doc => {
+                    let newcount = doc.data().ไม่ถูก + 1;
+
+                    t.update(Count_Accuracy, {
+                        ไม่ถูก: newcount,
+
+                    });
+                });
+            });
+
+        }
+
+        else {
+            //เชคว่ามี ตัว doc อยู๋ไหม ถ้าไม่ ก็ set ค่า 
+            // count_intent 
+            Count_Intent.get().then(function (docs) {
+                if (!docs.exists) {
+                    Count_Intent.set({
+                        ค่าธรรมเนียมการศึกษา: 1
+                    });
+                }
+
+                else {
+                    //เลขcount เวลามีคนเข้ามาสอบถาม
+
+                    db.runTransaction(t => {
+                        return t.get(Count_Intent).then(doc => {
+                            if (doc.data().ค่าธรรมเนียมการศึกษา > 0) {
+                                let newcount = doc.data().ค่าธรรมเนียมการศึกษา + 1;
+
+                                t.update(Count_Intent, {
+                                    ค่าธรรมเนียมการศึกษา: newcount
+
+                                });
+                            } else {
+                                t.update(Count_Intent, {
+                                    ค่าธรรมเนียมการศึกษา: 1
+                                });
+
+                            }
+
+                        });
+                    });
+                }
+            });
+
+            //return ข้อมูลคำตอบ 
+            return admin.firestore().collection('Tuition_fee').doc('คณะครุศาสตร์').collection('การศึกษาปฐมวัย').orderBy("date", "desc").limit(1).get().then((snapshot) => {
+                snapshot.forEach(doc => {
+                    agent.add(doc.data().description);
+                    agent.add(payload่json); //แสดง paylaod
+                });
+            });
+        }
+
+    }
+
+    //การสอนภาษาจีน
+    function Chinese_Teaching(agent) {
+        let payload = {
+            "type": "template",
+            "altText": "this is a confirm template",
+            "template": {
+                "type": "confirm",
+                "actions": [
+                    {
+                        "type": "message",
+                        "label": "ถูก",
+                        "text": "ได้รับคำตอบถูกต้องในเรื่องค่าธรรมเนียมการศึกษาสาขาการสอนภาษาจีน"
+                    },
+                    {
+                        "type": "message",
+                        "label": "ไม่ถูก",
+                        "text": "ได้รับคำตอบไม่ถูกต้องในเรื่องค่าธรรมเนียมการศึกษาสาขาการสอนภาษาจีน"
+                    }
+                ],
+                "text": "คุณได้รับคำตอบถูกต้องไหมคะ?"
+            }
+        };
+
+        //ประกาศตัวแปร payload เพื่อแสดงออกหน้าจอ
+        let payload่json = new Payload(`LINE`, payload, { sendAsMessage: true });
+        let text = request.body.queryResult.queryText;
+        let c = 'ได้รับคำตอบถูกต้องในเรื่องค่าธรรมเนียมการศึกษาสาขาการสอนภาษาจีน';
+        let b = 'ได้รับคำตอบไม่ถูกต้องในเรื่องค่าธรรมเนียมการศึกษาสาขาการสอนภาษาจีน';
+
+        //Count_Accuracy
+        let Count_Accuracy = admin.firestore().collection("Count_Accuracy").doc(date.toLocaleDateString()).collection("ค่าธรรมเนียมการศึกษา").doc("คณะครุศาสตร์").collection("Subject").doc("การสอนภาษาจีน");
+        Count_Accuracy.get().then(function (docs) {
+            if (!docs.exists) {
+                Count_Accuracy.set({
+                    ถูก: 0,
+                    ไม่ถูก: 0
+                });
+            }
+
+        });
+
+
+        if (text === c) {
+            agent.add("ขอบคุณค่ะ");
+            db.runTransaction(t => {
+                return t.get(Count_Accuracy).then(doc => {
+                    let newcount = doc.data().ถูก + 1;
+
+                    t.update(Count_Accuracy, {
+                        ถูก: newcount,
+
+                    });
+                });
+            });
+
+
+
+        }
+
+        else if (text === b) {
+
+            agent.add("กรุณากดปุ่มติดต่อเจ้าหน้าที่");
+            db.runTransaction(t => {
+                return t.get(Count_Accuracy).then(doc => {
+                    let newcount = doc.data().ไม่ถูก + 1;
+
+                    t.update(Count_Accuracy, {
+                        ไม่ถูก: newcount,
+
+                    });
+                });
+            });
+
+        }
+
+        else {
+            //เชคว่ามี ตัว doc อยู๋ไหม ถ้าไม่ ก็ set ค่า 
+            // count_intent 
+            Count_Intent.get().then(function (docs) {
+                if (!docs.exists) {
+                    Count_Intent.set({
+                        ค่าธรรมเนียมการศึกษา: 1
+                    });
+                }
+
+                else {
+                    //เลขcount เวลามีคนเข้ามาสอบถาม
+
+                    db.runTransaction(t => {
+                        return t.get(Count_Intent).then(doc => {
+                            if (doc.data().ค่าธรรมเนียมการศึกษา > 0) {
+                                let newcount = doc.data().ค่าธรรมเนียมการศึกษา + 1;
+
+                                t.update(Count_Intent, {
+                                    ค่าธรรมเนียมการศึกษา: newcount
+
+                                });
+                            } else {
+                                t.update(Count_Intent, {
+                                    ค่าธรรมเนียมการศึกษา: 1
+                                });
+
+                            }
+
+                        });
+                    });
+                }
+            });
+
+            //return ข้อมูลคำตอบ 
+            return admin.firestore().collection('Tuition_fee').doc('คณะครุศาสตร์').collection('การสอนภาษาจีน').orderBy("date", "desc").limit(1).get().then((snapshot) => {
+                snapshot.forEach(doc => {
+                    agent.add(doc.data().description);
+                    agent.add(payload่json); //แสดง paylaod
+                });
+            });
+        }
+
+    }
+
+    //จิตวิทยาการปรึกษาและแนะแนว-การสอนภาษาไทย
+    function Counseling_Psychology_and_Guidance_and_Thai_Teaching(agent) {
+        let payload = {
+            "type": "template",
+            "altText": "this is a confirm template",
+            "template": {
+                "type": "confirm",
+                "actions": [
+                    {
+                        "type": "message",
+                        "label": "ถูก",
+                        "text": "ได้รับคำตอบถูกต้องในเรื่องค่าธรรมเนียมการศึกษาสาขาจิตวิทยาการปรึกษาและแนะแนว-การสอนภาษาไทย"
+                    },
+                    {
+                        "type": "message",
+                        "label": "ไม่ถูก",
+                        "text": "ได้รับคำตอบไม่ถูกต้องในเรื่องค่าธรรมเนียมการศึกษาสาขาจิตวิทยาการปรึกษาและแนะแนว-การสอนภาษาไทย"
+                    }
+                ],
+                "text": "คุณได้รับคำตอบถูกต้องไหมคะ?"
+            }
+        };
+
+        //ประกาศตัวแปร payload เพื่อแสดงออกหน้าจอ
+        let payload่json = new Payload(`LINE`, payload, { sendAsMessage: true });
+        let text = request.body.queryResult.queryText;
+        let c = 'ได้รับคำตอบถูกต้องในเรื่องค่าธรรมเนียมการศึกษาสาขาจิตวิทยาการปรึกษาและแนะแนว-การสอนภาษาไทย';
+        let b = 'ได้รับคำตอบไม่ถูกต้องในเรื่องค่าธรรมเนียมการศึกษาสาขาจิตวิทยาการปรึกษาและแนะแนว-การสอนภาษาไทย';
+
+        //Count_Accuracy
+        let Count_Accuracy = admin.firestore().collection("Count_Accuracy").doc(date.toLocaleDateString()).collection("ค่าธรรมเนียมการศึกษา").doc("คณะครุศาสตร์").collection("Subject").doc("จิตวิทยาการปรึกษาและแนะแนว-การสอนภาษาไทย");
+        Count_Accuracy.get().then(function (docs) {
+            if (!docs.exists) {
+                Count_Accuracy.set({
+                    ถูก: 0,
+                    ไม่ถูก: 0
+                });
+            }
+
+        });
+
+
+        if (text === c) {
+            agent.add("ขอบคุณค่ะ");
+            db.runTransaction(t => {
+                return t.get(Count_Accuracy).then(doc => {
+                    let newcount = doc.data().ถูก + 1;
+
+                    t.update(Count_Accuracy, {
+                        ถูก: newcount,
+
+                    });
+                });
+            });
+
+
+
+        }
+
+        else if (text === b) {
+
+            agent.add("กรุณากดปุ่มติดต่อเจ้าหน้าที่");
+            db.runTransaction(t => {
+                return t.get(Count_Accuracy).then(doc => {
+                    let newcount = doc.data().ไม่ถูก + 1;
+
+                    t.update(Count_Accuracy, {
+                        ไม่ถูก: newcount,
+
+                    });
+                });
+            });
+
+        }
+
+        else {
+            //เชคว่ามี ตัว doc อยู๋ไหม ถ้าไม่ ก็ set ค่า 
+            // count_intent 
+            Count_Intent.get().then(function (docs) {
+                if (!docs.exists) {
+                    Count_Intent.set({
+                        ค่าธรรมเนียมการศึกษา: 1
+                    });
+                }
+
+                else {
+                    //เลขcount เวลามีคนเข้ามาสอบถาม
+
+                    db.runTransaction(t => {
+                        return t.get(Count_Intent).then(doc => {
+                            if (doc.data().ค่าธรรมเนียมการศึกษา > 0) {
+                                let newcount = doc.data().ค่าธรรมเนียมการศึกษา + 1;
+
+                                t.update(Count_Intent, {
+                                    ค่าธรรมเนียมการศึกษา: newcount
+
+                                });
+                            } else {
+                                t.update(Count_Intent, {
+                                    ค่าธรรมเนียมการศึกษา: 1
+                                });
+
+                            }
+
+                        });
+                    });
+                }
+            });
+
+            //return ข้อมูลคำตอบ 
+            return admin.firestore().collection('Tuition_fee').doc('คณะครุศาสตร์').collection('จิตวิทยาการปรึกษาและแนะแนว-การสอนภาษาไทย').orderBy("date", "desc").limit(1).get().then((snapshot) => {
+                snapshot.forEach(doc => {
+                    agent.add(doc.data().description);
+                    agent.add(payload่json); //แสดง paylaod
+                });
+            });
+        }
+
+    }
+
+
+    //เทคโนโลยีสารสนเทศทางการศึกษา-การสอนภาษาไทย
+    function Educational_Information_Technology(agent) {
+        let payload = {
+            "type": "template",
+            "altText": "this is a confirm template",
+            "template": {
+                "type": "confirm",
+                "actions": [
+                    {
+                        "type": "message",
+                        "label": "ถูก",
+                        "text": "ได้รับคำตอบถูกต้องในเรื่องค่าธรรมเนียมการศึกษาสาขาเทคโนโลยีสารสนเทศทางการศึกษา-การสอนภาษาไทย"
+                    },
+                    {
+                        "type": "message",
+                        "label": "ไม่ถูก",
+                        "text": "ได้รับคำตอบไม่ถูกต้องในเรื่องค่าธรรมเนียมการศึกษาสาขาเทคโนโลยีสารสนเทศทางการศึกษา-การสอนภาษาไทย"
+                    }
+                ],
+                "text": "คุณได้รับคำตอบถูกต้องไหมคะ?"
+            }
+        };
+
+        //ประกาศตัวแปร payload เพื่อแสดงออกหน้าจอ
+        let payload่json = new Payload(`LINE`, payload, { sendAsMessage: true });
+        let text = request.body.queryResult.queryText;
+        let c = 'ได้รับคำตอบถูกต้องในเรื่องค่าธรรมเนียมการศึกษาสาขาเทคโนโลยีสารสนเทศทางการศึกษา-การสอนภาษาไทย';
+        let b = 'ได้รับคำตอบไม่ถูกต้องในเรื่องค่าธรรมเนียมการศึกษาสาขาเทคโนโลยีสารสนเทศทางการศึกษา-การสอนภาษาไทย';
+
+        //Count_Accuracy
+        let Count_Accuracy = admin.firestore().collection("Count_Accuracy").doc(date.toLocaleDateString()).collection("ค่าธรรมเนียมการศึกษา").doc("คณะครุศาสตร์").collection("Subject").doc("เทคโนโลยีสารสนเทศทางการศึกษา-การสอนภาษาไทย");
+        Count_Accuracy.get().then(function (docs) {
+            if (!docs.exists) {
+                Count_Accuracy.set({
+                    ถูก: 0,
+                    ไม่ถูก: 0
+                });
+            }
+
+        });
+
+
+        if (text === c) {
+            agent.add("ขอบคุณค่ะ");
+            db.runTransaction(t => {
+                return t.get(Count_Accuracy).then(doc => {
+                    let newcount = doc.data().ถูก + 1;
+
+                    t.update(Count_Accuracy, {
+                        ถูก: newcount,
+
+                    });
+                });
+            });
+
+
+
+        }
+
+        else if (text === b) {
+
+            agent.add("กรุณากดปุ่มติดต่อเจ้าหน้าที่");
+            db.runTransaction(t => {
+                return t.get(Count_Accuracy).then(doc => {
+                    let newcount = doc.data().ไม่ถูก + 1;
+
+                    t.update(Count_Accuracy, {
+                        ไม่ถูก: newcount,
+
+                    });
+                });
+            });
+
+        }
+
+        else {
+            //เชคว่ามี ตัว doc อยู๋ไหม ถ้าไม่ ก็ set ค่า 
+            // count_intent 
+            Count_Intent.get().then(function (docs) {
+                if (!docs.exists) {
+                    Count_Intent.set({
+                        ค่าธรรมเนียมการศึกษา: 1
+                    });
+                }
+
+                else {
+                    //เลขcount เวลามีคนเข้ามาสอบถาม
+
+                    db.runTransaction(t => {
+                        return t.get(Count_Intent).then(doc => {
+                            if (doc.data().ค่าธรรมเนียมการศึกษา > 0) {
+                                let newcount = doc.data().ค่าธรรมเนียมการศึกษา + 1;
+
+                                t.update(Count_Intent, {
+                                    ค่าธรรมเนียมการศึกษา: newcount
+
+                                });
+                            } else {
+                                t.update(Count_Intent, {
+                                    ค่าธรรมเนียมการศึกษา: 1
+                                });
+
+                            }
+
+                        });
+                    });
+                }
+            });
+
+            //return ข้อมูลคำตอบ 
+            return admin.firestore().collection('Tuition_fee').doc('คณะครุศาสตร์').collection('เทคโนโลยีสารสนเทศทางการศึกษา-การสอนภาษาไทย').orderBy("date", "desc").limit(1).get().then((snapshot) => {
+                snapshot.forEach(doc => {
+                    agent.add(doc.data().description);
+                    agent.add(payload่json); //แสดง paylaod
+                });
+            });
+        }
+
+    }
+
+
+    //การสอนสังคมศึกษา
+    function Social_Studies_Teaching(agent) {
+        let payload = {
+            "type": "template",
+            "altText": "this is a confirm template",
+            "template": {
+                "type": "confirm",
+                "actions": [
+                    {
+                        "type": "message",
+                        "label": "ถูก",
+                        "text": "ได้รับคำตอบถูกต้องในเรื่องค่าธรรมเนียมการศึกษาสาขาการสอนสังคมศึกษา"
+                    },
+                    {
+                        "type": "message",
+                        "label": "ไม่ถูก",
+                        "text": "ได้รับคำตอบไม่ถูกต้องในเรื่องค่าธรรมเนียมการศึกษาสาขาการสอนสังคมศึกษา"
+                    }
+                ],
+                "text": "คุณได้รับคำตอบถูกต้องไหมคะ?"
+            }
+        };
+
+        //ประกาศตัวแปร payload เพื่อแสดงออกหน้าจอ
+        let payload่json = new Payload(`LINE`, payload, { sendAsMessage: true });
+        let text = request.body.queryResult.queryText;
+        let c = 'ได้รับคำตอบถูกต้องในเรื่องค่าธรรมเนียมการศึกษาสาขาการสอนสังคมศึกษา';
+        let b = 'ได้รับคำตอบไม่ถูกต้องในเรื่องค่าธรรมเนียมการศึกษาสาขาการสอนสังคมศึกษา';
+
+        //Count_Accuracy
+        let Count_Accuracy = admin.firestore().collection("Count_Accuracy").doc(date.toLocaleDateString()).collection("ค่าธรรมเนียมการศึกษา").doc("คณะครุศาสตร์").collection("Subject").doc("การสอนสังคมศึกษา");
+        Count_Accuracy.get().then(function (docs) {
+            if (!docs.exists) {
+                Count_Accuracy.set({
+                    ถูก: 0,
+                    ไม่ถูก: 0
+                });
+            }
+
+        });
+
+
+        if (text === c) {
+            agent.add("ขอบคุณค่ะ");
+            db.runTransaction(t => {
+                return t.get(Count_Accuracy).then(doc => {
+                    let newcount = doc.data().ถูก + 1;
+
+                    t.update(Count_Accuracy, {
+                        ถูก: newcount,
+
+                    });
+                });
+            });
+
+
+
+        }
+
+        else if (text === b) {
+
+            agent.add("กรุณากดปุ่มติดต่อเจ้าหน้าที่");
+            db.runTransaction(t => {
+                return t.get(Count_Accuracy).then(doc => {
+                    let newcount = doc.data().ไม่ถูก + 1;
+
+                    t.update(Count_Accuracy, {
+                        ไม่ถูก: newcount,
+
+                    });
+                });
+            });
+
+        }
+
+        else {
+            //เชคว่ามี ตัว doc อยู๋ไหม ถ้าไม่ ก็ set ค่า 
+            // count_intent 
+            Count_Intent.get().then(function (docs) {
+                if (!docs.exists) {
+                    Count_Intent.set({
+                        ค่าธรรมเนียมการศึกษา: 1
+                    });
+                }
+
+                else {
+                    //เลขcount เวลามีคนเข้ามาสอบถาม
+
+                    db.runTransaction(t => {
+                        return t.get(Count_Intent).then(doc => {
+                            if (doc.data().ค่าธรรมเนียมการศึกษา > 0) {
+                                let newcount = doc.data().ค่าธรรมเนียมการศึกษา + 1;
+
+                                t.update(Count_Intent, {
+                                    ค่าธรรมเนียมการศึกษา: newcount
+
+                                });
+                            } else {
+                                t.update(Count_Intent, {
+                                    ค่าธรรมเนียมการศึกษา: 1
+                                });
+
+                            }
+
+                        });
+                    });
+                }
+            });
+
+            //return ข้อมูลคำตอบ 
+            return admin.firestore().collection('Tuition_fee').doc('คณะครุศาสตร์').collection('การสอนสังคมศึกษา').orderBy("date", "desc").limit(1).get().then((snapshot) => {
+                snapshot.forEach(doc => {
+                    agent.add(doc.data().description);
+                    agent.add(payload่json); //แสดง paylaod
+                });
+            });
+        }
+
+    }
+
+
+
+    //คณะเทคโนโลยีอุตสาหกรรม 
+    //เทคโนโลยีอุตสาหกรรม
+    function Industrial_Technology(agent) {
+        let payload = {
+            "type": "template",
+            "altText": "this is a confirm template",
+            "template": {
+                "type": "confirm",
+                "actions": [
+                    {
+                        "type": "message",
+                        "label": "ถูก",
+                        "text": "ได้รับคำตอบถูกต้องในเรื่องค่าธรรมเนียมการศึกษาสาขาเทคโนโลยีอุตสาหกรรม"
+                    },
+                    {
+                        "type": "message",
+                        "label": "ไม่ถูก",
+                        "text": "ได้รับคำตอบไม่ถูกต้องในเรื่องค่าธรรมเนียมการศึกษาสาขาเทคโนโลยีอุตสาหกรรม"
+                    }
+                ],
+                "text": "คุณได้รับคำตอบถูกต้องไหมคะ?"
+            }
+        };
+
+        //ประกาศตัวแปร payload เพื่อแสดงออกหน้าจอ
+        let payload่json = new Payload(`LINE`, payload, { sendAsMessage: true });
+        let text = request.body.queryResult.queryText;
+        let c = 'ได้รับคำตอบถูกต้องในเรื่องค่าธรรมเนียมการศึกษาสาขาเทคโนโลยีอุตสาหกรรม';
+        let b = 'ได้รับคำตอบไม่ถูกต้องในเรื่องค่าธรรมเนียมการศึกษาสาขาเทคโนโลยีอุตสาหกรรม';
+
+        //Count_Accuracy
+        let Count_Accuracy = admin.firestore().collection("Count_Accuracy").doc(date.toLocaleDateString()).collection("ค่าธรรมเนียมการศึกษา").doc("คณะเทคโนโลยีอุตสาหกรรม").collection("Subject").doc("เทคโนโลยีอุตสาหกรรม");
+        Count_Accuracy.get().then(function (docs) {
+            if (!docs.exists) {
+                Count_Accuracy.set({
+                    ถูก: 0,
+                    ไม่ถูก: 0
+                });
+            }
+
+        });
+
+
+        if (text === c) {
+            agent.add("ขอบคุณค่ะ");
+            db.runTransaction(t => {
+                return t.get(Count_Accuracy).then(doc => {
+                    let newcount = doc.data().ถูก + 1;
+
+                    t.update(Count_Accuracy, {
+                        ถูก: newcount,
+
+                    });
+                });
+            });
+
+
+
+        }
+
+        else if (text === b) {
+
+            agent.add("กรุณากดปุ่มติดต่อเจ้าหน้าที่");
+            db.runTransaction(t => {
+                return t.get(Count_Accuracy).then(doc => {
+                    let newcount = doc.data().ไม่ถูก + 1;
+
+                    t.update(Count_Accuracy, {
+                        ไม่ถูก: newcount,
+
+                    });
+                });
+            });
+
+        }
+
+        else {
+            //เชคว่ามี ตัว doc อยู๋ไหม ถ้าไม่ ก็ set ค่า 
+            // count_intent 
+            Count_Intent.get().then(function (docs) {
+                if (!docs.exists) {
+                    Count_Intent.set({
+                        ค่าธรรมเนียมการศึกษา: 1
+                    });
+                }
+
+                else {
+                    //เลขcount เวลามีคนเข้ามาสอบถาม
+
+                    db.runTransaction(t => {
+                        return t.get(Count_Intent).then(doc => {
+                            if (doc.data().ค่าธรรมเนียมการศึกษา > 0) {
+                                let newcount = doc.data().ค่าธรรมเนียมการศึกษา + 1;
+
+                                t.update(Count_Intent, {
+                                    ค่าธรรมเนียมการศึกษา: newcount
+
+                                });
+                            } else {
+                                t.update(Count_Intent, {
+                                    ค่าธรรมเนียมการศึกษา: 1
+                                });
+
+                            }
+
+                        });
+                    });
+                }
+            });
+
+            //return ข้อมูลคำตอบ 
+            return admin.firestore().collection('Tuition_fee').doc('คณะเทคโนโลยีอุตสาหกรรม').collection('เทคโนโลยีอุตสาหกรรม').orderBy("date", "desc").limit(1).get().then((snapshot) => {
+                snapshot.forEach(doc => {
+                    agent.add(doc.data().description);
+                    agent.add(payload่json); //แสดง paylaod
+                });
+            });
+        }
+
+    }
+
+
+    //วิศวกรรมการจัดการอุตสาหกรรม
+    function Industrial_Management_Engineering(agent) {
+        let payload = {
+            "type": "template",
+            "altText": "this is a confirm template",
+            "template": {
+                "type": "confirm",
+                "actions": [
+                    {
+                        "type": "message",
+                        "label": "ถูก",
+                        "text": "ได้รับคำตอบถูกต้องในเรื่องค่าธรรมเนียมการศึกษาสาขาวิศวกรรมการจัดการอุตสาหกรรม"
+                    },
+                    {
+                        "type": "message",
+                        "label": "ไม่ถูก",
+                        "text": "ได้รับคำตอบไม่ถูกต้องในเรื่องค่าธรรมเนียมการศึกษาสาขาวิศวกรรมการจัดการอุตสาหกรรม"
+                    }
+                ],
+                "text": "คุณได้รับคำตอบถูกต้องไหมคะ?"
+            }
+        };
+
+        //ประกาศตัวแปร payload เพื่อแสดงออกหน้าจอ
+        let payload่json = new Payload(`LINE`, payload, { sendAsMessage: true });
+        let text = request.body.queryResult.queryText;
+        let c = 'ได้รับคำตอบถูกต้องในเรื่องค่าธรรมเนียมการศึกษาสาขาวิศวกรรมการจัดการอุตสาหกรรม';
+        let b = 'ได้รับคำตอบไม่ถูกต้องในเรื่องค่าธรรมเนียมการศึกษาสาขาวิศวกรรมการจัดการอุตสาหกรรม';
+
+        //Count_Accuracy
+        let Count_Accuracy = admin.firestore().collection("Count_Accuracy").doc(date.toLocaleDateString()).collection("ค่าธรรมเนียมการศึกษา").doc("คณะเทคโนโลยีอุตสาหกรรม").collection("Subject").doc("วิศวกรรมการจัดการอุตสาหกรรม");
+        Count_Accuracy.get().then(function (docs) {
+            if (!docs.exists) {
+                Count_Accuracy.set({
+                    ถูก: 0,
+                    ไม่ถูก: 0
+                });
+            }
+
+        });
+
+
+        if (text === c) {
+            agent.add("ขอบคุณค่ะ");
+            db.runTransaction(t => {
+                return t.get(Count_Accuracy).then(doc => {
+                    let newcount = doc.data().ถูก + 1;
+
+                    t.update(Count_Accuracy, {
+                        ถูก: newcount,
+
+                    });
+                });
+            });
+
+
+
+        }
+
+        else if (text === b) {
+
+            agent.add("กรุณากดปุ่มติดต่อเจ้าหน้าที่");
+            db.runTransaction(t => {
+                return t.get(Count_Accuracy).then(doc => {
+                    let newcount = doc.data().ไม่ถูก + 1;
+
+                    t.update(Count_Accuracy, {
+                        ไม่ถูก: newcount,
+
+                    });
+                });
+            });
+
+        }
+
+        else {
+            //เชคว่ามี ตัว doc อยู๋ไหม ถ้าไม่ ก็ set ค่า 
+            // count_intent 
+            Count_Intent.get().then(function (docs) {
+                if (!docs.exists) {
+                    Count_Intent.set({
+                        ค่าธรรมเนียมการศึกษา: 1
+                    });
+                }
+
+                else {
+                    //เลขcount เวลามีคนเข้ามาสอบถาม
+
+                    db.runTransaction(t => {
+                        return t.get(Count_Intent).then(doc => {
+                            if (doc.data().ค่าธรรมเนียมการศึกษา > 0) {
+                                let newcount = doc.data().ค่าธรรมเนียมการศึกษา + 1;
+
+                                t.update(Count_Intent, {
+                                    ค่าธรรมเนียมการศึกษา: newcount
+
+                                });
+                            } else {
+                                t.update(Count_Intent, {
+                                    ค่าธรรมเนียมการศึกษา: 1
+                                });
+
+                            }
+
+                        });
+                    });
+                }
+            });
+
+            //return ข้อมูลคำตอบ 
+            return admin.firestore().collection('Tuition_fee').doc('คณะเทคโนโลยีอุตสาหกรรม').collection('วิศวกรรมการจัดการอุตสาหกรรม').orderBy("date", "desc").limit(1).get().then((snapshot) => {
+                snapshot.forEach(doc => {
+                    agent.add(doc.data().description);
+                    agent.add(payload่json); //แสดง paylaod
+                });
+            });
+        }
+
+    }
+
+
+
+    //วิศวกรรมเครื่องกลยานยนต์
+    function Automotive_Mechanical_Engineering(agent) {
+        let payload = {
+            "type": "template",
+            "altText": "this is a confirm template",
+            "template": {
+                "type": "confirm",
+                "actions": [
+                    {
+                        "type": "message",
+                        "label": "ถูก",
+                        "text": "ได้รับคำตอบถูกต้องในเรื่องค่าธรรมเนียมการศึกษาสาขาวิศวกรรมเครื่องกลยานยนต์"
+                    },
+                    {
+                        "type": "message",
+                        "label": "ไม่ถูก",
+                        "text": "ได้รับคำตอบไม่ถูกต้องในเรื่องค่าธรรมเนียมการศึกษาสาขาวิศวกรรมเครื่องกลยานยนต์"
+                    }
+                ],
+                "text": "คุณได้รับคำตอบถูกต้องไหมคะ?"
+            }
+        };
+
+        //ประกาศตัวแปร payload เพื่อแสดงออกหน้าจอ
+        let payload่json = new Payload(`LINE`, payload, { sendAsMessage: true });
+        let text = request.body.queryResult.queryText;
+        let c = 'ได้รับคำตอบถูกต้องในเรื่องค่าธรรมเนียมการศึกษาสาขาวิศวกรรมเครื่องกลยานยนต์';
+        let b = 'ได้รับคำตอบไม่ถูกต้องในเรื่องค่าธรรมเนียมการศึกษาสาขาวิศวกรรมเครื่องกลยานยนต์';
+
+        //Count_Accuracy
+        let Count_Accuracy = admin.firestore().collection("Count_Accuracy").doc(date.toLocaleDateString()).collection("ค่าธรรมเนียมการศึกษา").doc("คณะเทคโนโลยีอุตสาหกรรม").collection("Subject").doc("วิศวกรรมเครื่องกลยานยนต์");
+        Count_Accuracy.get().then(function (docs) {
+            if (!docs.exists) {
+                Count_Accuracy.set({
+                    ถูก: 0,
+                    ไม่ถูก: 0
+                });
+            }
+
+        });
+
+
+        if (text === c) {
+            agent.add("ขอบคุณค่ะ");
+            db.runTransaction(t => {
+                return t.get(Count_Accuracy).then(doc => {
+                    let newcount = doc.data().ถูก + 1;
+
+                    t.update(Count_Accuracy, {
+                        ถูก: newcount,
+
+                    });
+                });
+            });
+
+
+
+        }
+
+        else if (text === b) {
+
+            agent.add("กรุณากดปุ่มติดต่อเจ้าหน้าที่");
+            db.runTransaction(t => {
+                return t.get(Count_Accuracy).then(doc => {
+                    let newcount = doc.data().ไม่ถูก + 1;
+
+                    t.update(Count_Accuracy, {
+                        ไม่ถูก: newcount,
+
+                    });
+                });
+            });
+
+        }
+
+        else {
+            //เชคว่ามี ตัว doc อยู๋ไหม ถ้าไม่ ก็ set ค่า 
+            // count_intent 
+            Count_Intent.get().then(function (docs) {
+                if (!docs.exists) {
+                    Count_Intent.set({
+                        ค่าธรรมเนียมการศึกษา: 1
+                    });
+                }
+
+                else {
+                    //เลขcount เวลามีคนเข้ามาสอบถาม
+
+                    db.runTransaction(t => {
+                        return t.get(Count_Intent).then(doc => {
+                            if (doc.data().ค่าธรรมเนียมการศึกษา > 0) {
+                                let newcount = doc.data().ค่าธรรมเนียมการศึกษา + 1;
+
+                                t.update(Count_Intent, {
+                                    ค่าธรรมเนียมการศึกษา: newcount
+
+                                });
+                            } else {
+                                t.update(Count_Intent, {
+                                    ค่าธรรมเนียมการศึกษา: 1
+                                });
+
+                            }
+
+                        });
+                    });
+                }
+            });
+
+            //return ข้อมูลคำตอบ 
+            return admin.firestore().collection('Tuition_fee').doc('คณะเทคโนโลยีอุตสาหกรรม').collection('วิศวกรรมเครื่องกลยานยนต์').orderBy("date", "desc").limit(1).get().then((snapshot) => {
+                snapshot.forEach(doc => {
+                    agent.add(doc.data().description);
+                    agent.add(payload่json); //แสดง paylaod
+                });
+            });
+        }
+
+    }
+
+
+
+    //วิศวกรรมไฟฟ้า
+    function Electonic_Engineering(agent) {
+        let payload = {
+            "type": "template",
+            "altText": "this is a confirm template",
+            "template": {
+                "type": "confirm",
+                "actions": [
+                    {
+                        "type": "message",
+                        "label": "ถูก",
+                        "text": "ได้รับคำตอบถูกต้องในเรื่องค่าธรรมเนียมการศึกษาสาขาวิศวกรรมไฟฟ้า"
+                    },
+                    {
+                        "type": "message",
+                        "label": "ไม่ถูก",
+                        "text": "ได้รับคำตอบไม่ถูกต้องในเรื่องค่าธรรมเนียมการศึกษาสาขาวิศวกรรมไฟฟ้า"
+                    }
+                ],
+                "text": "คุณได้รับคำตอบถูกต้องไหมคะ?"
+            }
+        };
+
+        //ประกาศตัวแปร payload เพื่อแสดงออกหน้าจอ
+        let payload่json = new Payload(`LINE`, payload, { sendAsMessage: true });
+        let text = request.body.queryResult.queryText;
+        let c = 'ได้รับคำตอบถูกต้องในเรื่องค่าธรรมเนียมการศึกษาสาขาวิศวกรรมไฟฟ้า';
+        let b = 'ได้รับคำตอบไม่ถูกต้องในเรื่องค่าธรรมเนียมการศึกษาสาขาวิศวกรรมไฟฟ้า';
+
+        //Count_Accuracy
+        let Count_Accuracy = admin.firestore().collection("Count_Accuracy").doc(date.toLocaleDateString()).collection("ค่าธรรมเนียมการศึกษา").doc("คณะเทคโนโลยีอุตสาหกรรม").collection("Subject").doc("วิศวกรรมไฟฟ้า");
+        Count_Accuracy.get().then(function (docs) {
+            if (!docs.exists) {
+                Count_Accuracy.set({
+                    ถูก: 0,
+                    ไม่ถูก: 0
+                });
+            }
+
+        });
+
+
+        if (text === c) {
+            agent.add("ขอบคุณค่ะ");
+            db.runTransaction(t => {
+                return t.get(Count_Accuracy).then(doc => {
+                    let newcount = doc.data().ถูก + 1;
+
+                    t.update(Count_Accuracy, {
+                        ถูก: newcount,
+
+                    });
+                });
+            });
+
+
+
+        }
+
+        else if (text === b) {
+
+            agent.add("กรุณากดปุ่มติดต่อเจ้าหน้าที่");
+            db.runTransaction(t => {
+                return t.get(Count_Accuracy).then(doc => {
+                    let newcount = doc.data().ไม่ถูก + 1;
+
+                    t.update(Count_Accuracy, {
+                        ไม่ถูก: newcount,
+
+                    });
+                });
+            });
+
+        }
+
+        else {
+            //เชคว่ามี ตัว doc อยู๋ไหม ถ้าไม่ ก็ set ค่า 
+            // count_intent 
+            Count_Intent.get().then(function (docs) {
+                if (!docs.exists) {
+                    Count_Intent.set({
+                        ค่าธรรมเนียมการศึกษา: 1
+                    });
+                }
+
+                else {
+                    //เลขcount เวลามีคนเข้ามาสอบถาม
+
+                    db.runTransaction(t => {
+                        return t.get(Count_Intent).then(doc => {
+                            if (doc.data().ค่าธรรมเนียมการศึกษา > 0) {
+                                let newcount = doc.data().ค่าธรรมเนียมการศึกษา + 1;
+
+                                t.update(Count_Intent, {
+                                    ค่าธรรมเนียมการศึกษา: newcount
+
+                                });
+                            } else {
+                                t.update(Count_Intent, {
+                                    ค่าธรรมเนียมการศึกษา: 1
+                                });
+
+                            }
+
+                        });
+                    });
+                }
+            });
+
+            //return ข้อมูลคำตอบ 
+            return admin.firestore().collection('Tuition_fee').doc('คณะเทคโนโลยีอุตสาหกรรม').collection('วิศวกรรมไฟฟ้า').orderBy("date", "desc").limit(1).get().then((snapshot) => {
+                snapshot.forEach(doc => {
+                    agent.add(doc.data().description);
+                    agent.add(payload่json); //แสดง paylaod
+                });
+            });
+        }
+
+    }
+
+
+
+
+    //ออกแบบผลิตภัณฑ์
+    function Product_Design(agent) {
+        let payload = {
+            "type": "template",
+            "altText": "this is a confirm template",
+            "template": {
+                "type": "confirm",
+                "actions": [
+                    {
+                        "type": "message",
+                        "label": "ถูก",
+                        "text": "ได้รับคำตอบถูกต้องในเรื่องค่าธรรมเนียมการศึกษาสาขาออกแบบผลิตภัณฑ์"
+                    },
+                    {
+                        "type": "message",
+                        "label": "ไม่ถูก",
+                        "text": "ได้รับคำตอบไม่ถูกต้องในเรื่องค่าธรรมเนียมการศึกษาสาขาออกแบบผลิตภัณฑ์"
+                    }
+                ],
+                "text": "คุณได้รับคำตอบถูกต้องไหมคะ?"
+            }
+        };
+
+        //ประกาศตัวแปร payload เพื่อแสดงออกหน้าจอ
+        let payload่json = new Payload(`LINE`, payload, { sendAsMessage: true });
+        let text = request.body.queryResult.queryText;
+        let c = 'ได้รับคำตอบถูกต้องในเรื่องค่าธรรมเนียมการศึกษาสาขาออกแบบผลิตภัณฑ์';
+        let b = 'ได้รับคำตอบไม่ถูกต้องในเรื่องค่าธรรมเนียมการศึกษาสาขาออกแบบผลิตภัณฑ์';
+
+        //Count_Accuracy
+        let Count_Accuracy = admin.firestore().collection("Count_Accuracy").doc(date.toLocaleDateString()).collection("ค่าธรรมเนียมการศึกษา").doc("คณะเทคโนโลยีอุตสาหกรรม").collection("Subject").doc("ออกแบบผลิตภัณฑ์");
+        Count_Accuracy.get().then(function (docs) {
+            if (!docs.exists) {
+                Count_Accuracy.set({
+                    ถูก: 0,
+                    ไม่ถูก: 0
+                });
+            }
+
+        });
+
+
+        if (text === c) {
+            agent.add("ขอบคุณค่ะ");
+            db.runTransaction(t => {
+                return t.get(Count_Accuracy).then(doc => {
+                    let newcount = doc.data().ถูก + 1;
+
+                    t.update(Count_Accuracy, {
+                        ถูก: newcount,
+
+                    });
+                });
+            });
+
+
+
+        }
+
+        else if (text === b) {
+
+            agent.add("กรุณากดปุ่มติดต่อเจ้าหน้าที่");
+            db.runTransaction(t => {
+                return t.get(Count_Accuracy).then(doc => {
+                    let newcount = doc.data().ไม่ถูก + 1;
+
+                    t.update(Count_Accuracy, {
+                        ไม่ถูก: newcount,
+
+                    });
+                });
+            });
+
+        }
+
+        else {
+            //เชคว่ามี ตัว doc อยู๋ไหม ถ้าไม่ ก็ set ค่า 
+            // count_intent 
+            Count_Intent.get().then(function (docs) {
+                if (!docs.exists) {
+                    Count_Intent.set({
+                        ค่าธรรมเนียมการศึกษา: 1
+                    });
+                }
+
+                else {
+                    //เลขcount เวลามีคนเข้ามาสอบถาม
+
+                    db.runTransaction(t => {
+                        return t.get(Count_Intent).then(doc => {
+                            if (doc.data().ค่าธรรมเนียมการศึกษา > 0) {
+                                let newcount = doc.data().ค่าธรรมเนียมการศึกษา + 1;
+
+                                t.update(Count_Intent, {
+                                    ค่าธรรมเนียมการศึกษา: newcount
+
+                                });
+                            } else {
+                                t.update(Count_Intent, {
+                                    ค่าธรรมเนียมการศึกษา: 1
+                                });
+
+                            }
+
+                        });
+                    });
+                }
+            });
+
+            //return ข้อมูลคำตอบ 
+            return admin.firestore().collection('Tuition_fee').doc('คณะเทคโนโลยีอุตสาหกรรม').collection('ออกแบบผลิตภัณฑ์').orderBy("date", "desc").limit(1).get().then((snapshot) => {
+                snapshot.forEach(doc => {
+                    agent.add(doc.data().description);
+                    agent.add(payload่json); //แสดง paylaod
+                });
+            });
+        }
+
+    }
+
+
+
+
+    //คณะมนุษยศาสตร์และสังคมศาสตร์ 
+    //การพัฒนาสังคม
+    function Social_development(agent) {
+        let payload = {
+            "type": "template",
+            "altText": "this is a confirm template",
+            "template": {
+                "type": "confirm",
+                "actions": [
+                    {
+                        "type": "message",
+                        "label": "ถูก",
+                        "text": "ได้รับคำตอบถูกต้องในเรื่องค่าธรรมเนียมการศึกษาสาขาการพัฒนาสังคม"
+                    },
+                    {
+                        "type": "message",
+                        "label": "ไม่ถูก",
+                        "text": "ได้รับคำตอบไม่ถูกต้องในเรื่องค่าธรรมเนียมการศึกษาสาขาการพัฒนาสังคม"
+                    }
+                ],
+                "text": "คุณได้รับคำตอบถูกต้องไหมคะ?"
+            }
+        };
+
+        //ประกาศตัวแปร payload เพื่อแสดงออกหน้าจอ
+        let payload่json = new Payload(`LINE`, payload, { sendAsMessage: true });
+        let text = request.body.queryResult.queryText;
+        let c = 'ได้รับคำตอบถูกต้องในเรื่องค่าธรรมเนียมการศึกษาสาขาการพัฒนาสังคม';
+        let b = 'ได้รับคำตอบไม่ถูกต้องในเรื่องค่าธรรมเนียมการศึกษาสาขาการพัฒนาสังคม';
+
+        //Count_Accuracy
+        let Count_Accuracy = admin.firestore().collection("Count_Accuracy").doc(date.toLocaleDateString()).collection("ค่าธรรมเนียมการศึกษา").doc("คณะมนุษยศาสตร์และสังคมศาสตร์").collection("Subject").doc("การพัฒนาสังคม");
+        Count_Accuracy.get().then(function (docs) {
+            if (!docs.exists) {
+                Count_Accuracy.set({
+                    ถูก: 0,
+                    ไม่ถูก: 0
+                });
+            }
+
+        });
+
+
+        if (text === c) {
+            agent.add("ขอบคุณค่ะ");
+            db.runTransaction(t => {
+                return t.get(Count_Accuracy).then(doc => {
+                    let newcount = doc.data().ถูก + 1;
+
+                    t.update(Count_Accuracy, {
+                        ถูก: newcount,
+
+                    });
+                });
+            });
+
+
+
+        }
+
+        else if (text === b) {
+
+            agent.add("กรุณากดปุ่มติดต่อเจ้าหน้าที่");
+            db.runTransaction(t => {
+                return t.get(Count_Accuracy).then(doc => {
+                    let newcount = doc.data().ไม่ถูก + 1;
+
+                    t.update(Count_Accuracy, {
+                        ไม่ถูก: newcount,
+
+                    });
+                });
+            });
+
+        }
+
+        else {
+            //เชคว่ามี ตัว doc อยู๋ไหม ถ้าไม่ ก็ set ค่า 
+            // count_intent 
+            Count_Intent.get().then(function (docs) {
+                if (!docs.exists) {
+                    Count_Intent.set({
+                        ค่าธรรมเนียมการศึกษา: 1
+                    });
+                }
+
+                else {
+                    //เลขcount เวลามีคนเข้ามาสอบถาม
+
+                    db.runTransaction(t => {
+                        return t.get(Count_Intent).then(doc => {
+                            if (doc.data().ค่าธรรมเนียมการศึกษา > 0) {
+                                let newcount = doc.data().ค่าธรรมเนียมการศึกษา + 1;
+
+                                t.update(Count_Intent, {
+                                    ค่าธรรมเนียมการศึกษา: newcount
+
+                                });
+                            } else {
+                                t.update(Count_Intent, {
+                                    ค่าธรรมเนียมการศึกษา: 1
+                                });
+
+                            }
+
+                        });
+                    });
+                }
+            });
+
+            //return ข้อมูลคำตอบ 
+            return admin.firestore().collection('Tuition_fee').doc('คณะมนุษยศาสตร์และสังคมศาสตร์').collection('การพัฒนาสังคม').orderBy("date", "desc").limit(1).get().then((snapshot) => {
+                snapshot.forEach(doc => {
+                    agent.add(doc.data().description);
+                    agent.add(payload่json); //แสดง paylaod
+                });
+            });
+        }
+
+    }
+
+
+    //ภาษาอังกฤษ
+    function English(agent) {
+        let payload = {
+            "type": "template",
+            "altText": "this is a confirm template",
+            "template": {
+                "type": "confirm",
+                "actions": [
+                    {
+                        "type": "message",
+                        "label": "ถูก",
+                        "text": "ได้รับคำตอบถูกต้องในเรื่องค่าธรรมเนียมการศึกษาสาขาภาษาอังกฤษ"
+                    },
+                    {
+                        "type": "message",
+                        "label": "ไม่ถูก",
+                        "text": "ได้รับคำตอบไม่ถูกต้องในเรื่องค่าธรรมเนียมการศึกษาสาขาภาษาอังกฤษ"
+                    }
+                ],
+                "text": "คุณได้รับคำตอบถูกต้องไหมคะ?"
+            }
+        };
+
+        //ประกาศตัวแปร payload เพื่อแสดงออกหน้าจอ
+        let payload่json = new Payload(`LINE`, payload, { sendAsMessage: true });
+        let text = request.body.queryResult.queryText;
+        let c = 'ได้รับคำตอบถูกต้องในเรื่องค่าธรรมเนียมการศึกษาสาขาภาษาอังกฤษ';
+        let b = 'ได้รับคำตอบไม่ถูกต้องในเรื่องค่าธรรมเนียมการศึกษาสาขาภาษาอังกฤษ';
+
+        //Count_Accuracy
+        let Count_Accuracy = admin.firestore().collection("Count_Accuracy").doc(date.toLocaleDateString()).collection("ค่าธรรมเนียมการศึกษา").doc("คณะมนุษยศาสตร์และสังคมศาสตร์").collection("Subject").doc("ภาษาอังกฤษ");
+        Count_Accuracy.get().then(function (docs) {
+            if (!docs.exists) {
+                Count_Accuracy.set({
+                    ถูก: 0,
+                    ไม่ถูก: 0
+                });
+            }
+
+        });
+
+
+        if (text === c) {
+            agent.add("ขอบคุณค่ะ");
+            db.runTransaction(t => {
+                return t.get(Count_Accuracy).then(doc => {
+                    let newcount = doc.data().ถูก + 1;
+
+                    t.update(Count_Accuracy, {
+                        ถูก: newcount,
+
+                    });
+                });
+            });
+
+
+
+        }
+
+        else if (text === b) {
+
+            agent.add("กรุณากดปุ่มติดต่อเจ้าหน้าที่");
+            db.runTransaction(t => {
+                return t.get(Count_Accuracy).then(doc => {
+                    let newcount = doc.data().ไม่ถูก + 1;
+
+                    t.update(Count_Accuracy, {
+                        ไม่ถูก: newcount,
+
+                    });
+                });
+            });
+
+        }
+
+        else {
+            //เชคว่ามี ตัว doc อยู๋ไหม ถ้าไม่ ก็ set ค่า 
+            // count_intent 
+            Count_Intent.get().then(function (docs) {
+                if (!docs.exists) {
+                    Count_Intent.set({
+                        ค่าธรรมเนียมการศึกษา: 1
+                    });
+                }
+
+                else {
+                    //เลขcount เวลามีคนเข้ามาสอบถาม
+
+                    db.runTransaction(t => {
+                        return t.get(Count_Intent).then(doc => {
+                            if (doc.data().ค่าธรรมเนียมการศึกษา > 0) {
+                                let newcount = doc.data().ค่าธรรมเนียมการศึกษา + 1;
+
+                                t.update(Count_Intent, {
+                                    ค่าธรรมเนียมการศึกษา: newcount
+
+                                });
+                            } else {
+                                t.update(Count_Intent, {
+                                    ค่าธรรมเนียมการศึกษา: 1
+                                });
+
+                            }
+
+                        });
+                    });
+                }
+            });
+
+            //return ข้อมูลคำตอบ 
+            return admin.firestore().collection('Tuition_fee').doc('คณะมนุษยศาสตร์และสังคมศาสตร์').collection('ภาษาอังกฤษ').orderBy("date", "desc").limit(1).get().then((snapshot) => {
+                snapshot.forEach(doc => {
+                    agent.add(doc.data().description);
+                    agent.add(payload่json); //แสดง paylaod
+                });
+            });
+        }
+
+    }
+
+    //ดนตรีสากล
+    function Western_Music(agent) {
+        let payload = {
+            "type": "template",
+            "altText": "this is a confirm template",
+            "template": {
+                "type": "confirm",
+                "actions": [
+                    {
+                        "type": "message",
+                        "label": "ถูก",
+                        "text": "ได้รับคำตอบถูกต้องในเรื่องค่าธรรมเนียมการศึกษาสาขาดนตรีสากล"
+                    },
+                    {
+                        "type": "message",
+                        "label": "ไม่ถูก",
+                        "text": "ได้รับคำตอบไม่ถูกต้องในเรื่องค่าธรรมเนียมการศึกษาสาขาดนตรีสากล"
+                    }
+                ],
+                "text": "คุณได้รับคำตอบถูกต้องไหมคะ?"
+            }
+        };
+
+        //ประกาศตัวแปร payload เพื่อแสดงออกหน้าจอ
+        let payload่json = new Payload(`LINE`, payload, { sendAsMessage: true });
+        let text = request.body.queryResult.queryText;
+        let c = 'ได้รับคำตอบถูกต้องในเรื่องค่าธรรมเนียมการศึกษาสาขาดนตรีสากล';
+        let b = 'ได้รับคำตอบไม่ถูกต้องในเรื่องค่าธรรมเนียมการศึกษาสาขาดนตรีสากล';
+
+        //Count_Accuracy
+        let Count_Accuracy = admin.firestore().collection("Count_Accuracy").doc(date.toLocaleDateString()).collection("ค่าธรรมเนียมการศึกษา").doc("คณะมนุษยศาสตร์และสังคมศาสตร์").collection("Subject").doc("ดนตรีสากล");
+        Count_Accuracy.get().then(function (docs) {
+            if (!docs.exists) {
+                Count_Accuracy.set({
+                    ถูก: 0,
+                    ไม่ถูก: 0
+                });
+            }
+
+        });
+
+
+        if (text === c) {
+            agent.add("ขอบคุณค่ะ");
+            db.runTransaction(t => {
+                return t.get(Count_Accuracy).then(doc => {
+                    let newcount = doc.data().ถูก + 1;
+
+                    t.update(Count_Accuracy, {
+                        ถูก: newcount,
+
+                    });
+                });
+            });
+
+
+
+        }
+
+        else if (text === b) {
+
+            agent.add("กรุณากดปุ่มติดต่อเจ้าหน้าที่");
+            db.runTransaction(t => {
+                return t.get(Count_Accuracy).then(doc => {
+                    let newcount = doc.data().ไม่ถูก + 1;
+
+                    t.update(Count_Accuracy, {
+                        ไม่ถูก: newcount,
+
+                    });
+                });
+            });
+
+        }
+
+        else {
+            //เชคว่ามี ตัว doc อยู๋ไหม ถ้าไม่ ก็ set ค่า 
+            // count_intent 
+            Count_Intent.get().then(function (docs) {
+                if (!docs.exists) {
+                    Count_Intent.set({
+                        ค่าธรรมเนียมการศึกษา: 1
+                    });
+                }
+
+                else {
+                    //เลขcount เวลามีคนเข้ามาสอบถาม
+
+                    db.runTransaction(t => {
+                        return t.get(Count_Intent).then(doc => {
+                            if (doc.data().ค่าธรรมเนียมการศึกษา > 0) {
+                                let newcount = doc.data().ค่าธรรมเนียมการศึกษา + 1;
+
+                                t.update(Count_Intent, {
+                                    ค่าธรรมเนียมการศึกษา: newcount
+
+                                });
+                            } else {
+                                t.update(Count_Intent, {
+                                    ค่าธรรมเนียมการศึกษา: 1
+                                });
+
+                            }
+
+                        });
+                    });
+                }
+            });
+
+            //return ข้อมูลคำตอบ 
+            return admin.firestore().collection('Tuition_fee').doc('คณะมนุษยศาสตร์และสังคมศาสตร์').collection('ดนตรีสากล').orderBy("date", "desc").limit(1).get().then((snapshot) => {
+                snapshot.forEach(doc => {
+                    agent.add(doc.data().description);
+                    agent.add(payload่json); //แสดง paylaod
+                });
+            });
+        }
+
+    }
+
+    //ทัศนศิลป์
+    function Visual_Arts(agent) {
+        let payload = {
+            "type": "template",
+            "altText": "this is a confirm template",
+            "template": {
+                "type": "confirm",
+                "actions": [
+                    {
+                        "type": "message",
+                        "label": "ถูก",
+                        "text": "ได้รับคำตอบถูกต้องในเรื่องค่าธรรมเนียมการศึกษาสาขาทัศนศิลป์"
+                    },
+                    {
+                        "type": "message",
+                        "label": "ไม่ถูก",
+                        "text": "ได้รับคำตอบไม่ถูกต้องในเรื่องค่าธรรมเนียมการศึกษาสาขาทัศนศิลป์"
+                    }
+                ],
+                "text": "คุณได้รับคำตอบถูกต้องไหมคะ?"
+            }
+        };
+
+        //ประกาศตัวแปร payload เพื่อแสดงออกหน้าจอ
+        let payload่json = new Payload(`LINE`, payload, { sendAsMessage: true });
+        let text = request.body.queryResult.queryText;
+        let c = 'ได้รับคำตอบถูกต้องในเรื่องค่าธรรมเนียมการศึกษาสาขาทัศนศิลป์';
+        let b = 'ได้รับคำตอบไม่ถูกต้องในเรื่องค่าธรรมเนียมการศึกษาสาขาทัศนศิลป์';
+
+        //Count_Accuracy
+        let Count_Accuracy = admin.firestore().collection("Count_Accuracy").doc(date.toLocaleDateString()).collection("ค่าธรรมเนียมการศึกษา").doc("คณะมนุษยศาสตร์และสังคมศาสตร์").collection("Subject").doc("ทัศนศิลป์");
+        Count_Accuracy.get().then(function (docs) {
+            if (!docs.exists) {
+                Count_Accuracy.set({
+                    ถูก: 0,
+                    ไม่ถูก: 0
+                });
+            }
+
+        });
+
+
+        if (text === c) {
+            agent.add("ขอบคุณค่ะ");
+            db.runTransaction(t => {
+                return t.get(Count_Accuracy).then(doc => {
+                    let newcount = doc.data().ถูก + 1;
+
+                    t.update(Count_Accuracy, {
+                        ถูก: newcount,
+
+                    });
+                });
+            });
+
+
+
+        }
+
+        else if (text === b) {
+
+            agent.add("กรุณากดปุ่มติดต่อเจ้าหน้าที่");
+            db.runTransaction(t => {
+                return t.get(Count_Accuracy).then(doc => {
+                    let newcount = doc.data().ไม่ถูก + 1;
+
+                    t.update(Count_Accuracy, {
+                        ไม่ถูก: newcount,
+
+                    });
+                });
+            });
+
+        }
+
+        else {
+            //เชคว่ามี ตัว doc อยู๋ไหม ถ้าไม่ ก็ set ค่า 
+            // count_intent 
+            Count_Intent.get().then(function (docs) {
+                if (!docs.exists) {
+                    Count_Intent.set({
+                        ค่าธรรมเนียมการศึกษา: 1
+                    });
+                }
+
+                else {
+                    //เลขcount เวลามีคนเข้ามาสอบถาม
+
+                    db.runTransaction(t => {
+                        return t.get(Count_Intent).then(doc => {
+                            if (doc.data().ค่าธรรมเนียมการศึกษา > 0) {
+                                let newcount = doc.data().ค่าธรรมเนียมการศึกษา + 1;
+
+                                t.update(Count_Intent, {
+                                    ค่าธรรมเนียมการศึกษา: newcount
+
+                                });
+                            } else {
+                                t.update(Count_Intent, {
+                                    ค่าธรรมเนียมการศึกษา: 1
+                                });
+
+                            }
+
+                        });
+                    });
+                }
+            });
+
+            //return ข้อมูลคำตอบ 
+            return admin.firestore().collection('Tuition_fee').doc('คณะมนุษยศาสตร์และสังคมศาสตร์').collection('ทัศนศิลป์').orderBy("date", "desc").limit(1).get().then((snapshot) => {
+                snapshot.forEach(doc => {
+                    agent.add(doc.data().description);
+                    agent.add(payload่json); //แสดง paylaod
+                });
+            });
+        }
+
+    }
+
+
+    //รัฐศาสตร์
+    function Political_Science(agent) {
+        let payload = {
+            "type": "template",
+            "altText": "this is a confirm template",
+            "template": {
+                "type": "confirm",
+                "actions": [
+                    {
+                        "type": "message",
+                        "label": "ถูก",
+                        "text": "ได้รับคำตอบถูกต้องในเรื่องค่าธรรมเนียมการศึกษาสาขารัฐศาสตร์"
+                    },
+                    {
+                        "type": "message",
+                        "label": "ไม่ถูก",
+                        "text": "ได้รับคำตอบไม่ถูกต้องในเรื่องค่าธรรมเนียมการศึกษาสาขารัฐศาสตร์"
+                    }
+                ],
+                "text": "คุณได้รับคำตอบถูกต้องไหมคะ?"
+            }
+        };
+
+        //ประกาศตัวแปร payload เพื่อแสดงออกหน้าจอ
+        let payload่json = new Payload(`LINE`, payload, { sendAsMessage: true });
+        let text = request.body.queryResult.queryText;
+        let c = 'ได้รับคำตอบถูกต้องในเรื่องค่าธรรมเนียมการศึกษาสาขารัฐศาสตร์';
+        let b = 'ได้รับคำตอบไม่ถูกต้องในเรื่องค่าธรรมเนียมการศึกษาสาขารัฐศาสตร์';
+
+        //Count_Accuracy
+        let Count_Accuracy = admin.firestore().collection("Count_Accuracy").doc(date.toLocaleDateString()).collection("ค่าธรรมเนียมการศึกษา").doc("คณะมนุษยศาสตร์และสังคมศาสตร์").collection("Subject").doc("รัฐศาสตร์");
+        Count_Accuracy.get().then(function (docs) {
+            if (!docs.exists) {
+                Count_Accuracy.set({
+                    ถูก: 0,
+                    ไม่ถูก: 0
+                });
+            }
+
+        });
+
+
+        if (text === c) {
+            agent.add("ขอบคุณค่ะ");
+            db.runTransaction(t => {
+                return t.get(Count_Accuracy).then(doc => {
+                    let newcount = doc.data().ถูก + 1;
+
+                    t.update(Count_Accuracy, {
+                        ถูก: newcount,
+
+                    });
+                });
+            });
+
+
+
+        }
+
+        else if (text === b) {
+
+            agent.add("กรุณากดปุ่มติดต่อเจ้าหน้าที่");
+            db.runTransaction(t => {
+                return t.get(Count_Accuracy).then(doc => {
+                    let newcount = doc.data().ไม่ถูก + 1;
+
+                    t.update(Count_Accuracy, {
+                        ไม่ถูก: newcount,
+
+                    });
+                });
+            });
+
+        }
+
+        else {
+            //เชคว่ามี ตัว doc อยู๋ไหม ถ้าไม่ ก็ set ค่า 
+            // count_intent 
+            Count_Intent.get().then(function (docs) {
+                if (!docs.exists) {
+                    Count_Intent.set({
+                        ค่าธรรมเนียมการศึกษา: 1
+                    });
+                }
+
+                else {
+                    //เลขcount เวลามีคนเข้ามาสอบถาม
+
+                    db.runTransaction(t => {
+                        return t.get(Count_Intent).then(doc => {
+                            if (doc.data().ค่าธรรมเนียมการศึกษา > 0) {
+                                let newcount = doc.data().ค่าธรรมเนียมการศึกษา + 1;
+
+                                t.update(Count_Intent, {
+                                    ค่าธรรมเนียมการศึกษา: newcount
+
+                                });
+                            } else {
+                                t.update(Count_Intent, {
+                                    ค่าธรรมเนียมการศึกษา: 1
+                                });
+
+                            }
+
+                        });
+                    });
+                }
+            });
+
+            //return ข้อมูลคำตอบ 
+            return admin.firestore().collection('Tuition_fee').doc('คณะมนุษยศาสตร์และสังคมศาสตร์').collection('รัฐศาสตร์').orderBy("date", "desc").limit(1).get().then((snapshot) => {
+                snapshot.forEach(doc => {
+                    agent.add(doc.data().description);
+                    agent.add(payload่json); //แสดง paylaod
+                });
+            });
+        }
+
+    }
+
+    //รัฐประศาสนศาสตร์
+    function Public_Adminstration(agent) {
+        let payload = {
+            "type": "template",
+            "altText": "this is a confirm template",
+            "template": {
+                "type": "confirm",
+                "actions": [
+                    {
+                        "type": "message",
+                        "label": "ถูก",
+                        "text": "ได้รับคำตอบถูกต้องในเรื่องค่าธรรมเนียมการศึกษาสาขารัฐประศาสนศาสตร์"
+                    },
+                    {
+                        "type": "message",
+                        "label": "ไม่ถูก",
+                        "text": "ได้รับคำตอบไม่ถูกต้องในเรื่องค่าธรรมเนียมการศึกษาสาขารัฐประศาสนศาสตร์"
+                    }
+                ],
+                "text": "คุณได้รับคำตอบถูกต้องไหมคะ?"
+            }
+        };
+
+        //ประกาศตัวแปร payload เพื่อแสดงออกหน้าจอ
+        let payload่json = new Payload(`LINE`, payload, { sendAsMessage: true });
+        let text = request.body.queryResult.queryText;
+        let c = 'ได้รับคำตอบถูกต้องในเรื่องค่าธรรมเนียมการศึกษาสาขารัฐประศาสนศาสตร์';
+        let b = 'ได้รับคำตอบไม่ถูกต้องในเรื่องค่าธรรมเนียมการศึกษาสาขารัฐประศาสนศาสตร์';
+
+        //Count_Accuracy
+        let Count_Accuracy = admin.firestore().collection("Count_Accuracy").doc(date.toLocaleDateString()).collection("ค่าธรรมเนียมการศึกษา").doc("คณะมนุษยศาสตร์และสังคมศาสตร์").collection("Subject").doc("รัฐประศาสนศาสตร์");
+        Count_Accuracy.get().then(function (docs) {
+            if (!docs.exists) {
+                Count_Accuracy.set({
+                    ถูก: 0,
+                    ไม่ถูก: 0
+                });
+            }
+
+        });
+
+
+        if (text === c) {
+            agent.add("ขอบคุณค่ะ");
+            db.runTransaction(t => {
+                return t.get(Count_Accuracy).then(doc => {
+                    let newcount = doc.data().ถูก + 1;
+
+                    t.update(Count_Accuracy, {
+                        ถูก: newcount,
+
+                    });
+                });
+            });
+
+
+
+        }
+
+        else if (text === b) {
+
+            agent.add("กรุณากดปุ่มติดต่อเจ้าหน้าที่");
+            db.runTransaction(t => {
+                return t.get(Count_Accuracy).then(doc => {
+                    let newcount = doc.data().ไม่ถูก + 1;
+
+                    t.update(Count_Accuracy, {
+                        ไม่ถูก: newcount,
+
+                    });
+                });
+            });
+
+        }
+
+        else {
+            //เชคว่ามี ตัว doc อยู๋ไหม ถ้าไม่ ก็ set ค่า 
+            // count_intent 
+            Count_Intent.get().then(function (docs) {
+                if (!docs.exists) {
+                    Count_Intent.set({
+                        ค่าธรรมเนียมการศึกษา: 1
+                    });
+                }
+
+                else {
+                    //เลขcount เวลามีคนเข้ามาสอบถาม
+
+                    db.runTransaction(t => {
+                        return t.get(Count_Intent).then(doc => {
+                            if (doc.data().ค่าธรรมเนียมการศึกษา > 0) {
+                                let newcount = doc.data().ค่าธรรมเนียมการศึกษา + 1;
+
+                                t.update(Count_Intent, {
+                                    ค่าธรรมเนียมการศึกษา: newcount
+
+                                });
+                            } else {
+                                t.update(Count_Intent, {
+                                    ค่าธรรมเนียมการศึกษา: 1
+                                });
+
+                            }
+
+                        });
+                    });
+                }
+            });
+
+            //return ข้อมูลคำตอบ 
+            return admin.firestore().collection('Tuition_fee').doc('คณะมนุษยศาสตร์และสังคมศาสตร์').collection('รัฐประศาสนศาสตร์').orderBy("date", "desc").limit(1).get().then((snapshot) => {
+                snapshot.forEach(doc => {
+                    agent.add(doc.data().description);
+                    agent.add(payload่json); //แสดง paylaod
+                });
+            });
+        }
+
+    }
+
+
+    //นิติศาสตร์บัณฑิต
+    function Laws_Program(agent) {
+        let payload = {
+            "type": "template",
+            "altText": "this is a confirm template",
+            "template": {
+                "type": "confirm",
+                "actions": [
+                    {
+                        "type": "message",
+                        "label": "ถูก",
+                        "text": "ได้รับคำตอบถูกต้องในเรื่องค่าธรรมเนียมการศึกษาสาขานิติศาสตร์บัณฑิต"
+                    },
+                    {
+                        "type": "message",
+                        "label": "ไม่ถูก",
+                        "text": "ได้รับคำตอบไม่ถูกต้องในเรื่องค่าธรรมเนียมการศึกษาสาขานิติศาสตร์บัณฑิต"
+                    }
+                ],
+                "text": "คุณได้รับคำตอบถูกต้องไหมคะ?"
+            }
+        };
+
+        //ประกาศตัวแปร payload เพื่อแสดงออกหน้าจอ
+        let payload่json = new Payload(`LINE`, payload, { sendAsMessage: true });
+        let text = request.body.queryResult.queryText;
+        let c = 'ได้รับคำตอบถูกต้องในเรื่องค่าธรรมเนียมการศึกษาสาขานิติศาสตร์บัณฑิต';
+        let b = 'ได้รับคำตอบไม่ถูกต้องในเรื่องค่าธรรมเนียมการศึกษาสาขานิติศาสตร์บัณฑิต';
+
+        //Count_Accuracy
+        let Count_Accuracy = admin.firestore().collection("Count_Accuracy").doc(date.toLocaleDateString()).collection("ค่าธรรมเนียมการศึกษา").doc("คณะมนุษยศาสตร์และสังคมศาสตร์").collection("Subject").doc("นิติศาสตร์บัณฑิต");
+        Count_Accuracy.get().then(function (docs) {
+            if (!docs.exists) {
+                Count_Accuracy.set({
+                    ถูก: 0,
+                    ไม่ถูก: 0
+                });
+            }
+
+        });
+
+
+        if (text === c) {
+            agent.add("ขอบคุณค่ะ");
+            db.runTransaction(t => {
+                return t.get(Count_Accuracy).then(doc => {
+                    let newcount = doc.data().ถูก + 1;
+
+                    t.update(Count_Accuracy, {
+                        ถูก: newcount,
+
+                    });
+                });
+            });
+
+
+
+        }
+
+        else if (text === b) {
+
+            agent.add("กรุณากดปุ่มติดต่อเจ้าหน้าที่");
+            db.runTransaction(t => {
+                return t.get(Count_Accuracy).then(doc => {
+                    let newcount = doc.data().ไม่ถูก + 1;
+
+                    t.update(Count_Accuracy, {
+                        ไม่ถูก: newcount,
+
+                    });
+                });
+            });
+
+        }
+
+        else {
+            //เชคว่ามี ตัว doc อยู๋ไหม ถ้าไม่ ก็ set ค่า 
+            // count_intent 
+            Count_Intent.get().then(function (docs) {
+                if (!docs.exists) {
+                    Count_Intent.set({
+                        ค่าธรรมเนียมการศึกษา: 1
+                    });
+                }
+
+                else {
+                    //เลขcount เวลามีคนเข้ามาสอบถาม
+
+                    db.runTransaction(t => {
+                        return t.get(Count_Intent).then(doc => {
+                            if (doc.data().ค่าธรรมเนียมการศึกษา > 0) {
+                                let newcount = doc.data().ค่าธรรมเนียมการศึกษา + 1;
+
+                                t.update(Count_Intent, {
+                                    ค่าธรรมเนียมการศึกษา: newcount
+
+                                });
+                            } else {
+                                t.update(Count_Intent, {
+                                    ค่าธรรมเนียมการศึกษา: 1
+                                });
+
+                            }
+
+                        });
+                    });
+                }
+            });
+
+            //return ข้อมูลคำตอบ 
+            return admin.firestore().collection('Tuition_fee').doc('คณะมนุษยศาสตร์และสังคมศาสตร์').collection('นิติศาสตร์บัณฑิต').orderBy("date", "desc").limit(1).get().then((snapshot) => {
+                snapshot.forEach(doc => {
+                    agent.add(doc.data().description);
+                    agent.add(payload่json); //แสดง paylaod
+                });
+            });
+        }
+
+    }
+
+
+
+    //ภาษาญี่ปุ่น
+    function Japanese(agent) {
+        let payload = {
+            "type": "template",
+            "altText": "this is a confirm template",
+            "template": {
+                "type": "confirm",
+                "actions": [
+                    {
+                        "type": "message",
+                        "label": "ถูก",
+                        "text": "ได้รับคำตอบถูกต้องในเรื่องค่าธรรมเนียมการศึกษาสาขาภาษาญี่ปุ่น"
+                    },
+                    {
+                        "type": "message",
+                        "label": "ไม่ถูก",
+                        "text": "ได้รับคำตอบไม่ถูกต้องในเรื่องค่าธรรมเนียมการศึกษาสาขาภาษาญี่ปุ่น"
+                    }
+                ],
+                "text": "คุณได้รับคำตอบถูกต้องไหมคะ?"
+            }
+        };
+
+        //ประกาศตัวแปร payload เพื่อแสดงออกหน้าจอ
+        let payload่json = new Payload(`LINE`, payload, { sendAsMessage: true });
+        let text = request.body.queryResult.queryText;
+        let c = 'ได้รับคำตอบถูกต้องในเรื่องค่าธรรมเนียมการศึกษาสาขาภาษาญี่ปุ่น';
+        let b = 'ได้รับคำตอบไม่ถูกต้องในเรื่องค่าธรรมเนียมการศึกษาสาขาภาษาญี่ปุ่น';
+
+        //Count_Accuracy
+        let Count_Accuracy = admin.firestore().collection("Count_Accuracy").doc(date.toLocaleDateString()).collection("ค่าธรรมเนียมการศึกษา").doc("คณะมนุษยศาสตร์และสังคมศาสตร์").collection("Subject").doc("ภาษาญี่ปุ่น");
+        Count_Accuracy.get().then(function (docs) {
+            if (!docs.exists) {
+                Count_Accuracy.set({
+                    ถูก: 0,
+                    ไม่ถูก: 0
+                });
+            }
+
+        });
+
+
+        if (text === c) {
+            agent.add("ขอบคุณค่ะ");
+            db.runTransaction(t => {
+                return t.get(Count_Accuracy).then(doc => {
+                    let newcount = doc.data().ถูก + 1;
+
+                    t.update(Count_Accuracy, {
+                        ถูก: newcount,
+
+                    });
+                });
+            });
+
+
+
+        }
+
+        else if (text === b) {
+
+            agent.add("กรุณากดปุ่มติดต่อเจ้าหน้าที่");
+            db.runTransaction(t => {
+                return t.get(Count_Accuracy).then(doc => {
+                    let newcount = doc.data().ไม่ถูก + 1;
+
+                    t.update(Count_Accuracy, {
+                        ไม่ถูก: newcount,
+
+                    });
+                });
+            });
+
+        }
+
+        else {
+            //เชคว่ามี ตัว doc อยู๋ไหม ถ้าไม่ ก็ set ค่า 
+            // count_intent 
+            Count_Intent.get().then(function (docs) {
+                if (!docs.exists) {
+                    Count_Intent.set({
+                        ค่าธรรมเนียมการศึกษา: 1
+                    });
+                }
+
+                else {
+                    //เลขcount เวลามีคนเข้ามาสอบถาม
+
+                    db.runTransaction(t => {
+                        return t.get(Count_Intent).then(doc => {
+                            if (doc.data().ค่าธรรมเนียมการศึกษา > 0) {
+                                let newcount = doc.data().ค่าธรรมเนียมการศึกษา + 1;
+
+                                t.update(Count_Intent, {
+                                    ค่าธรรมเนียมการศึกษา: newcount
+
+                                });
+                            } else {
+                                t.update(Count_Intent, {
+                                    ค่าธรรมเนียมการศึกษา: 1
+                                });
+
+                            }
+
+                        });
+                    });
+                }
+            });
+
+            //return ข้อมูลคำตอบ 
+            return admin.firestore().collection('Tuition_fee').doc('คณะมนุษยศาสตร์และสังคมศาสตร์').collection('ภาษาญี่ปุ่น').orderBy("date", "desc").limit(1).get().then((snapshot) => {
+                snapshot.forEach(doc => {
+                    agent.add(doc.data().description);
+                    agent.add(payload่json); //แสดง paylaod
+                });
+            });
+        }
+
+    }
+
+
+
+    //ศิลปกรรม
+    function Fine_and_Applied_Arts(agent) {
+        let payload = {
+            "type": "template",
+            "altText": "this is a confirm template",
+            "template": {
+                "type": "confirm",
+                "actions": [
+                    {
+                        "type": "message",
+                        "label": "ถูก",
+                        "text": "ได้รับคำตอบถูกต้องในเรื่องค่าธรรมเนียมการศึกษาสาขาศิลปกรรม"
+                    },
+                    {
+                        "type": "message",
+                        "label": "ไม่ถูก",
+                        "text": "ได้รับคำตอบไม่ถูกต้องในเรื่องค่าธรรมเนียมการศึกษาสาขาศิลปกรรม"
+                    }
+                ],
+                "text": "คุณได้รับคำตอบถูกต้องไหมคะ?"
+            }
+        };
+
+        //ประกาศตัวแปร payload เพื่อแสดงออกหน้าจอ
+        let payload่json = new Payload(`LINE`, payload, { sendAsMessage: true });
+        let text = request.body.queryResult.queryText;
+        let c = 'ได้รับคำตอบถูกต้องในเรื่องค่าธรรมเนียมการศึกษาสาขาศิลปกรรม';
+        let b = 'ได้รับคำตอบไม่ถูกต้องในเรื่องค่าธรรมเนียมการศึกษาสาขาศิลปกรรม';
+
+        //Count_Accuracy
+        let Count_Accuracy = admin.firestore().collection("Count_Accuracy").doc(date.toLocaleDateString()).collection("ค่าธรรมเนียมการศึกษา").doc("คณะมนุษยศาสตร์และสังคมศาสตร์").collection("Subject").doc("ศิลปกรรม");
+        Count_Accuracy.get().then(function (docs) {
+            if (!docs.exists) {
+                Count_Accuracy.set({
+                    ถูก: 0,
+                    ไม่ถูก: 0
+                });
+            }
+
+        });
+
+
+        if (text === c) {
+            agent.add("ขอบคุณค่ะ");
+            db.runTransaction(t => {
+                return t.get(Count_Accuracy).then(doc => {
+                    let newcount = doc.data().ถูก + 1;
+
+                    t.update(Count_Accuracy, {
+                        ถูก: newcount,
+
+                    });
+                });
+            });
+
+
+
+        }
+
+        else if (text === b) {
+
+            agent.add("กรุณากดปุ่มติดต่อเจ้าหน้าที่");
+            db.runTransaction(t => {
+                return t.get(Count_Accuracy).then(doc => {
+                    let newcount = doc.data().ไม่ถูก + 1;
+
+                    t.update(Count_Accuracy, {
+                        ไม่ถูก: newcount,
+
+                    });
+                });
+            });
+
+        }
+
+        else {
+            //เชคว่ามี ตัว doc อยู๋ไหม ถ้าไม่ ก็ set ค่า 
+            // count_intent 
+            Count_Intent.get().then(function (docs) {
+                if (!docs.exists) {
+                    Count_Intent.set({
+                        ค่าธรรมเนียมการศึกษา: 1
+                    });
+                }
+
+                else {
+                    //เลขcount เวลามีคนเข้ามาสอบถาม
+
+                    db.runTransaction(t => {
+                        return t.get(Count_Intent).then(doc => {
+                            if (doc.data().ค่าธรรมเนียมการศึกษา > 0) {
+                                let newcount = doc.data().ค่าธรรมเนียมการศึกษา + 1;
+
+                                t.update(Count_Intent, {
+                                    ค่าธรรมเนียมการศึกษา: newcount
+
+                                });
+                            } else {
+                                t.update(Count_Intent, {
+                                    ค่าธรรมเนียมการศึกษา: 1
+                                });
+
+                            }
+
+                        });
+                    });
+                }
+            });
+
+            //return ข้อมูลคำตอบ 
+            return admin.firestore().collection('Tuition_fee').doc('คณะมนุษยศาสตร์และสังคมศาสตร์').collection('ศิลปกรรม').orderBy("date", "desc").limit(1).get().then((snapshot) => {
+                snapshot.forEach(doc => {
+                    agent.add(doc.data().description);
+                    agent.add(payload่json); //แสดง paylaod
+                });
+            });
+        }
+
+    }
+
+
+    //สารสนเทศศาสตร์และบรรณารักษศาสตร์
+    function Information_and_Library_Science(agent) {
+        let payload = {
+            "type": "template",
+            "altText": "this is a confirm template",
+            "template": {
+                "type": "confirm",
+                "actions": [
+                    {
+                        "type": "message",
+                        "label": "ถูก",
+                        "text": "ได้รับคำตอบถูกต้องในเรื่องค่าธรรมเนียมการศึกษาสาขาสารสนเทศศาสตร์และบรรณารักษศาสตร์"
+                    },
+                    {
+                        "type": "message",
+                        "label": "ไม่ถูก",
+                        "text": "ได้รับคำตอบไม่ถูกต้องในเรื่องค่าธรรมเนียมการศึกษาสาขาสารสนเทศศาสตร์และบรรณารักษศาสตร์"
+                    }
+                ],
+                "text": "คุณได้รับคำตอบถูกต้องไหมคะ?"
+            }
+        };
+
+        //ประกาศตัวแปร payload เพื่อแสดงออกหน้าจอ
+        let payload่json = new Payload(`LINE`, payload, { sendAsMessage: true });
+        let text = request.body.queryResult.queryText;
+        let c = 'ได้รับคำตอบถูกต้องในเรื่องค่าธรรมเนียมการศึกษาสาขาสารสนเทศศาสตร์และบรรณารักษศาสตร์';
+        let b = 'ได้รับคำตอบไม่ถูกต้องในเรื่องค่าธรรมเนียมการศึกษาสาขาสารสนเทศศาสตร์และบรรณารักษศาสตร์';
+
+        //Count_Accuracy
+        let Count_Accuracy = admin.firestore().collection("Count_Accuracy").doc(date.toLocaleDateString()).collection("ค่าธรรมเนียมการศึกษา").doc("คณะมนุษยศาสตร์และสังคมศาสตร์").collection("Subject").doc("สารสนเทศศาสตร์และบรรณารักษศาสตร์");
+        Count_Accuracy.get().then(function (docs) {
+            if (!docs.exists) {
+                Count_Accuracy.set({
+                    ถูก: 0,
+                    ไม่ถูก: 0
+                });
+            }
+
+        });
+
+
+        if (text === c) {
+            agent.add("ขอบคุณค่ะ");
+            db.runTransaction(t => {
+                return t.get(Count_Accuracy).then(doc => {
+                    let newcount = doc.data().ถูก + 1;
+
+                    t.update(Count_Accuracy, {
+                        ถูก: newcount,
+
+                    });
+                });
+            });
+
+
+
+        }
+
+        else if (text === b) {
+
+            agent.add("กรุณากดปุ่มติดต่อเจ้าหน้าที่");
+            db.runTransaction(t => {
+                return t.get(Count_Accuracy).then(doc => {
+                    let newcount = doc.data().ไม่ถูก + 1;
+
+                    t.update(Count_Accuracy, {
+                        ไม่ถูก: newcount,
+
+                    });
+                });
+            });
+
+        }
+
+        else {
+            //เชคว่ามี ตัว doc อยู๋ไหม ถ้าไม่ ก็ set ค่า 
+            // count_intent 
+            Count_Intent.get().then(function (docs) {
+                if (!docs.exists) {
+                    Count_Intent.set({
+                        ค่าธรรมเนียมการศึกษา: 1
+                    });
+                }
+
+                else {
+                    //เลขcount เวลามีคนเข้ามาสอบถาม
+
+                    db.runTransaction(t => {
+                        return t.get(Count_Intent).then(doc => {
+                            if (doc.data().ค่าธรรมเนียมการศึกษา > 0) {
+                                let newcount = doc.data().ค่าธรรมเนียมการศึกษา + 1;
+
+                                t.update(Count_Intent, {
+                                    ค่าธรรมเนียมการศึกษา: newcount
+
+                                });
+                            } else {
+                                t.update(Count_Intent, {
+                                    ค่าธรรมเนียมการศึกษา: 1
+                                });
+
+                            }
+
+                        });
+                    });
+                }
+            });
+
+            //return ข้อมูลคำตอบ 
+            return admin.firestore().collection('Tuition_fee').doc('คณะมนุษยศาสตร์และสังคมศาสตร์').collection('สารสนเทศศาสตร์และบรรณารักษศาสตร์').orderBy("date", "desc").limit(1).get().then((snapshot) => {
+                snapshot.forEach(doc => {
+                    agent.add(doc.data().description);
+                    agent.add(payload่json); //แสดง paylaod
+                });
+            });
+        }
+
+    }
+
+
+    //นาฎดุริยางคศิลป์ไทย
+    function Thai_Music_Education(agent) {
+        let payload = {
+            "type": "template",
+            "altText": "this is a confirm template",
+            "template": {
+                "type": "confirm",
+                "actions": [
+                    {
+                        "type": "message",
+                        "label": "ถูก",
+                        "text": "ได้รับคำตอบถูกต้องในเรื่องค่าธรรมเนียมการศึกษาสาขานาฎดุริยางคศิลป์ไทย"
+                    },
+                    {
+                        "type": "message",
+                        "label": "ไม่ถูก",
+                        "text": "ได้รับคำตอบไม่ถูกต้องในเรื่องค่าธรรมเนียมการศึกษาสาขานาฎดุริยางคศิลป์ไทย"
+                    }
+                ],
+                "text": "คุณได้รับคำตอบถูกต้องไหมคะ?"
+            }
+        };
+
+        //ประกาศตัวแปร payload เพื่อแสดงออกหน้าจอ
+        let payload่json = new Payload(`LINE`, payload, { sendAsMessage: true });
+        let text = request.body.queryResult.queryText;
+        let c = 'ได้รับคำตอบถูกต้องในเรื่องค่าธรรมเนียมการศึกษาสาขานาฎดุริยางคศิลป์ไทย';
+        let b = 'ได้รับคำตอบไม่ถูกต้องในเรื่องค่าธรรมเนียมการศึกษาสาขานาฎดุริยางคศิลป์ไทย';
+
+        //Count_Accuracy
+        let Count_Accuracy = admin.firestore().collection("Count_Accuracy").doc(date.toLocaleDateString()).collection("ค่าธรรมเนียมการศึกษา").doc("คณะมนุษยศาสตร์และสังคมศาสตร์").collection("Subject").doc("นาฎดุริยางคศิลป์ไทย");
+        Count_Accuracy.get().then(function (docs) {
+            if (!docs.exists) {
+                Count_Accuracy.set({
+                    ถูก: 0,
+                    ไม่ถูก: 0
+                });
+            }
+
+        });
+
+
+        if (text === c) {
+            agent.add("ขอบคุณค่ะ");
+            db.runTransaction(t => {
+                return t.get(Count_Accuracy).then(doc => {
+                    let newcount = doc.data().ถูก + 1;
+
+                    t.update(Count_Accuracy, {
+                        ถูก: newcount,
+
+                    });
+                });
+            });
+
+
+
+        }
+
+        else if (text === b) {
+
+            agent.add("กรุณากดปุ่มติดต่อเจ้าหน้าที่");
+            db.runTransaction(t => {
+                return t.get(Count_Accuracy).then(doc => {
+                    let newcount = doc.data().ไม่ถูก + 1;
+
+                    t.update(Count_Accuracy, {
+                        ไม่ถูก: newcount,
+
+                    });
+                });
+            });
+
+        }
+
+        else {
+            //เชคว่ามี ตัว doc อยู๋ไหม ถ้าไม่ ก็ set ค่า 
+            // count_intent 
+            Count_Intent.get().then(function (docs) {
+                if (!docs.exists) {
+                    Count_Intent.set({
+                        ค่าธรรมเนียมการศึกษา: 1
+                    });
+                }
+
+                else {
+                    //เลขcount เวลามีคนเข้ามาสอบถาม
+
+                    db.runTransaction(t => {
+                        return t.get(Count_Intent).then(doc => {
+                            if (doc.data().ค่าธรรมเนียมการศึกษา > 0) {
+                                let newcount = doc.data().ค่าธรรมเนียมการศึกษา + 1;
+
+                                t.update(Count_Intent, {
+                                    ค่าธรรมเนียมการศึกษา: newcount
+
+                                });
+                            } else {
+                                t.update(Count_Intent, {
+                                    ค่าธรรมเนียมการศึกษา: 1
+                                });
+
+                            }
+
+                        });
+                    });
+                }
+            });
+
+            //return ข้อมูลคำตอบ 
+            return admin.firestore().collection('Tuition_fee').doc('คณะมนุษยศาสตร์และสังคมศาสตร์').collection('นาฎดุริยางคศิลป์ไทย').orderBy("date", "desc").limit(1).get().then((snapshot) => {
+                snapshot.forEach(doc => {
+                    agent.add(doc.data().description);
+                    agent.add(payload่json); //แสดง paylaod
+                });
+            });
+        }
+
+    }
+
+
+
+    //คณะวิทยาการจัดการ 
+    //การบัญชี
+    function Accounting(agent) {
+        let payload = {
+            "type": "template",
+            "altText": "this is a confirm template",
+            "template": {
+                "type": "confirm",
+                "actions": [
+                    {
+                        "type": "message",
+                        "label": "ถูก",
+                        "text": "ได้รับคำตอบถูกต้องในเรื่องค่าธรรมเนียมการศึกษาสาขาการบัญชี"
+                    },
+                    {
+                        "type": "message",
+                        "label": "ไม่ถูก",
+                        "text": "ได้รับคำตอบไม่ถูกต้องในเรื่องค่าธรรมเนียมการศึกษาสาขาการบัญชี"
+                    }
+                ],
+                "text": "คุณได้รับคำตอบถูกต้องไหมคะ?"
+            }
+        };
+
+        //ประกาศตัวแปร payload เพื่อแสดงออกหน้าจอ
+        let payload่json = new Payload(`LINE`, payload, { sendAsMessage: true });
+        let text = request.body.queryResult.queryText;
+        let c = 'ได้รับคำตอบถูกต้องในเรื่องค่าธรรมเนียมการศึกษาสาขาการบัญชี';
+        let b = 'ได้รับคำตอบไม่ถูกต้องในเรื่องค่าธรรมเนียมการศึกษาสาขาการบัญชี';
+
+        //Count_Accuracy
+        let Count_Accuracy = admin.firestore().collection("Count_Accuracy").doc(date.toLocaleDateString()).collection("ค่าธรรมเนียมการศึกษา").doc("คณะวิทยาการจัดการ").collection("Subject").doc("การบัญชี");
+        Count_Accuracy.get().then(function (docs) {
+            if (!docs.exists) {
+                Count_Accuracy.set({
+                    ถูก: 0,
+                    ไม่ถูก: 0
+                });
+            }
+
+        });
+
+
+        if (text === c) {
+            agent.add("ขอบคุณค่ะ");
+            db.runTransaction(t => {
+                return t.get(Count_Accuracy).then(doc => {
+                    let newcount = doc.data().ถูก + 1;
+
+                    t.update(Count_Accuracy, {
+                        ถูก: newcount,
+
+                    });
+                });
+            });
+
+
+
+        }
+
+        else if (text === b) {
+
+            agent.add("กรุณากดปุ่มติดต่อเจ้าหน้าที่");
+            db.runTransaction(t => {
+                return t.get(Count_Accuracy).then(doc => {
+                    let newcount = doc.data().ไม่ถูก + 1;
+
+                    t.update(Count_Accuracy, {
+                        ไม่ถูก: newcount,
+
+                    });
+                });
+            });
+
+        }
+
+        else {
+            //เชคว่ามี ตัว doc อยู๋ไหม ถ้าไม่ ก็ set ค่า 
+            // count_intent 
+            Count_Intent.get().then(function (docs) {
+                if (!docs.exists) {
+                    Count_Intent.set({
+                        ค่าธรรมเนียมการศึกษา: 1
+                    });
+                }
+
+                else {
+                    //เลขcount เวลามีคนเข้ามาสอบถาม
+
+                    db.runTransaction(t => {
+                        return t.get(Count_Intent).then(doc => {
+                            if (doc.data().ค่าธรรมเนียมการศึกษา > 0) {
+                                let newcount = doc.data().ค่าธรรมเนียมการศึกษา + 1;
+
+                                t.update(Count_Intent, {
+                                    ค่าธรรมเนียมการศึกษา: newcount
+
+                                });
+                            } else {
+                                t.update(Count_Intent, {
+                                    ค่าธรรมเนียมการศึกษา: 1
+                                });
+
+                            }
+
+                        });
+                    });
+                }
+            });
+
+            //return ข้อมูลคำตอบ 
+            return admin.firestore().collection('Tuition_fee').doc('คณะวิทยาการจัดการ').collection('การบัญชี').orderBy("date", "desc").limit(1).get().then((snapshot) => {
+                snapshot.forEach(doc => {
+                    agent.add(doc.data().description);
+                    agent.add(payload่json); //แสดง paylaod
+                });
+            });
+        }
+
+    }
+
+
+    //การจัดการทรัพยากรมนุษย์
+    function Human_Resource_Management(agent) {
+        let payload = {
+            "type": "template",
+            "altText": "this is a confirm template",
+            "template": {
+                "type": "confirm",
+                "actions": [
+                    {
+                        "type": "message",
+                        "label": "ถูก",
+                        "text": "ได้รับคำตอบถูกต้องในเรื่องค่าธรรมเนียมการศึกษาสาขาการจัดการทรัพยากรมนุษย์"
+                    },
+                    {
+                        "type": "message",
+                        "label": "ไม่ถูก",
+                        "text": "ได้รับคำตอบไม่ถูกต้องในเรื่องค่าธรรมเนียมการศึกษาสาขาการจัดการทรัพยากรมนุษย์"
+                    }
+                ],
+                "text": "คุณได้รับคำตอบถูกต้องไหมคะ?"
+            }
+        };
+
+        //ประกาศตัวแปร payload เพื่อแสดงออกหน้าจอ
+        let payload่json = new Payload(`LINE`, payload, { sendAsMessage: true });
+        let text = request.body.queryResult.queryText;
+        let c = 'ได้รับคำตอบถูกต้องในเรื่องค่าธรรมเนียมการศึกษาสาขาการจัดการทรัพยากรมนุษย์';
+        let b = 'ได้รับคำตอบไม่ถูกต้องในเรื่องค่าธรรมเนียมการศึกษาสาขาการจัดการทรัพยากรมนุษย์';
+
+        //Count_Accuracy
+        let Count_Accuracy = admin.firestore().collection("Count_Accuracy").doc(date.toLocaleDateString()).collection("ค่าธรรมเนียมการศึกษา").doc("คณะวิทยาการจัดการ").collection("Subject").doc("การจัดการทรัพยากรมนุษย์");
+        Count_Accuracy.get().then(function (docs) {
+            if (!docs.exists) {
+                Count_Accuracy.set({
+                    ถูก: 0,
+                    ไม่ถูก: 0
+                });
+            }
+
+        });
+
+
+        if (text === c) {
+            agent.add("ขอบคุณค่ะ");
+            db.runTransaction(t => {
+                return t.get(Count_Accuracy).then(doc => {
+                    let newcount = doc.data().ถูก + 1;
+
+                    t.update(Count_Accuracy, {
+                        ถูก: newcount,
+
+                    });
+                });
+            });
+
+
+
+        }
+
+        else if (text === b) {
+
+            agent.add("กรุณากดปุ่มติดต่อเจ้าหน้าที่");
+            db.runTransaction(t => {
+                return t.get(Count_Accuracy).then(doc => {
+                    let newcount = doc.data().ไม่ถูก + 1;
+
+                    t.update(Count_Accuracy, {
+                        ไม่ถูก: newcount,
+
+                    });
+                });
+            });
+
+        }
+
+        else {
+            //เชคว่ามี ตัว doc อยู๋ไหม ถ้าไม่ ก็ set ค่า 
+            // count_intent 
+            Count_Intent.get().then(function (docs) {
+                if (!docs.exists) {
+                    Count_Intent.set({
+                        ค่าธรรมเนียมการศึกษา: 1
+                    });
+                }
+
+                else {
+                    //เลขcount เวลามีคนเข้ามาสอบถาม
+
+                    db.runTransaction(t => {
+                        return t.get(Count_Intent).then(doc => {
+                            if (doc.data().ค่าธรรมเนียมการศึกษา > 0) {
+                                let newcount = doc.data().ค่าธรรมเนียมการศึกษา + 1;
+
+                                t.update(Count_Intent, {
+                                    ค่าธรรมเนียมการศึกษา: newcount
+
+                                });
+                            } else {
+                                t.update(Count_Intent, {
+                                    ค่าธรรมเนียมการศึกษา: 1
+                                });
+
+                            }
+
+                        });
+                    });
+                }
+            });
+
+            //return ข้อมูลคำตอบ 
+            return admin.firestore().collection('Tuition_fee').doc('คณะวิทยาการจัดการ').collection('การจัดการทรัพยากรมนุษย์').orderBy("date", "desc").limit(1).get().then((snapshot) => {
+                snapshot.forEach(doc => {
+                    agent.add(doc.data().description);
+                    agent.add(payload่json); //แสดง paylaod
+                });
+            });
+        }
+
+    }
+
+    //การตลาด
+    function Marketing(agent) {
+        let payload = {
+            "type": "template",
+            "altText": "this is a confirm template",
+            "template": {
+                "type": "confirm",
+                "actions": [
+                    {
+                        "type": "message",
+                        "label": "ถูก",
+                        "text": "ได้รับคำตอบถูกต้องในเรื่องค่าธรรมเนียมการศึกษาสาขาการตลาด"
+                    },
+                    {
+                        "type": "message",
+                        "label": "ไม่ถูก",
+                        "text": "ได้รับคำตอบไม่ถูกต้องในเรื่องค่าธรรมเนียมการศึกษาสาขาการตลาด"
+                    }
+                ],
+                "text": "คุณได้รับคำตอบถูกต้องไหมคะ?"
+            }
+        };
+
+        //ประกาศตัวแปร payload เพื่อแสดงออกหน้าจอ
+        let payload่json = new Payload(`LINE`, payload, { sendAsMessage: true });
+        let text = request.body.queryResult.queryText;
+        let c = 'ได้รับคำตอบถูกต้องในเรื่องค่าธรรมเนียมการศึกษาสาขาการตลาด';
+        let b = 'ได้รับคำตอบไม่ถูกต้องในเรื่องค่าธรรมเนียมการศึกษาสาขาการตลาด';
+
+        //Count_Accuracy
+        let Count_Accuracy = admin.firestore().collection("Count_Accuracy").doc(date.toLocaleDateString()).collection("ค่าธรรมเนียมการศึกษา").doc("คณะวิทยาการจัดการ").collection("Subject").doc("การตลาด");
+        Count_Accuracy.get().then(function (docs) {
+            if (!docs.exists) {
+                Count_Accuracy.set({
+                    ถูก: 0,
+                    ไม่ถูก: 0
+                });
+            }
+
+        });
+
+
+        if (text === c) {
+            agent.add("ขอบคุณค่ะ");
+            db.runTransaction(t => {
+                return t.get(Count_Accuracy).then(doc => {
+                    let newcount = doc.data().ถูก + 1;
+
+                    t.update(Count_Accuracy, {
+                        ถูก: newcount,
+
+                    });
+                });
+            });
+
+
+
+        }
+
+        else if (text === b) {
+
+            agent.add("กรุณากดปุ่มติดต่อเจ้าหน้าที่");
+            db.runTransaction(t => {
+                return t.get(Count_Accuracy).then(doc => {
+                    let newcount = doc.data().ไม่ถูก + 1;
+
+                    t.update(Count_Accuracy, {
+                        ไม่ถูก: newcount,
+
+                    });
+                });
+            });
+
+        }
+
+        else {
+            //เชคว่ามี ตัว doc อยู๋ไหม ถ้าไม่ ก็ set ค่า 
+            // count_intent 
+            Count_Intent.get().then(function (docs) {
+                if (!docs.exists) {
+                    Count_Intent.set({
+                        ค่าธรรมเนียมการศึกษา: 1
+                    });
+                }
+
+                else {
+                    //เลขcount เวลามีคนเข้ามาสอบถาม
+
+                    db.runTransaction(t => {
+                        return t.get(Count_Intent).then(doc => {
+                            if (doc.data().ค่าธรรมเนียมการศึกษา > 0) {
+                                let newcount = doc.data().ค่าธรรมเนียมการศึกษา + 1;
+
+                                t.update(Count_Intent, {
+                                    ค่าธรรมเนียมการศึกษา: newcount
+
+                                });
+                            } else {
+                                t.update(Count_Intent, {
+                                    ค่าธรรมเนียมการศึกษา: 1
+                                });
+
+                            }
+
+                        });
+                    });
+                }
+            });
+
+            //return ข้อมูลคำตอบ 
+            return admin.firestore().collection('Tuition_fee').doc('คณะวิทยาการจัดการ').collection('การตลาด').orderBy("date", "desc").limit(1).get().then((snapshot) => {
+                snapshot.forEach(doc => {
+                    agent.add(doc.data().description);
+                    agent.add(payload่json); //แสดง paylaod
+                });
+            });
+        }
+
+    }
+
+    //คอมพิวเตอร์ธุรกิจ
+    function Business_Computer(agent) {
+        let payload = {
+            "type": "template",
+            "altText": "this is a confirm template",
+            "template": {
+                "type": "confirm",
+                "actions": [
+                    {
+                        "type": "message",
+                        "label": "ถูก",
+                        "text": "ได้รับคำตอบถูกต้องในเรื่องค่าธรรมเนียมการศึกษาสาขาคอมพิวเตอร์ธุรกิจ"
+                    },
+                    {
+                        "type": "message",
+                        "label": "ไม่ถูก",
+                        "text": "ได้รับคำตอบไม่ถูกต้องในเรื่องค่าธรรมเนียมการศึกษาสาขาคอมพิวเตอร์ธุรกิจ"
+                    }
+                ],
+                "text": "คุณได้รับคำตอบถูกต้องไหมคะ?"
+            }
+        };
+
+        //ประกาศตัวแปร payload เพื่อแสดงออกหน้าจอ
+        let payload่json = new Payload(`LINE`, payload, { sendAsMessage: true });
+        let text = request.body.queryResult.queryText;
+        let c = 'ได้รับคำตอบถูกต้องในเรื่องค่าธรรมเนียมการศึกษาสาขาคอมพิวเตอร์ธุรกิจ';
+        let b = 'ได้รับคำตอบไม่ถูกต้องในเรื่องค่าธรรมเนียมการศึกษาสาขาคอมพิวเตอร์ธุรกิจ';
+
+        //Count_Accuracy
+        let Count_Accuracy = admin.firestore().collection("Count_Accuracy").doc(date.toLocaleDateString()).collection("ค่าธรรมเนียมการศึกษา").doc("คณะวิทยาการจัดการ").collection("Subject").doc("คอมพิวเตอร์ธุรกิจ");
+        Count_Accuracy.get().then(function (docs) {
+            if (!docs.exists) {
+                Count_Accuracy.set({
+                    ถูก: 0,
+                    ไม่ถูก: 0
+                });
+            }
+
+        });
+
+
+        if (text === c) {
+            agent.add("ขอบคุณค่ะ");
+            db.runTransaction(t => {
+                return t.get(Count_Accuracy).then(doc => {
+                    let newcount = doc.data().ถูก + 1;
+
+                    t.update(Count_Accuracy, {
+                        ถูก: newcount,
+
+                    });
+                });
+            });
+
+
+
+        }
+
+        else if (text === b) {
+
+            agent.add("กรุณากดปุ่มติดต่อเจ้าหน้าที่");
+            db.runTransaction(t => {
+                return t.get(Count_Accuracy).then(doc => {
+                    let newcount = doc.data().ไม่ถูก + 1;
+
+                    t.update(Count_Accuracy, {
+                        ไม่ถูก: newcount,
+
+                    });
+                });
+            });
+
+        }
+
+        else {
+            //เชคว่ามี ตัว doc อยู๋ไหม ถ้าไม่ ก็ set ค่า 
+            // count_intent 
+            Count_Intent.get().then(function (docs) {
+                if (!docs.exists) {
+                    Count_Intent.set({
+                        ค่าธรรมเนียมการศึกษา: 1
+                    });
+                }
+
+                else {
+                    //เลขcount เวลามีคนเข้ามาสอบถาม
+
+                    db.runTransaction(t => {
+                        return t.get(Count_Intent).then(doc => {
+                            if (doc.data().ค่าธรรมเนียมการศึกษา > 0) {
+                                let newcount = doc.data().ค่าธรรมเนียมการศึกษา + 1;
+
+                                t.update(Count_Intent, {
+                                    ค่าธรรมเนียมการศึกษา: newcount
+
+                                });
+                            } else {
+                                t.update(Count_Intent, {
+                                    ค่าธรรมเนียมการศึกษา: 1
+                                });
+
+                            }
+
+                        });
+                    });
+                }
+            });
+
+            //return ข้อมูลคำตอบ 
+            return admin.firestore().collection('Tuition_fee').doc('คณะวิทยาการจัดการ').collection('คอมพิวเตอร์ธุรกิจ').orderBy("date", "desc").limit(1).get().then((snapshot) => {
+                snapshot.forEach(doc => {
+                    agent.add(doc.data().description);
+                    agent.add(payload่json); //แสดง paylaod
+                });
+            });
+        }
+
+    }
+
+
+    //การบัญชี
+    function Management(agent) {
+        let payload = {
+            "type": "template",
+            "altText": "this is a confirm template",
+            "template": {
+                "type": "confirm",
+                "actions": [
+                    {
+                        "type": "message",
+                        "label": "ถูก",
+                        "text": "ได้รับคำตอบถูกต้องในเรื่องค่าธรรมเนียมการศึกษาสาขาการจัดการ"
+                    },
+                    {
+                        "type": "message",
+                        "label": "ไม่ถูก",
+                        "text": "ได้รับคำตอบไม่ถูกต้องในเรื่องค่าธรรมเนียมการศึกษาสาขาการจัดการ"
+                    }
+                ],
+                "text": "คุณได้รับคำตอบถูกต้องไหมคะ?"
+            }
+        };
+
+        //ประกาศตัวแปร payload เพื่อแสดงออกหน้าจอ
+        let payload่json = new Payload(`LINE`, payload, { sendAsMessage: true });
+        let text = request.body.queryResult.queryText;
+        let c = 'ได้รับคำตอบถูกต้องในเรื่องค่าธรรมเนียมการศึกษาสาขาการจัดการ';
+        let b = 'ได้รับคำตอบไม่ถูกต้องในเรื่องค่าธรรมเนียมการศึกษาสาขาการจัดการ';
+
+        //Count_Accuracy
+        let Count_Accuracy = admin.firestore().collection("Count_Accuracy").doc(date.toLocaleDateString()).collection("ค่าธรรมเนียมการศึกษา").doc("คณะวิทยาการจัดการ").collection("Subject").doc("การจัดการ");
+        Count_Accuracy.get().then(function (docs) {
+            if (!docs.exists) {
+                Count_Accuracy.set({
+                    ถูก: 0,
+                    ไม่ถูก: 0
+                });
+            }
+
+        });
+
+
+        if (text === c) {
+            agent.add("ขอบคุณค่ะ");
+            db.runTransaction(t => {
+                return t.get(Count_Accuracy).then(doc => {
+                    let newcount = doc.data().ถูก + 1;
+
+                    t.update(Count_Accuracy, {
+                        ถูก: newcount,
+
+                    });
+                });
+            });
+
+
+
+        }
+
+        else if (text === b) {
+
+            agent.add("กรุณากดปุ่มติดต่อเจ้าหน้าที่");
+            db.runTransaction(t => {
+                return t.get(Count_Accuracy).then(doc => {
+                    let newcount = doc.data().ไม่ถูก + 1;
+
+                    t.update(Count_Accuracy, {
+                        ไม่ถูก: newcount,
+
+                    });
+                });
+            });
+
+        }
+
+        else {
+            //เชคว่ามี ตัว doc อยู๋ไหม ถ้าไม่ ก็ set ค่า 
+            // count_intent 
+            Count_Intent.get().then(function (docs) {
+                if (!docs.exists) {
+                    Count_Intent.set({
+                        ค่าธรรมเนียมการศึกษา: 1
+                    });
+                }
+
+                else {
+                    //เลขcount เวลามีคนเข้ามาสอบถาม
+
+                    db.runTransaction(t => {
+                        return t.get(Count_Intent).then(doc => {
+                            if (doc.data().ค่าธรรมเนียมการศึกษา > 0) {
+                                let newcount = doc.data().ค่าธรรมเนียมการศึกษา + 1;
+
+                                t.update(Count_Intent, {
+                                    ค่าธรรมเนียมการศึกษา: newcount
+
+                                });
+                            } else {
+                                t.update(Count_Intent, {
+                                    ค่าธรรมเนียมการศึกษา: 1
+                                });
+
+                            }
+
+                        });
+                    });
+                }
+            });
+
+            //return ข้อมูลคำตอบ 
+            return admin.firestore().collection('Tuition_fee').doc('คณะวิทยาการจัดการ').collection('การจัดการ').orderBy("date", "desc").limit(1).get().then((snapshot) => {
+                snapshot.forEach(doc => {
+                    agent.add(doc.data().description);
+                    agent.add(payload่json); //แสดง paylaod
+                });
+            });
+        }
+
+    }
+
+
+    //นิเทศศาสตร์
+    function Communication_Arts(agent) {
+        let payload = {
+            "type": "template",
+            "altText": "this is a confirm template",
+            "template": {
+                "type": "confirm",
+                "actions": [
+                    {
+                        "type": "message",
+                        "label": "ถูก",
+                        "text": "ได้รับคำตอบถูกต้องในเรื่องค่าธรรมเนียมการศึกษาสาขานิเทศศาสตร์"
+                    },
+                    {
+                        "type": "message",
+                        "label": "ไม่ถูก",
+                        "text": "ได้รับคำตอบไม่ถูกต้องในเรื่องค่าธรรมเนียมการศึกษาสาขานิเทศศาสตร์"
+                    }
+                ],
+                "text": "คุณได้รับคำตอบถูกต้องไหมคะ?"
+            }
+        };
+
+        //ประกาศตัวแปร payload เพื่อแสดงออกหน้าจอ
+        let payload่json = new Payload(`LINE`, payload, { sendAsMessage: true });
+        let text = request.body.queryResult.queryText;
+        let c = 'ได้รับคำตอบถูกต้องในเรื่องค่าธรรมเนียมการศึกษาสาขานิเทศศาสตร์';
+        let b = 'ได้รับคำตอบไม่ถูกต้องในเรื่องค่าธรรมเนียมการศึกษาสาขานิเทศศาสตร์';
+
+        //Count_Accuracy
+        let Count_Accuracy = admin.firestore().collection("Count_Accuracy").doc(date.toLocaleDateString()).collection("ค่าธรรมเนียมการศึกษา").doc("คณะวิทยาการจัดการ").collection("Subject").doc("นิเทศศาสตร์");
+        Count_Accuracy.get().then(function (docs) {
+            if (!docs.exists) {
+                Count_Accuracy.set({
+                    ถูก: 0,
+                    ไม่ถูก: 0
+                });
+            }
+
+        });
+
+
+        if (text === c) {
+            agent.add("ขอบคุณค่ะ");
+            db.runTransaction(t => {
+                return t.get(Count_Accuracy).then(doc => {
+                    let newcount = doc.data().ถูก + 1;
+
+                    t.update(Count_Accuracy, {
+                        ถูก: newcount,
+
+                    });
+                });
+            });
+
+
+
+        }
+
+        else if (text === b) {
+
+            agent.add("กรุณากดปุ่มติดต่อเจ้าหน้าที่");
+            db.runTransaction(t => {
+                return t.get(Count_Accuracy).then(doc => {
+                    let newcount = doc.data().ไม่ถูก + 1;
+
+                    t.update(Count_Accuracy, {
+                        ไม่ถูก: newcount,
+
+                    });
+                });
+            });
+
+        }
+
+        else {
+            //เชคว่ามี ตัว doc อยู๋ไหม ถ้าไม่ ก็ set ค่า 
+            // count_intent 
+            Count_Intent.get().then(function (docs) {
+                if (!docs.exists) {
+                    Count_Intent.set({
+                        ค่าธรรมเนียมการศึกษา: 1
+                    });
+                }
+
+                else {
+                    //เลขcount เวลามีคนเข้ามาสอบถาม
+
+                    db.runTransaction(t => {
+                        return t.get(Count_Intent).then(doc => {
+                            if (doc.data().ค่าธรรมเนียมการศึกษา > 0) {
+                                let newcount = doc.data().ค่าธรรมเนียมการศึกษา + 1;
+
+                                t.update(Count_Intent, {
+                                    ค่าธรรมเนียมการศึกษา: newcount
+
+                                });
+                            } else {
+                                t.update(Count_Intent, {
+                                    ค่าธรรมเนียมการศึกษา: 1
+                                });
+
+                            }
+
+                        });
+                    });
+                }
+            });
+
+            //return ข้อมูลคำตอบ 
+            return admin.firestore().collection('Tuition_fee').doc('คณะวิทยาการจัดการ').collection('นิเทศศาสตร์').orderBy("date", "desc").limit(1).get().then((snapshot) => {
+                snapshot.forEach(doc => {
+                    agent.add(doc.data().description);
+                    agent.add(payload่json); //แสดง paylaod
+                });
+            });
+        }
+
+    }
+
+
+    //การท่องเที่ยว
+    function Tourism(agent) {
+        let payload = {
+            "type": "template",
+            "altText": "this is a confirm template",
+            "template": {
+                "type": "confirm",
+                "actions": [
+                    {
+                        "type": "message",
+                        "label": "ถูก",
+                        "text": "ได้รับคำตอบถูกต้องในเรื่องค่าธรรมเนียมการศึกษาสาขาการท่องเที่ยว"
+                    },
+                    {
+                        "type": "message",
+                        "label": "ไม่ถูก",
+                        "text": "ได้รับคำตอบไม่ถูกต้องในเรื่องค่าธรรมเนียมการศึกษาสาขาการท่องเที่ยว"
+                    }
+                ],
+                "text": "คุณได้รับคำตอบถูกต้องไหมคะ?"
+            }
+        };
+
+        //ประกาศตัวแปร payload เพื่อแสดงออกหน้าจอ
+        let payload่json = new Payload(`LINE`, payload, { sendAsMessage: true });
+        let text = request.body.queryResult.queryText;
+        let c = 'ได้รับคำตอบถูกต้องในเรื่องค่าธรรมเนียมการศึกษาสาขาการท่องเที่ยว';
+        let b = 'ได้รับคำตอบไม่ถูกต้องในเรื่องค่าธรรมเนียมการศึกษาสาขาการท่องเที่ยว';
+
+        //Count_Accuracy
+        let Count_Accuracy = admin.firestore().collection("Count_Accuracy").doc(date.toLocaleDateString()).collection("ค่าธรรมเนียมการศึกษา").doc("คณะวิทยาการจัดการ").collection("Subject").doc("การท่องเที่ยว");
+        Count_Accuracy.get().then(function (docs) {
+            if (!docs.exists) {
+                Count_Accuracy.set({
+                    ถูก: 0,
+                    ไม่ถูก: 0
+                });
+            }
+
+        });
+
+
+        if (text === c) {
+            agent.add("ขอบคุณค่ะ");
+            db.runTransaction(t => {
+                return t.get(Count_Accuracy).then(doc => {
+                    let newcount = doc.data().ถูก + 1;
+
+                    t.update(Count_Accuracy, {
+                        ถูก: newcount,
+
+                    });
+                });
+            });
+
+
+
+        }
+
+        else if (text === b) {
+
+            agent.add("กรุณากดปุ่มติดต่อเจ้าหน้าที่");
+            db.runTransaction(t => {
+                return t.get(Count_Accuracy).then(doc => {
+                    let newcount = doc.data().ไม่ถูก + 1;
+
+                    t.update(Count_Accuracy, {
+                        ไม่ถูก: newcount,
+
+                    });
+                });
+            });
+
+        }
+
+        else {
+            //เชคว่ามี ตัว doc อยู๋ไหม ถ้าไม่ ก็ set ค่า 
+            // count_intent 
+            Count_Intent.get().then(function (docs) {
+                if (!docs.exists) {
+                    Count_Intent.set({
+                        ค่าธรรมเนียมการศึกษา: 1
+                    });
+                }
+
+                else {
+                    //เลขcount เวลามีคนเข้ามาสอบถาม
+
+                    db.runTransaction(t => {
+                        return t.get(Count_Intent).then(doc => {
+                            if (doc.data().ค่าธรรมเนียมการศึกษา > 0) {
+                                let newcount = doc.data().ค่าธรรมเนียมการศึกษา + 1;
+
+                                t.update(Count_Intent, {
+                                    ค่าธรรมเนียมการศึกษา: newcount
+
+                                });
+                            } else {
+                                t.update(Count_Intent, {
+                                    ค่าธรรมเนียมการศึกษา: 1
+                                });
+
+                            }
+
+                        });
+                    });
+                }
+            });
+
+            //return ข้อมูลคำตอบ 
+            return admin.firestore().collection('Tuition_fee').doc('คณะวิทยาการจัดการ').collection('การท่องเที่ยว').orderBy("date", "desc").limit(1).get().then((snapshot) => {
+                snapshot.forEach(doc => {
+                    agent.add(doc.data().description);
+                    agent.add(payload่json); //แสดง paylaod
+                });
+            });
+        }
+
+    }
+
+
+
+    //คณะวิทยาศาสตร์และเทคโนโลยี
+    //อาชีวอนามัยและความปลอดภัย
+    function Occupational_Safety_and_Health(agent) {
+        let payload = {
+            "type": "template",
+            "altText": "this is a confirm template",
+            "template": {
+                "type": "confirm",
+                "actions": [
+                    {
+                        "type": "message",
+                        "label": "ถูก",
+                        "text": "ได้รับคำตอบถูกต้องในเรื่องค่าธรรมเนียมการศึกษาสาขาอาชีวอนามัยและความปลอดภัย"
+                    },
+                    {
+                        "type": "message",
+                        "label": "ไม่ถูก",
+                        "text": "ได้รับคำตอบไม่ถูกต้องในเรื่องค่าธรรมเนียมการศึกษาสาขาอาชีวอนามัยและความปลอดภัย"
+                    }
+                ],
+                "text": "คุณได้รับคำตอบถูกต้องไหมคะ?"
+            }
+        };
+
+        //ประกาศตัวแปร payload เพื่อแสดงออกหน้าจอ
+        let payload่json = new Payload(`LINE`, payload, { sendAsMessage: true });
+        let text = request.body.queryResult.queryText;
+        let c = 'ได้รับคำตอบถูกต้องในเรื่องค่าธรรมเนียมการศึกษาสาขาอาชีวอนามัยและความปลอดภัย';
+        let b = 'ได้รับคำตอบไม่ถูกต้องในเรื่องค่าธรรมเนียมการศึกษาสาขาอาชีวอนามัยและความปลอดภัย';
+
+        //Count_Accuracy
+        let Count_Accuracy = admin.firestore().collection("Count_Accuracy").doc(date.toLocaleDateString()).collection("ค่าธรรมเนียมการศึกษา").doc("คณะวิทยาศาสตร์และเทคโนโลยี").collection("Subject").doc("อาชีวอนามัยและความปลอดภัย");
+        Count_Accuracy.get().then(function (docs) {
+            if (!docs.exists) {
+                Count_Accuracy.set({
+                    ถูก: 0,
+                    ไม่ถูก: 0
+                });
+            }
+
+        });
+
+
+        if (text === c) {
+            agent.add("ขอบคุณค่ะ");
+            db.runTransaction(t => {
+                return t.get(Count_Accuracy).then(doc => {
+                    let newcount = doc.data().ถูก + 1;
+
+                    t.update(Count_Accuracy, {
+                        ถูก: newcount,
+
+                    });
+                });
+            });
+
+
+
+        }
+
+        else if (text === b) {
+
+            agent.add("กรุณากดปุ่มติดต่อเจ้าหน้าที่");
+            db.runTransaction(t => {
+                return t.get(Count_Accuracy).then(doc => {
+                    let newcount = doc.data().ไม่ถูก + 1;
+
+                    t.update(Count_Accuracy, {
+                        ไม่ถูก: newcount,
+
+                    });
+                });
+            });
+
+        }
+
+        else {
+            //เชคว่ามี ตัว doc อยู๋ไหม ถ้าไม่ ก็ set ค่า 
+            // count_intent 
+            Count_Intent.get().then(function (docs) {
+                if (!docs.exists) {
+                    Count_Intent.set({
+                        ค่าธรรมเนียมการศึกษา: 1
+                    });
+                }
+
+                else {
+                    //เลขcount เวลามีคนเข้ามาสอบถาม
+
+                    db.runTransaction(t => {
+                        return t.get(Count_Intent).then(doc => {
+                            if (doc.data().ค่าธรรมเนียมการศึกษา > 0) {
+                                let newcount = doc.data().ค่าธรรมเนียมการศึกษา + 1;
+
+                                t.update(Count_Intent, {
+                                    ค่าธรรมเนียมการศึกษา: newcount
+
+                                });
+                            } else {
+                                t.update(Count_Intent, {
+                                    ค่าธรรมเนียมการศึกษา: 1
+                                });
+
+                            }
+
+                        });
+                    });
+                }
+            });
+
+            //return ข้อมูลคำตอบ 
+            return admin.firestore().collection('Tuition_fee').doc('คณะวิทยาศาสตร์และเทคโนโลยี').collection('อาชีวอนามัยและความปลอดภัย').orderBy("date", "desc").limit(1).get().then((snapshot) => {
+                snapshot.forEach(doc => {
+                    agent.add(doc.data().description);
+                    agent.add(payload่json); //แสดง paylaod
+                });
+            });
+        }
+
+    }
+
+
+    //วิทยาศาสตร์สิ่งแวดล้อม
+    function Environmental_Science(agent) {
+        let payload = {
+            "type": "template",
+            "altText": "this is a confirm template",
+            "template": {
+                "type": "confirm",
+                "actions": [
+                    {
+                        "type": "message",
+                        "label": "ถูก",
+                        "text": "ได้รับคำตอบถูกต้องในเรื่องค่าธรรมเนียมการศึกษาสาขาวิทยาศาสตร์สิ่งแวดล้อม"
+                    },
+                    {
+                        "type": "message",
+                        "label": "ไม่ถูก",
+                        "text": "ได้รับคำตอบไม่ถูกต้องในเรื่องค่าธรรมเนียมการศึกษาสาขาวิทยาศาสตร์สิ่งแวดล้อม"
+                    }
+                ],
+                "text": "คุณได้รับคำตอบถูกต้องไหมคะ?"
+            }
+        };
+
+        //ประกาศตัวแปร payload เพื่อแสดงออกหน้าจอ
+        let payload่json = new Payload(`LINE`, payload, { sendAsMessage: true });
+        let text = request.body.queryResult.queryText;
+        let c = 'ได้รับคำตอบถูกต้องในเรื่องค่าธรรมเนียมการศึกษาสาขาวิทยาศาสตร์สิ่งแวดล้อม';
+        let b = 'ได้รับคำตอบไม่ถูกต้องในเรื่องค่าธรรมเนียมการศึกษาสาขาวิทยาศาสตร์สิ่งแวดล้อม';
+
+        //Count_Accuracy
+        let Count_Accuracy = admin.firestore().collection("Count_Accuracy").doc(date.toLocaleDateString()).collection("ค่าธรรมเนียมการศึกษา").doc("คณะวิทยาศาสตร์และเทคโนโลยี").collection("Subject").doc("วิทยาศาสตร์สิ่งแวดล้อม");
+        Count_Accuracy.get().then(function (docs) {
+            if (!docs.exists) {
+                Count_Accuracy.set({
+                    ถูก: 0,
+                    ไม่ถูก: 0
+                });
+            }
+
+        });
+
+
+        if (text === c) {
+            agent.add("ขอบคุณค่ะ");
+            db.runTransaction(t => {
+                return t.get(Count_Accuracy).then(doc => {
+                    let newcount = doc.data().ถูก + 1;
+
+                    t.update(Count_Accuracy, {
+                        ถูก: newcount,
+
+                    });
+                });
+            });
+
+
+
+        }
+
+        else if (text === b) {
+
+            agent.add("กรุณากดปุ่มติดต่อเจ้าหน้าที่");
+            db.runTransaction(t => {
+                return t.get(Count_Accuracy).then(doc => {
+                    let newcount = doc.data().ไม่ถูก + 1;
+
+                    t.update(Count_Accuracy, {
+                        ไม่ถูก: newcount,
+
+                    });
+                });
+            });
+
+        }
+
+        else {
+            //เชคว่ามี ตัว doc อยู๋ไหม ถ้าไม่ ก็ set ค่า 
+            // count_intent 
+            Count_Intent.get().then(function (docs) {
+                if (!docs.exists) {
+                    Count_Intent.set({
+                        ค่าธรรมเนียมการศึกษา: 1
+                    });
+                }
+
+                else {
+                    //เลขcount เวลามีคนเข้ามาสอบถาม
+
+                    db.runTransaction(t => {
+                        return t.get(Count_Intent).then(doc => {
+                            if (doc.data().ค่าธรรมเนียมการศึกษา > 0) {
+                                let newcount = doc.data().ค่าธรรมเนียมการศึกษา + 1;
+
+                                t.update(Count_Intent, {
+                                    ค่าธรรมเนียมการศึกษา: newcount
+
+                                });
+                            } else {
+                                t.update(Count_Intent, {
+                                    ค่าธรรมเนียมการศึกษา: 1
+                                });
+
+                            }
+
+                        });
+                    });
+                }
+            });
+
+            //return ข้อมูลคำตอบ 
+            return admin.firestore().collection('Tuition_fee').doc('คณะวิทยาศาสตร์และเทคโนโลยี').collection('วิทยาศาสตร์สิ่งแวดล้อม').orderBy("date", "desc").limit(1).get().then((snapshot) => {
+                snapshot.forEach(doc => {
+                    agent.add(doc.data().description);
+                    agent.add(payload่json); //แสดง paylaod
+                });
+            });
+        }
+
+    }
+
+
+    //เทคโนโลยีสารสนเทศ
+    function Information_Technology(agent) {
+        let payload = {
+            "type": "template",
+            "altText": "this is a confirm template",
+            "template": {
+                "type": "confirm",
+                "actions": [
+                    {
+                        "type": "message",
+                        "label": "ถูก",
+                        "text": "ได้รับคำตอบถูกต้องในเรื่องค่าธรรมเนียมการศึกษาสาขาเทคโนโลยีสารสนเทศ"
+                    },
+                    {
+                        "type": "message",
+                        "label": "ไม่ถูก",
+                        "text": "ได้รับคำตอบไม่ถูกต้องในเรื่องค่าธรรมเนียมการศึกษาสาขาเทคโนโลยีสารสนเทศ"
+                    }
+                ],
+                "text": "คุณได้รับคำตอบถูกต้องไหมคะ?"
+            }
+        };
+
+        //ประกาศตัวแปร payload เพื่อแสดงออกหน้าจอ
+        let payload่json = new Payload(`LINE`, payload, { sendAsMessage: true });
+        let text = request.body.queryResult.queryText;
+        let c = 'ได้รับคำตอบถูกต้องในเรื่องค่าธรรมเนียมการศึกษาสาขาเทคโนโลยีสารสนเทศ';
+        let b = 'ได้รับคำตอบไม่ถูกต้องในเรื่องค่าธรรมเนียมการศึกษาสาขาเทคโนโลยีสารสนเทศ';
+
+        //Count_Accuracy
+        let Count_Accuracy = admin.firestore().collection("Count_Accuracy").doc(date.toLocaleDateString()).collection("ค่าธรรมเนียมการศึกษา").doc("คณะวิทยาศาสตร์และเทคโนโลยี").collection("Subject").doc("เทคโนโลยีสารสนเทศ");
+        Count_Accuracy.get().then(function (docs) {
+            if (!docs.exists) {
+                Count_Accuracy.set({
+                    ถูก: 0,
+                    ไม่ถูก: 0
+                });
+            }
+
+        });
+
+
+        if (text === c) {
+            agent.add("ขอบคุณค่ะ");
+            db.runTransaction(t => {
+                return t.get(Count_Accuracy).then(doc => {
+                    let newcount = doc.data().ถูก + 1;
+
+                    t.update(Count_Accuracy, {
+                        ถูก: newcount,
+
+                    });
+                });
+            });
+
+
+
+        }
+
+        else if (text === b) {
+
+            agent.add("กรุณากดปุ่มติดต่อเจ้าหน้าที่");
+            db.runTransaction(t => {
+                return t.get(Count_Accuracy).then(doc => {
+                    let newcount = doc.data().ไม่ถูก + 1;
+
+                    t.update(Count_Accuracy, {
+                        ไม่ถูก: newcount,
+
+                    });
+                });
+            });
+
+        }
+
+        else {
+            //เชคว่ามี ตัว doc อยู๋ไหม ถ้าไม่ ก็ set ค่า 
+            // count_intent 
+            Count_Intent.get().then(function (docs) {
+                if (!docs.exists) {
+                    Count_Intent.set({
+                        ค่าธรรมเนียมการศึกษา: 1
+                    });
+                }
+
+                else {
+                    //เลขcount เวลามีคนเข้ามาสอบถาม
+
+                    db.runTransaction(t => {
+                        return t.get(Count_Intent).then(doc => {
+                            if (doc.data().ค่าธรรมเนียมการศึกษา > 0) {
+                                let newcount = doc.data().ค่าธรรมเนียมการศึกษา + 1;
+
+                                t.update(Count_Intent, {
+                                    ค่าธรรมเนียมการศึกษา: newcount
+
+                                });
+                            } else {
+                                t.update(Count_Intent, {
+                                    ค่าธรรมเนียมการศึกษา: 1
+                                });
+
+                            }
+
+                        });
+                    });
+                }
+            });
+
+            //return ข้อมูลคำตอบ 
+            return admin.firestore().collection('Tuition_fee').doc('คณะวิทยาศาสตร์และเทคโนโลยี').collection('เทคโนโลยีสารสนเทศ').orderBy("date", "desc").limit(1).get().then((snapshot) => {
+                snapshot.forEach(doc => {
+                    agent.add(doc.data().description);
+                    agent.add(payload่json); //แสดง paylaod
+                });
+            });
+        }
+
+    }
+
+
+    //การอาหารและธุรกิจบริการ
+    function Food_and_Service(agent) {
+        let payload = {
+            "type": "template",
+            "altText": "this is a confirm template",
+            "template": {
+                "type": "confirm",
+                "actions": [
+                    {
+                        "type": "message",
+                        "label": "ถูก",
+                        "text": "ได้รับคำตอบถูกต้องในเรื่องค่าธรรมเนียมการศึกษาสาขาการอาหารและธุรกิจบริการ"
+                    },
+                    {
+                        "type": "message",
+                        "label": "ไม่ถูก",
+                        "text": "ได้รับคำตอบไม่ถูกต้องในเรื่องค่าธรรมเนียมการศึกษาสาขาการอาหารและธุรกิจบริการ"
+                    }
+                ],
+                "text": "คุณได้รับคำตอบถูกต้องไหมคะ?"
+            }
+        };
+
+        //ประกาศตัวแปร payload เพื่อแสดงออกหน้าจอ
+        let payload่json = new Payload(`LINE`, payload, { sendAsMessage: true });
+        let text = request.body.queryResult.queryText;
+        let c = 'ได้รับคำตอบถูกต้องในเรื่องค่าธรรมเนียมการศึกษาสาขาการอาหารและธุรกิจบริการ';
+        let b = 'ได้รับคำตอบไม่ถูกต้องในเรื่องค่าธรรมเนียมการศึกษาสาขาการอาหารและธุรกิจบริการ';
+
+        //Count_Accuracy
+        let Count_Accuracy = admin.firestore().collection("Count_Accuracy").doc(date.toLocaleDateString()).collection("ค่าธรรมเนียมการศึกษา").doc("คณะวิทยาศาสตร์และเทคโนโลยี").collection("Subject").doc("การอาหารและธุรกิจบริการ");
+        Count_Accuracy.get().then(function (docs) {
+            if (!docs.exists) {
+                Count_Accuracy.set({
+                    ถูก: 0,
+                    ไม่ถูก: 0
+                });
+            }
+
+        });
+
+
+        if (text === c) {
+            agent.add("ขอบคุณค่ะ");
+            db.runTransaction(t => {
+                return t.get(Count_Accuracy).then(doc => {
+                    let newcount = doc.data().ถูก + 1;
+
+                    t.update(Count_Accuracy, {
+                        ถูก: newcount,
+
+                    });
+                });
+            });
+
+
+
+        }
+
+        else if (text === b) {
+
+            agent.add("กรุณากดปุ่มติดต่อเจ้าหน้าที่");
+            db.runTransaction(t => {
+                return t.get(Count_Accuracy).then(doc => {
+                    let newcount = doc.data().ไม่ถูก + 1;
+
+                    t.update(Count_Accuracy, {
+                        ไม่ถูก: newcount,
+
+                    });
+                });
+            });
+
+        }
+
+        else {
+            //เชคว่ามี ตัว doc อยู๋ไหม ถ้าไม่ ก็ set ค่า 
+            // count_intent 
+            Count_Intent.get().then(function (docs) {
+                if (!docs.exists) {
+                    Count_Intent.set({
+                        ค่าธรรมเนียมการศึกษา: 1
+                    });
+                }
+
+                else {
+                    //เลขcount เวลามีคนเข้ามาสอบถาม
+
+                    db.runTransaction(t => {
+                        return t.get(Count_Intent).then(doc => {
+                            if (doc.data().ค่าธรรมเนียมการศึกษา > 0) {
+                                let newcount = doc.data().ค่าธรรมเนียมการศึกษา + 1;
+
+                                t.update(Count_Intent, {
+                                    ค่าธรรมเนียมการศึกษา: newcount
+
+                                });
+                            } else {
+                                t.update(Count_Intent, {
+                                    ค่าธรรมเนียมการศึกษา: 1
+                                });
+
+                            }
+
+                        });
+                    });
+                }
+            });
+
+            //return ข้อมูลคำตอบ 
+            return admin.firestore().collection('Tuition_fee').doc('คณะวิทยาศาสตร์และเทคโนโลยี').collection('การอาหารและธุรกิจบริการ').orderBy("date", "desc").limit(1).get().then((snapshot) => {
+                snapshot.forEach(doc => {
+                    agent.add(doc.data().description);
+                    agent.add(payload่json); //แสดง paylaod
+                });
+            });
+        }
+
+    }
+
+    //เทคโนโลยีการเกษตร
+    function Agricultural_Technology(agent) {
+        let payload = {
+            "type": "template",
+            "altText": "this is a confirm template",
+            "template": {
+                "type": "confirm",
+                "actions": [
+                    {
+                        "type": "message",
+                        "label": "ถูก",
+                        "text": "ได้รับคำตอบถูกต้องในเรื่องค่าธรรมเนียมการศึกษาสาขาเทคโนโลยีการเกษตร"
+                    },
+                    {
+                        "type": "message",
+                        "label": "ไม่ถูก",
+                        "text": "ได้รับคำตอบไม่ถูกต้องในเรื่องค่าธรรมเนียมการศึกษาสาขาเทคโนโลยีการเกษตร"
+                    }
+                ],
+                "text": "คุณได้รับคำตอบถูกต้องไหมคะ?"
+            }
+        };
+
+        //ประกาศตัวแปร payload เพื่อแสดงออกหน้าจอ
+        let payload่json = new Payload(`LINE`, payload, { sendAsMessage: true });
+        let text = request.body.queryResult.queryText;
+        let c = 'ได้รับคำตอบถูกต้องในเรื่องค่าธรรมเนียมการศึกษาสาขาเทคโนโลยีการเกษตร';
+        let b = 'ได้รับคำตอบไม่ถูกต้องในเรื่องค่าธรรมเนียมการศึกษาสาขาเทคโนโลยีการเกษตร';
+
+        //Count_Accuracy
+        let Count_Accuracy = admin.firestore().collection("Count_Accuracy").doc(date.toLocaleDateString()).collection("ค่าธรรมเนียมการศึกษา").doc("คณะวิทยาศาสตร์และเทคโนโลยี").collection("Subject").doc("เทคโนโลยีการเกษตร");
+        Count_Accuracy.get().then(function (docs) {
+            if (!docs.exists) {
+                Count_Accuracy.set({
+                    ถูก: 0,
+                    ไม่ถูก: 0
+                });
+            }
+
+        });
+
+
+        if (text === c) {
+            agent.add("ขอบคุณค่ะ");
+            db.runTransaction(t => {
+                return t.get(Count_Accuracy).then(doc => {
+                    let newcount = doc.data().ถูก + 1;
+
+                    t.update(Count_Accuracy, {
+                        ถูก: newcount,
+
+                    });
+                });
+            });
+
+
+
+        }
+
+        else if (text === b) {
+
+            agent.add("กรุณากดปุ่มติดต่อเจ้าหน้าที่");
+            db.runTransaction(t => {
+                return t.get(Count_Accuracy).then(doc => {
+                    let newcount = doc.data().ไม่ถูก + 1;
+
+                    t.update(Count_Accuracy, {
+                        ไม่ถูก: newcount,
+
+                    });
+                });
+            });
+
+        }
+
+        else {
+            //เชคว่ามี ตัว doc อยู๋ไหม ถ้าไม่ ก็ set ค่า 
+            // count_intent 
+            Count_Intent.get().then(function (docs) {
+                if (!docs.exists) {
+                    Count_Intent.set({
+                        ค่าธรรมเนียมการศึกษา: 1
+                    });
+                }
+
+                else {
+                    //เลขcount เวลามีคนเข้ามาสอบถาม
+
+                    db.runTransaction(t => {
+                        return t.get(Count_Intent).then(doc => {
+                            if (doc.data().ค่าธรรมเนียมการศึกษา > 0) {
+                                let newcount = doc.data().ค่าธรรมเนียมการศึกษา + 1;
+
+                                t.update(Count_Intent, {
+                                    ค่าธรรมเนียมการศึกษา: newcount
+
+                                });
+                            } else {
+                                t.update(Count_Intent, {
+                                    ค่าธรรมเนียมการศึกษา: 1
+                                });
+
+                            }
+
+                        });
+                    });
+                }
+            });
+
+            //return ข้อมูลคำตอบ 
+            return admin.firestore().collection('Tuition_fee').doc('คณะวิทยาศาสตร์และเทคโนโลยี').collection('เทคโนโลยีการเกษตร').orderBy("date", "desc").limit(1).get().then((snapshot) => {
+                snapshot.forEach(doc => {
+                    agent.add(doc.data().description);
+                    agent.add(payload่json); //แสดง paylaod
+                });
+            });
+        }
+
+    }
+
+
+
+    //วิชาเคมี
+    function Chemistry(agent) {
+        let payload = {
+            "type": "template",
+            "altText": "this is a confirm template",
+            "template": {
+                "type": "confirm",
+                "actions": [
+                    {
+                        "type": "message",
+                        "label": "ถูก",
+                        "text": "ได้รับคำตอบถูกต้องในเรื่องค่าธรรมเนียมการศึกษาสาขาวิชาเคมี"
+                    },
+                    {
+                        "type": "message",
+                        "label": "ไม่ถูก",
+                        "text": "ได้รับคำตอบไม่ถูกต้องในเรื่องค่าธรรมเนียมการศึกษาสาขาวิชาเคมี"
+                    }
+                ],
+                "text": "คุณได้รับคำตอบถูกต้องไหมคะ?"
+            }
+        };
+
+        //ประกาศตัวแปร payload เพื่อแสดงออกหน้าจอ
+        let payload่json = new Payload(`LINE`, payload, { sendAsMessage: true });
+        let text = request.body.queryResult.queryText;
+        let c = 'ได้รับคำตอบถูกต้องในเรื่องค่าธรรมเนียมการศึกษาสาขาวิชาเคมี';
+        let b = 'ได้รับคำตอบไม่ถูกต้องในเรื่องค่าธรรมเนียมการศึกษาสาขาวิชาเคมี';
+
+        //Count_Accuracy
+        let Count_Accuracy = admin.firestore().collection("Count_Accuracy").doc(date.toLocaleDateString()).collection("ค่าธรรมเนียมการศึกษา").doc("คณะวิทยาศาสตร์และเทคโนโลยี").collection("Subject").doc("วิชาเคมี");
+        Count_Accuracy.get().then(function (docs) {
+            if (!docs.exists) {
+                Count_Accuracy.set({
+                    ถูก: 0,
+                    ไม่ถูก: 0
+                });
+            }
+
+        });
+
+
+        if (text === c) {
+            agent.add("ขอบคุณค่ะ");
+            db.runTransaction(t => {
+                return t.get(Count_Accuracy).then(doc => {
+                    let newcount = doc.data().ถูก + 1;
+
+                    t.update(Count_Accuracy, {
+                        ถูก: newcount,
+
+                    });
+                });
+            });
+
+
+
+        }
+
+        else if (text === b) {
+
+            agent.add("กรุณากดปุ่มติดต่อเจ้าหน้าที่");
+            db.runTransaction(t => {
+                return t.get(Count_Accuracy).then(doc => {
+                    let newcount = doc.data().ไม่ถูก + 1;
+
+                    t.update(Count_Accuracy, {
+                        ไม่ถูก: newcount,
+
+                    });
+                });
+            });
+
+        }
+
+        else {
+            //เชคว่ามี ตัว doc อยู๋ไหม ถ้าไม่ ก็ set ค่า 
+            // count_intent 
+            Count_Intent.get().then(function (docs) {
+                if (!docs.exists) {
+                    Count_Intent.set({
+                        ค่าธรรมเนียมการศึกษา: 1
+                    });
+                }
+
+                else {
+                    //เลขcount เวลามีคนเข้ามาสอบถาม
+
+                    db.runTransaction(t => {
+                        return t.get(Count_Intent).then(doc => {
+                            if (doc.data().ค่าธรรมเนียมการศึกษา > 0) {
+                                let newcount = doc.data().ค่าธรรมเนียมการศึกษา + 1;
+
+                                t.update(Count_Intent, {
+                                    ค่าธรรมเนียมการศึกษา: newcount
+
+                                });
+                            } else {
+                                t.update(Count_Intent, {
+                                    ค่าธรรมเนียมการศึกษา: 1
+                                });
+
+                            }
+
+                        });
+                    });
+                }
+            });
+
+            //return ข้อมูลคำตอบ 
+            return admin.firestore().collection('Tuition_fee').doc('คณะวิทยาศาสตร์และเทคโนโลยี').collection('วิชาเคมี').orderBy("date", "desc").limit(1).get().then((snapshot) => {
+                snapshot.forEach(doc => {
+                    agent.add(doc.data().description);
+                    agent.add(payload่json); //แสดง paylaod
+                });
+            });
+        }
+
+    }
+
+
+
+    //ชีววิทยาประยุกต์
+    function Biology(agent) {
+        let payload = {
+            "type": "template",
+            "altText": "this is a confirm template",
+            "template": {
+                "type": "confirm",
+                "actions": [
+                    {
+                        "type": "message",
+                        "label": "ถูก",
+                        "text": "ได้รับคำตอบถูกต้องในเรื่องค่าธรรมเนียมการศึกษาสาขาชีววิทยาประยุกต์"
+                    },
+                    {
+                        "type": "message",
+                        "label": "ไม่ถูก",
+                        "text": "ได้รับคำตอบไม่ถูกต้องในเรื่องค่าธรรมเนียมการศึกษาสาขาชีววิทยาประยุกต์"
+                    }
+                ],
+                "text": "คุณได้รับคำตอบถูกต้องไหมคะ?"
+            }
+        };
+
+        //ประกาศตัวแปร payload เพื่อแสดงออกหน้าจอ
+        let payload่json = new Payload(`LINE`, payload, { sendAsMessage: true });
+        let text = request.body.queryResult.queryText;
+        let c = 'ได้รับคำตอบถูกต้องในเรื่องค่าธรรมเนียมการศึกษาสาขาชีววิทยาประยุกต์';
+        let b = 'ได้รับคำตอบไม่ถูกต้องในเรื่องค่าธรรมเนียมการศึกษาสาขาชีววิทยาประยุกต์';
+
+        //Count_Accuracy
+        let Count_Accuracy = admin.firestore().collection("Count_Accuracy").doc(date.toLocaleDateString()).collection("ค่าธรรมเนียมการศึกษา").doc("คณะวิทยาศาสตร์และเทคโนโลยี").collection("Subject").doc("ชีววิทยาประยุกต์");
+        Count_Accuracy.get().then(function (docs) {
+            if (!docs.exists) {
+                Count_Accuracy.set({
+                    ถูก: 0,
+                    ไม่ถูก: 0
+                });
+            }
+
+        });
+
+
+        if (text === c) {
+            agent.add("ขอบคุณค่ะ");
+            db.runTransaction(t => {
+                return t.get(Count_Accuracy).then(doc => {
+                    let newcount = doc.data().ถูก + 1;
+
+                    t.update(Count_Accuracy, {
+                        ถูก: newcount,
+
+                    });
+                });
+            });
+
+
+
+        }
+
+        else if (text === b) {
+
+            agent.add("กรุณากดปุ่มติดต่อเจ้าหน้าที่");
+            db.runTransaction(t => {
+                return t.get(Count_Accuracy).then(doc => {
+                    let newcount = doc.data().ไม่ถูก + 1;
+
+                    t.update(Count_Accuracy, {
+                        ไม่ถูก: newcount,
+
+                    });
+                });
+            });
+
+        }
+
+        else {
+            //เชคว่ามี ตัว doc อยู๋ไหม ถ้าไม่ ก็ set ค่า 
+            // count_intent 
+            Count_Intent.get().then(function (docs) {
+                if (!docs.exists) {
+                    Count_Intent.set({
+                        ค่าธรรมเนียมการศึกษา: 1
+                    });
+                }
+
+                else {
+                    //เลขcount เวลามีคนเข้ามาสอบถาม
+
+                    db.runTransaction(t => {
+                        return t.get(Count_Intent).then(doc => {
+                            if (doc.data().ค่าธรรมเนียมการศึกษา > 0) {
+                                let newcount = doc.data().ค่าธรรมเนียมการศึกษา + 1;
+
+                                t.update(Count_Intent, {
+                                    ค่าธรรมเนียมการศึกษา: newcount
+
+                                });
+                            } else {
+                                t.update(Count_Intent, {
+                                    ค่าธรรมเนียมการศึกษา: 1
+                                });
+
+                            }
+
+                        });
+                    });
+                }
+            });
+
+            //return ข้อมูลคำตอบ 
+            return admin.firestore().collection('Tuition_fee').doc('คณะวิทยาศาสตร์และเทคโนโลยี').collection('ชีววิทยาประยุกต์').orderBy("date", "desc").limit(1).get().then((snapshot) => {
+                snapshot.forEach(doc => {
+                    agent.add(doc.data().description);
+                    agent.add(payload่json); //แสดง paylaod
+                });
+            });
+        }
+
+    }
+
+
+    //ฟิสิกส์ประยุกต์
+    function Physics(agent) {
+        let payload = {
+            "type": "template",
+            "altText": "this is a confirm template",
+            "template": {
+                "type": "confirm",
+                "actions": [
+                    {
+                        "type": "message",
+                        "label": "ถูก",
+                        "text": "ได้รับคำตอบถูกต้องในเรื่องค่าธรรมเนียมการศึกษาสาขาฟิสิกส์ประยุกต์"
+                    },
+                    {
+                        "type": "message",
+                        "label": "ไม่ถูก",
+                        "text": "ได้รับคำตอบไม่ถูกต้องในเรื่องค่าธรรมเนียมการศึกษาสาขาฟิสิกส์ประยุกต์"
+                    }
+                ],
+                "text": "คุณได้รับคำตอบถูกต้องไหมคะ?"
+            }
+        };
+
+        //ประกาศตัวแปร payload เพื่อแสดงออกหน้าจอ
+        let payload่json = new Payload(`LINE`, payload, { sendAsMessage: true });
+        let text = request.body.queryResult.queryText;
+        let c = 'ได้รับคำตอบถูกต้องในเรื่องค่าธรรมเนียมการศึกษาสาขาฟิสิกส์ประยุกต์';
+        let b = 'ได้รับคำตอบไม่ถูกต้องในเรื่องค่าธรรมเนียมการศึกษาสาขาฟิสิกส์ประยุกต์';
+
+        //Count_Accuracy
+        let Count_Accuracy = admin.firestore().collection("Count_Accuracy").doc(date.toLocaleDateString()).collection("ค่าธรรมเนียมการศึกษา").doc("คณะวิทยาศาสตร์และเทคโนโลยี").collection("Subject").doc("ฟิสิกส์ประยุกต์");
+        Count_Accuracy.get().then(function (docs) {
+            if (!docs.exists) {
+                Count_Accuracy.set({
+                    ถูก: 0,
+                    ไม่ถูก: 0
+                });
+            }
+
+        });
+
+
+        if (text === c) {
+            agent.add("ขอบคุณค่ะ");
+            db.runTransaction(t => {
+                return t.get(Count_Accuracy).then(doc => {
+                    let newcount = doc.data().ถูก + 1;
+
+                    t.update(Count_Accuracy, {
+                        ถูก: newcount,
+
+                    });
+                });
+            });
+
+
+
+        }
+
+        else if (text === b) {
+
+            agent.add("กรุณากดปุ่มติดต่อเจ้าหน้าที่");
+            db.runTransaction(t => {
+                return t.get(Count_Accuracy).then(doc => {
+                    let newcount = doc.data().ไม่ถูก + 1;
+
+                    t.update(Count_Accuracy, {
+                        ไม่ถูก: newcount,
+
+                    });
+                });
+            });
+
+        }
+
+        else {
+            //เชคว่ามี ตัว doc อยู๋ไหม ถ้าไม่ ก็ set ค่า 
+            // count_intent 
+            Count_Intent.get().then(function (docs) {
+                if (!docs.exists) {
+                    Count_Intent.set({
+                        ค่าธรรมเนียมการศึกษา: 1
+                    });
+                }
+
+                else {
+                    //เลขcount เวลามีคนเข้ามาสอบถาม
+
+                    db.runTransaction(t => {
+                        return t.get(Count_Intent).then(doc => {
+                            if (doc.data().ค่าธรรมเนียมการศึกษา > 0) {
+                                let newcount = doc.data().ค่าธรรมเนียมการศึกษา + 1;
+
+                                t.update(Count_Intent, {
+                                    ค่าธรรมเนียมการศึกษา: newcount
+
+                                });
+                            } else {
+                                t.update(Count_Intent, {
+                                    ค่าธรรมเนียมการศึกษา: 1
+                                });
+
+                            }
+
+                        });
+                    });
+                }
+            });
+
+            //return ข้อมูลคำตอบ 
+            return admin.firestore().collection('Tuition_fee').doc('คณะวิทยาศาสตร์และเทคโนโลยี').collection('ฟิสิกส์ประยุกต์').orderBy("date", "desc").limit(1).get().then((snapshot) => {
+                snapshot.forEach(doc => {
+                    agent.add(doc.data().description);
+                    agent.add(payload่json); //แสดง paylaod
+                });
+            });
+        }
+
+    }
+
+
+    //วิทยาการคอมพิวเตอร์
+    function Computer_Science(agent) {
+        let payload = {
+            "type": "template",
+            "altText": "this is a confirm template",
+            "template": {
+                "type": "confirm",
+                "actions": [
+                    {
+                        "type": "message",
+                        "label": "ถูก",
+                        "text": "ได้รับคำตอบถูกต้องในเรื่องค่าธรรมเนียมการศึกษาสาขาวิทยาการคอมพิวเตอร์"
+                    },
+                    {
+                        "type": "message",
+                        "label": "ไม่ถูก",
+                        "text": "ได้รับคำตอบไม่ถูกต้องในเรื่องค่าธรรมเนียมการศึกษาสาขาวิทยาการคอมพิวเตอร์"
+                    }
+                ],
+                "text": "คุณได้รับคำตอบถูกต้องไหมคะ?"
+            }
+        };
+
+        //ประกาศตัวแปร payload เพื่อแสดงออกหน้าจอ
+        let payload่json = new Payload(`LINE`, payload, { sendAsMessage: true });
+        let text = request.body.queryResult.queryText;
+        let c = 'ได้รับคำตอบถูกต้องในเรื่องค่าธรรมเนียมการศึกษาสาขาวิทยาการคอมพิวเตอร์';
+        let b = 'ได้รับคำตอบไม่ถูกต้องในเรื่องค่าธรรมเนียมการศึกษาสาขาวิทยาการคอมพิวเตอร์';
+
+        //Count_Accuracy
+        let Count_Accuracy = admin.firestore().collection("Count_Accuracy").doc(date.toLocaleDateString()).collection("ค่าธรรมเนียมการศึกษา").doc("คณะวิทยาศาสตร์และเทคโนโลยี").collection("Subject").doc("วิทยาการคอมพิวเตอร์");
+        Count_Accuracy.get().then(function (docs) {
+            if (!docs.exists) {
+                Count_Accuracy.set({
+                    ถูก: 0,
+                    ไม่ถูก: 0
+                });
+            }
+
+        });
+
+
+        if (text === c) {
+            agent.add("ขอบคุณค่ะ");
+            db.runTransaction(t => {
+                return t.get(Count_Accuracy).then(doc => {
+                    let newcount = doc.data().ถูก + 1;
+
+                    t.update(Count_Accuracy, {
+                        ถูก: newcount,
+
+                    });
+                });
+            });
+
+
+
+        }
+
+        else if (text === b) {
+
+            agent.add("กรุณากดปุ่มติดต่อเจ้าหน้าที่");
+            db.runTransaction(t => {
+                return t.get(Count_Accuracy).then(doc => {
+                    let newcount = doc.data().ไม่ถูก + 1;
+
+                    t.update(Count_Accuracy, {
+                        ไม่ถูก: newcount,
+
+                    });
+                });
+            });
+
+        }
+
+        else {
+            //เชคว่ามี ตัว doc อยู๋ไหม ถ้าไม่ ก็ set ค่า 
+            // count_intent 
+            Count_Intent.get().then(function (docs) {
+                if (!docs.exists) {
+                    Count_Intent.set({
+                        ค่าธรรมเนียมการศึกษา: 1
+                    });
+                }
+
+                else {
+                    //เลขcount เวลามีคนเข้ามาสอบถาม
+
+                    db.runTransaction(t => {
+                        return t.get(Count_Intent).then(doc => {
+                            if (doc.data().ค่าธรรมเนียมการศึกษา > 0) {
+                                let newcount = doc.data().ค่าธรรมเนียมการศึกษา + 1;
+
+                                t.update(Count_Intent, {
+                                    ค่าธรรมเนียมการศึกษา: newcount
+
+                                });
+                            } else {
+                                t.update(Count_Intent, {
+                                    ค่าธรรมเนียมการศึกษา: 1
+                                });
+
+                            }
+
+                        });
+                    });
+                }
+            });
+
+            //return ข้อมูลคำตอบ 
+            return admin.firestore().collection('Tuition_fee').doc('คณะวิทยาศาสตร์และเทคโนโลยี').collection('วิทยาการคอมพิวเตอร์').orderBy("date", "desc").limit(1).get().then((snapshot) => {
+                snapshot.forEach(doc => {
+                    agent.add(doc.data().description);
+                    agent.add(payload่json); //แสดง paylaod
+                });
+            });
+        }
+
+    }
+
+    //สาธารณสุขศาสตร์
+    function Public_Health(agent) {
+        let payload = {
+            "type": "template",
+            "altText": "this is a confirm template",
+            "template": {
+                "type": "confirm",
+                "actions": [
+                    {
+                        "type": "message",
+                        "label": "ถูก",
+                        "text": "ได้รับคำตอบถูกต้องในเรื่องค่าธรรมเนียมการศึกษาสาขาสาธารณสุขศาสตร์"
+                    },
+                    {
+                        "type": "message",
+                        "label": "ไม่ถูก",
+                        "text": "ได้รับคำตอบไม่ถูกต้องในเรื่องค่าธรรมเนียมการศึกษาสาขาสาธารณสุขศาสตร์"
+                    }
+                ],
+                "text": "คุณได้รับคำตอบถูกต้องไหมคะ?"
+            }
+        };
+
+        //ประกาศตัวแปร payload เพื่อแสดงออกหน้าจอ
+        let payload่json = new Payload(`LINE`, payload, { sendAsMessage: true });
+        let text = request.body.queryResult.queryText;
+        let c = 'ได้รับคำตอบถูกต้องในเรื่องค่าธรรมเนียมการศึกษาสาขาสาธารณสุขศาสตร์';
+        let b = 'ได้รับคำตอบไม่ถูกต้องในเรื่องค่าธรรมเนียมการศึกษาสาขาสาธารณสุขศาสตร์';
+
+        //Count_Accuracy
+        let Count_Accuracy = admin.firestore().collection("Count_Accuracy").doc(date.toLocaleDateString()).collection("ค่าธรรมเนียมการศึกษา").doc("คณะวิทยาศาสตร์และเทคโนโลยี").collection("Subject").doc("สาธารณสุขศาสตร์");
+        Count_Accuracy.get().then(function (docs) {
+            if (!docs.exists) {
+                Count_Accuracy.set({
+                    ถูก: 0,
+                    ไม่ถูก: 0
+                });
+            }
+
+        });
+
+
+        if (text === c) {
+            agent.add("ขอบคุณค่ะ");
+            db.runTransaction(t => {
+                return t.get(Count_Accuracy).then(doc => {
+                    let newcount = doc.data().ถูก + 1;
+
+                    t.update(Count_Accuracy, {
+                        ถูก: newcount,
+
+                    });
+                });
+            });
+
+
+
+        }
+
+        else if (text === b) {
+
+            agent.add("กรุณากดปุ่มติดต่อเจ้าหน้าที่");
+            db.runTransaction(t => {
+                return t.get(Count_Accuracy).then(doc => {
+                    let newcount = doc.data().ไม่ถูก + 1;
+
+                    t.update(Count_Accuracy, {
+                        ไม่ถูก: newcount,
+
+                    });
+                });
+            });
+
+        }
+
+        else {
+            //เชคว่ามี ตัว doc อยู๋ไหม ถ้าไม่ ก็ set ค่า 
+            // count_intent 
+            Count_Intent.get().then(function (docs) {
+                if (!docs.exists) {
+                    Count_Intent.set({
+                        ค่าธรรมเนียมการศึกษา: 1
+                    });
+                }
+
+                else {
+                    //เลขcount เวลามีคนเข้ามาสอบถาม
+
+                    db.runTransaction(t => {
+                        return t.get(Count_Intent).then(doc => {
+                            if (doc.data().ค่าธรรมเนียมการศึกษา > 0) {
+                                let newcount = doc.data().ค่าธรรมเนียมการศึกษา + 1;
+
+                                t.update(Count_Intent, {
+                                    ค่าธรรมเนียมการศึกษา: newcount
+
+                                });
+                            } else {
+                                t.update(Count_Intent, {
+                                    ค่าธรรมเนียมการศึกษา: 1
+                                });
+
+                            }
+
+                        });
+                    });
+                }
+            });
+
+            //return ข้อมูลคำตอบ 
+            return admin.firestore().collection('Tuition_fee').doc('คณะวิทยาศาสตร์และเทคโนโลยี').collection('สาธารณสุขศาสตร์').orderBy("date", "desc").limit(1).get().then((snapshot) => {
+                snapshot.forEach(doc => {
+                    agent.add(doc.data().description);
+                    agent.add(payload่json); //แสดง paylaod
+                });
+            });
+        }
+
+    }
+
+
+    //คณิตศาสตร์และสถิติประยุกต์
+    function Mathematics_and_Applied_Statistics(agent) {
+        let payload = {
+            "type": "template",
+            "altText": "this is a confirm template",
+            "template": {
+                "type": "confirm",
+                "actions": [
+                    {
+                        "type": "message",
+                        "label": "ถูก",
+                        "text": "ได้รับคำตอบถูกต้องในเรื่องค่าธรรมเนียมการศึกษาสาขาคณิตศาสตร์และสถิติประยุกต์"
+                    },
+                    {
+                        "type": "message",
+                        "label": "ไม่ถูก",
+                        "text": "ได้รับคำตอบไม่ถูกต้องในเรื่องค่าธรรมเนียมการศึกษาสาขาคณิตศาสตร์และสถิติประยุกต์"
+                    }
+                ],
+                "text": "คุณได้รับคำตอบถูกต้องไหมคะ?"
+            }
+        };
+
+        //ประกาศตัวแปร payload เพื่อแสดงออกหน้าจอ
+        let payload่json = new Payload(`LINE`, payload, { sendAsMessage: true });
+        let text = request.body.queryResult.queryText;
+        let c = 'ได้รับคำตอบถูกต้องในเรื่องค่าธรรมเนียมการศึกษาสาขาคณิตศาสตร์และสถิติประยุกต์';
+        let b = 'ได้รับคำตอบไม่ถูกต้องในเรื่องค่าธรรมเนียมการศึกษาสาขาคณิตศาสตร์และสถิติประยุกต์';
+
+        //Count_Accuracy
+        let Count_Accuracy = admin.firestore().collection("Count_Accuracy").doc(date.toLocaleDateString()).collection("ค่าธรรมเนียมการศึกษา").doc("คณะวิทยาศาสตร์และเทคโนโลยี").collection("Subject").doc("คณิตศาสตร์และสถิติประยุกต์");
+        Count_Accuracy.get().then(function (docs) {
+            if (!docs.exists) {
+                Count_Accuracy.set({
+                    ถูก: 0,
+                    ไม่ถูก: 0
+                });
+            }
+
+        });
+
+
+        if (text === c) {
+            agent.add("ขอบคุณค่ะ");
+            db.runTransaction(t => {
+                return t.get(Count_Accuracy).then(doc => {
+                    let newcount = doc.data().ถูก + 1;
+
+                    t.update(Count_Accuracy, {
+                        ถูก: newcount,
+
+                    });
+                });
+            });
+
+
+
+        }
+
+        else if (text === b) {
+
+            agent.add("กรุณากดปุ่มติดต่อเจ้าหน้าที่");
+            db.runTransaction(t => {
+                return t.get(Count_Accuracy).then(doc => {
+                    let newcount = doc.data().ไม่ถูก + 1;
+
+                    t.update(Count_Accuracy, {
+                        ไม่ถูก: newcount,
+
+                    });
+                });
+            });
+
+        }
+
+        else {
+            //เชคว่ามี ตัว doc อยู๋ไหม ถ้าไม่ ก็ set ค่า 
+            // count_intent 
+            Count_Intent.get().then(function (docs) {
+                if (!docs.exists) {
+                    Count_Intent.set({
+                        ค่าธรรมเนียมการศึกษา: 1
+                    });
+                }
+
+                else {
+                    //เลขcount เวลามีคนเข้ามาสอบถาม
+
+                    db.runTransaction(t => {
+                        return t.get(Count_Intent).then(doc => {
+                            if (doc.data().ค่าธรรมเนียมการศึกษา > 0) {
+                                let newcount = doc.data().ค่าธรรมเนียมการศึกษา + 1;
+
+                                t.update(Count_Intent, {
+                                    ค่าธรรมเนียมการศึกษา: newcount
+
+                                });
+                            } else {
+                                t.update(Count_Intent, {
+                                    ค่าธรรมเนียมการศึกษา: 1
+                                });
+
+                            }
+
+                        });
+                    });
+                }
+            });
+
+            //return ข้อมูลคำตอบ 
+            return admin.firestore().collection('Tuition_fee').doc('คณะวิทยาศาสตร์และเทคโนโลยี').collection('คณิตศาสตร์และสถิติประยุกต์').orderBy("date", "desc").limit(1).get().then((snapshot) => {
+                snapshot.forEach(doc => {
+                    agent.add(doc.data().description);
+                    agent.add(payload่json); //แสดง paylaod
+                });
+            });
+        }
+
+    }
 
 
     function Default_Fallback_Intent(agent) {
@@ -5641,18 +10852,60 @@ exports.dialogflowFirebaseFulfillment = functions.https.onRequest((request, resp
 
     //ค่าธรรมเนียมการศึกษา Tuition_fee
     //คณะครุศาสตร์
-    intentMap.set("Mathematics", Mathematics);  //สาขาคณิตศาสตร์
-    // intentMap.set("Procession_Student_Retirement", Procession_Student_Retirement); //การดำเนินการเมื่อพ้นสภาพการเป็นนักศึกษา
-    // intentMap.set("Regular_session", Regular_session); //เกรดเฉลี่ยขั้นต่ำ ภาคปกติ
-    // intentMap.set("Spacial_session", Spacial_session); //เกรดเฉลี่ยขั้นต่ำ ภาคพิเศษ
-    // intentMap.set("In_case_Student_Retirement", In_case_Student_Retirement); //กรณีการพ้นสภาพการเป็นนักศึกษา
-    // intentMap.set("Procession_Student_Retirement", Procession_Student_Retirement); //การดำเนินการเมื่อพ้นสภาพการเป็นนักศึกษา
-    // intentMap.set("Regular_session", Regular_session); //เกรดเฉลี่ยขั้นต่ำ ภาคปกติ
-    // intentMap.set("Spacial_session", Spacial_session); //เกรดเฉลี่ยขั้นต่ำ ภาคพิเศษ
-    // intentMap.set("In_case_Student_Retirement", In_case_Student_Retirement); //กรณีการพ้นสภาพการเป็นนักศึกษา
-    // intentMap.set("Procession_Student_Retirement", Procession_Student_Retirement); //การดำเนินการเมื่อพ้นสภาพการเป็นนักศึกษา
+    intentMap.set("Mathematics", Mathematics);  //คณิตศาสตร์
+    intentMap.set("Teaching_General_Science", Teaching_General_Science); //การสอนวิทยาศาสตร์ทั่วไป
+    intentMap.set("Computer_Education", Computer_Education); //คอมพิวเตอร์ศึกษา
+    intentMap.set("Thai_Teaching", Thai_Teaching); //การสอนภาษาไทย
+    intentMap.set("English_Teaching", English_Teaching); //การสอนภาษาอังกฤษ
+    intentMap.set("Early_Childhood_Education", Early_Childhood_Education); //การศึกษาปฐมวัย
+    intentMap.set("Chinese_Teaching", Chinese_Teaching); //การสอนภาษาจีน
+    intentMap.set("Counseling_Psychology_and_Guidance_and_Thai_Teaching", Counseling_Psychology_and_Guidance_and_Thai_Teaching); //จิตวิทยาการปรึกษาและแนะแนว-การสอนภาษาไทย
+    intentMap.set("Educational_Information_Technology", Educational_Information_Technology); //เทคโนโลยีสารสนเทศทางการศึกษา-การสอนภาษาไทย
+    intentMap.set("Social_Studies_Teaching", Social_Studies_Teaching); //การสอนสังคมศึกษา
+
+    //คณะเทคโนโลยีอุตสาหกรรม 
+    intentMap.set("Industrial_Technology", Industrial_Technology);  //เทคโนโลยีอุตสาหกรรม
+    intentMap.set("Industrial_Management_Engineering", Industrial_Management_Engineering); //วิศวกรรมการจัดการอุตสาหกรรม
+    intentMap.set("Automotive_Mechanical_Engineering", Automotive_Mechanical_Engineering); //วิศวกรรมเครื่องกลยานยนต์
+    intentMap.set("Electonic_Engineering", Electonic_Engineering); //วิศวกรรมไฟฟ้า
+    intentMap.set("Product_Design", Product_Design); //ออกแบบผลิตภัณฑ์
 
 
+    //คณะมนุษยศาสตร์และสังคมศาสตร์ 
+    intentMap.set("Social_development", Social_development);  //การพัฒนาสังคม
+    intentMap.set("English", English); //ภาษาอังกฤษ
+    intentMap.set("Western_Music", Western_Music); //ดนตรีสากล
+    intentMap.set("Visual_Arts", Visual_Arts); //ทัศนศิลป์
+    intentMap.set("Political_Science", Political_Science); //รัฐศาสตร์
+    intentMap.set("Public_Adminstration", Public_Adminstration); //รัฐประศาสนศาสตร์
+    intentMap.set("Laws_Program", Laws_Program); //นิติศาสตร์บัณฑิต
+    intentMap.set("Japanese", Japanese); //ภาษาญี่ปุ่น
+    intentMap.set("Fine_and_Applied_Arts", Fine_and_Applied_Arts); //ศิลปกรรม
+    intentMap.set("Information_and_Library_Science", Information_and_Library_Science); //สารสนเทศศาสตร์และบรรณารักษศาสตร์
+    intentMap.set("Thai_Music_Education", Thai_Music_Education); //นาฎดุริยางคศิลป์ไทย
+
+
+    //คณะวิทยาการจัดการ 
+    intentMap.set("Accounting", Accounting);  //การบัญชี
+    intentMap.set("Human_Resource_Management", Human_Resource_Management); //การจัดการทรัพยากรมนุษย์
+    intentMap.set("Marketing", Marketing); //การตลาด
+    intentMap.set("Business_Computer", Business_Computer); //คอมพิวเตอร์ธุรกิจ
+    intentMap.set("Management", Management); //การจัดการ
+    intentMap.set("Communication_Arts", Communication_Arts); //นิเทศศาสตร์
+    intentMap.set("Tourism", Tourism); //การท่องเที่ยว
+
+    //คณะวิทยาศาสตร์และเทคโนโลยี
+    intentMap.set("Occupational_Safety_and_Health", Occupational_Safety_and_Health);  //อาชีวอนามัยและความปลอดภัย
+    intentMap.set("Environmental_Science", Environmental_Science); //วิทยาศาสตร์สิ่งแวดล้อม
+    intentMap.set("Information_Technology", Information_Technology); //เทคโนโลยีสารสนเทศ
+    intentMap.set("Food_and_Service", Food_and_Service); //การอาหารและธุรกิจบริการ
+    intentMap.set("Agricultural_Technology", Agricultural_Technology); //เทคโนโลยีการเกษตร
+    intentMap.set("Chemistry", Chemistry); //วิชาเคมี
+    intentMap.set("Biology", Biology); //ชีววิทยาประยุกต์
+    intentMap.set("Physics", Physics); //ฟิสิกส์ประยุกต์
+    intentMap.set("Computer_Science", Computer_Science); //วิทยาการคอมพิวเตอร์
+    intentMap.set("Public_Health", Public_Health); //สาธารณสุขศาสตร์
+    intentMap.set("Mathematics_and_Applied_Statistics", Mathematics_and_Applied_Statistics); //คณิตศาสตร์และสถิติประยุกต์
 
     agent.handleRequest(intentMap);
 }
