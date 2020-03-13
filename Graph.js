@@ -360,14 +360,6 @@ function showData(report_month, number) {
   table.appendChild(tbody);
 
   document.getElementById("content").appendChild(table);
-
-
-
-
-
-
-
-
 }
 
 
