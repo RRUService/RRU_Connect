@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <title>ระบบจัดการข้อมูลแช็ตบ็อตสำหรับสนับสนุนงานวิชาการและงานทะเบียน</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <!--===============================================================================================-->
+
+
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.1.3/css/bootstrap.min.css">
+  
+  <link rel="stylesheet" href="https://www.w3schools.com/w3css/4/w3.css">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Raleway">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+  <style>
+
+
+#chart {
+    max-width: 650px;
+    margin: 35px auto;
+    margin-left: 85px;
+    margin-top: 88px;
+}
+#content {
+    margin: 35px auto;
+    margin-left: 69%;
+    margin-top: -365px;
+}
+table.gridtable {
+	font-family: verdana,arial,sans-serif;
+	font-size:11px;
+	color:#333333;
+	border-width: 1px;
+	border-color: #666666;
+	border-collapse: collapse;
+}
+table.gridtable th {
+	border-width: 1px;
+	padding: 8px;
+	border-style: solid;
+	border-color: #666666;
+	background-color: #dedede;
+}
+table.gridtable td {
+	border-width: 1px;
+	padding: 8px;
+	border-style: solid;
+	border-color: #666666;
+	background-color: #ffffff;
+}
+.button {
+    background-color: #900e0b;
+    border: none;
+    color: white;
+    padding: 12px 28px;
+    text-align: center;
+    text-decoration: none;
+    display: inline-block;
+    font-size: 16px;
+    margin: 4px 2px;
+    cursor: pointer;
+    margin-left: 40%;
+    margin-top: 2%;
+  }
+
+  
+</style>
+
+
+<script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
+<script src="https://cdn.jsdelivr.net/npm/vue-apexcharts"></script>
+
+<body>
+  
+
+<div style="margin-left: 40%;margin-top: 5%;">
+
+  <h5>เวลาบลาๆ</h5>
+  
+  <input type="date" id="start" name="trip-start"  style="height: 48px;width: 282px;font-size: 17px;"
+         value="yyyy-mm-dd"
+         min="2020-01-01" max="3000-12-31" > </n>
+</div>
+
+<input class="button button5" type="button" value="แสดง" id="submit" onclick="myFunction()">
+
+<!-- <div id="chart" style="display:block;"></div> -->
+
+</body>
+
+
+<!-- TODO: Add SDKs for Firebase products that you want to use
+     https://firebase.google.com/docs/web/setup#available-libraries -->
+<script src="https://www.gstatic.com/firebasejs/7.7.0/firebase-app.js"></script>
+<script src="https://www.gstatic.com/firebasejs/7.7.0/firebase-auth.js"></script>
+<script src="https://www.gstatic.com/firebasejs/7.7.0/firebase-firestore.js"></script>
+<script>
+  // Your web app's Firebase configuration
+  var firebaseConfig = {
+    apiKey: "AIzaSyA5KFIcemUtm1_i64TUyifV0WfKjbm9irk",
+    authDomain: "rru-connect-epeevr.firebaseapp.com",
+    databaseURL: "https://rru-connect-epeevr.firebaseio.com",
+    projectId: "rru-connect-epeevr",
+    storageBucket: "rru-connect-epeevr.appspot.com",
+    messagingSenderId: "898597223567",
+    appId: "1:898597223567:web:8cd2b5064e8edbaf20c4fa"
+  };
+  // Initialize Firebase
+  firebase.initializeApp(firebaseConfig);
+</script>
+<!-- <script src="Graph.js" charset="utf-8"></script> -->
+
+<script src="Graph_count.js" charset="utf-8"></script>
+</html>
