@@ -137,7 +137,7 @@ iframe {
 
 .container-login100 {
   width: 100%;  
-  min-height: 68vh;
+  min-height: 6vh;
   display: -webkit-box;
   display: -webkit-flex;
   display: -moz-box;
@@ -147,16 +147,13 @@ iframe {
   justify-content: center;
   align-items: center;
   padding: 15px;
-  
-  background-position: center;
-  background-size: cover;
-  background-repeat: no-repeat;;
+  background-image: url("https://www.img.in.th/image/T1aFLL");
 }
 
 
 .wrap-login100 {
-  width: 390px;
-  background: #fff;
+  width: 490px;
+  background: #488b4573;
   border-radius: 10px;
   position: relative;
 }
@@ -172,7 +169,7 @@ iframe {
 .login100-form-title {
   font-family: Ubuntu-Bold;
   font-size: 30px;
-  color: #4c9e48;
+  color: #2e473c;
   line-height: 1.2;
   text-transform: uppercase;
   text-align: center;
@@ -187,11 +184,14 @@ iframe {
 [ Input ]*/
 
 .wrap-input100 {
-  width: 100%;
+  width: 85%;
   position: relative;
   background-color: #e6e6e6;
   border: 1px solid transparent;
   border-radius: 3px;
+  display: block;
+  margin-left: auto;
+  margin-right: auto
 }
 
 
@@ -339,10 +339,13 @@ iframe {
   justify-content: center;
   align-items: center;
   padding: 0 20px;
-  width: 100%;
+  width: 60%;
   height: 62px;
-  background-color: #488b45;
+  background-color: #2e473c;
   border-radius: 3px;
+  display: block;
+  margin-left: auto;
+  margin-right: auto;
 
   -webkit-transition: all 0.4s;
   -o-transition: all 0.4s;
