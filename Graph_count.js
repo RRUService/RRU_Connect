@@ -6,6 +6,8 @@ function myFunction() {
 
     var element = document.getElementById("chart");
 
+    
+
   if(element != null){
     element.parentNode.removeChild(element);
   }
@@ -23,6 +25,9 @@ function myFunction() {
 
     var today = yyyy + '-' + mm + '-' + dd;
     console.log(today);
+    if(today === "NaN-NaN-NaN"){
+      window.alert("กรุณาเลือกวันที่ด้วยค่ะ");
+    }
 
 
     //ดึงค่า นับหมวดหมู่ที่มากที่สุดออกมาดู
@@ -64,6 +69,7 @@ function myFunction() {
 
         var options = {
             series: [{
+            name:"จำนวน",
             data: data
           }],
             chart: {
