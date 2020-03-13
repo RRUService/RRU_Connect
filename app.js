@@ -2,8 +2,8 @@
 let Value_Category;
 let Value_SubCategory;
 const db = firebase.firestore();
-
 const table = document.querySelector('#retable');
+
 // const ss = db.collection('Registration').doc('Topic').collection('Additional_Credit_Registration');
 
 // let first = db.collection('Registration').doc('Topic').collection('Additional_Credit_Registration')

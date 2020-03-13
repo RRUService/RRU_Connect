@@ -7,12 +7,14 @@ const LINE_MESSAGING_API = " https://notify-api.line.me/api/notify";
 const admin = require('firebase-admin');
 admin.initializeApp();
 const db = admin.firestore();
+const https = require('https');
 process.env.DEBUG = "dialogflow:debug"; // enables lib debugging statements
 
 
 
 
 exports.dialogflowFirebaseFulfillment = functions.https.onRequest((request, response) => {
+ 
     const agent = new WebhookClient({ request, response });
     const payload = {
         "type": "template",
@@ -10756,15 +10758,28 @@ exports.dialogflowFirebaseFulfillment = functions.https.onRequest((request, resp
 
     }
 
-
+	function Contact_staff(agent) {
+      let text = request.body.queryResult.queryText;
+      agent.add(text);
+    }
+  
+  
     function Default_Fallback_Intent(agent) {
+     
+		
         let text = request.body.queryResult.queryText;
+      	let user_id = request.body.originalDetectIntentRequest.payload.data.source.userId;
+      
+      
+  		 
+
+     
         let c = 'หอพัก';
         //agent.add("Correct");
         if (text.search(c) !== -1) {
             agent.add("Correct");
         } else {
-            agent.add("intent");
+            agent.add();
         }
     }
 
@@ -10906,7 +10921,12 @@ exports.dialogflowFirebaseFulfillment = functions.https.onRequest((request, resp
     intentMap.set("Computer_Science", Computer_Science); //วิทยาการคอมพิวเตอร์
     intentMap.set("Public_Health", Public_Health); //สาธารณสุขศาสตร์
     intentMap.set("Mathematics_and_Applied_Statistics", Mathematics_and_Applied_Statistics); //คณิตศาสตร์และสถิติประยุกต์
-
+	
+  
+  	//Contact_staff - fallback
+  	 intentMap.set("Contact_staff - fallback", Contact_staff);
+  
+  
     agent.handleRequest(intentMap);
 }
 );
