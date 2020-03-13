@@ -67,14 +67,11 @@ function myFunction() {
   var username = document.getElementById("start").value; //วันที่ document
   var DataList = document.getElementById("category").value;// get id value
 
+ 
   var element = document.getElementById("chart");
 
   if(element != null){
     element.parentNode.removeChild(element);
-  }else{
-
-
-    
   }
   var element1 = document.getElementById("content");
   if(element1 != null){
@@ -94,6 +91,13 @@ function myFunction() {
   var today = yyyy + '-' + mm + '-' + dd;
   console.log(today);
 
+  if(today === "NaN-NaN-NaN"){
+    window.alert("กรุณาเลือกวันที่ด้วยค่ะ");
+  }
+  else if(DataList === "กรุณาเลือกหมวดหมู่"){
+    window.alert("กรุณาเลือกหมวดหมู่ด้วยค่ะ");
+  }
+
 
 
 
@@ -101,12 +105,16 @@ function myFunction() {
 
   if (DataList === "ค่าธรรมเนียมการศึกษา") {
     var y = document.getElementById("subcategory");//get id
+
+    
     var Index_Subcategoy = y.selectedIndex;
     Value_SubCategory = y.options[Index_Subcategoy].value;
     var Subject = TopicData[DataList][Value_SubCategory];
     console.log(TopicData[DataList][Value_SubCategory] + "23"); //คณะ
     console.log(DataList);//หมวดหมู่ค่าธรรมเนียม
-
+    if(Subject === "กรุณาเลือกคณะ"){
+      window.alert("กรุณาเลือกคณะด้วยค่ะ");
+    }
 
     // document.getElementById('chart').style.display = 'block';
     db.collection("Count_Accuracy").doc(today).collection(DataList).doc(Subject).collection("Subject").get().then(function (data) { //อ่านข้อมูลจาก collection sale_report
