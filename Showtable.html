@@ -15,11 +15,19 @@
 
   <link rel="stylesheet" href="https://www.w3schools.com/w3css/4/w3.css">
 
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+  <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css">
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css">
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js"></script>
+  <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"></script>
+
+
   <!--===============================================================================================-->
 
 </head>
 <style>
+
   .tend {
     white-space: nowrap;
   }
@@ -144,18 +152,15 @@
 .dropdown:hover .dropdown-content {
   display: block;
 }
-
 </style>
 
-<body>
-
-  <img src="images/logo4.jpg" style="width: 100%; height: 35%;">
-
-  <center>
-
+<body><div class="limiter">
+  <div>
+  <img src="images/logo4.jpg" style="width: 100%; height: 35%;" />
+  </div>
   <div  id="myHeader">
     <div class="navbar">
-      <a href="#home">หน้าหลัก</a>
+      <a href="Menu2.html">หน้าหลัก</a>
       <div class="dropdown">
         <button class="dropbtn">สถิติและข้อมูลการสอบถาม
           <i class="fa fa-caret-down"></i>
@@ -180,79 +185,59 @@
 
   </div>
 
-  </center>
+</div>
+</div>
 
+  <div class="content">
+    <div class="wrapper">
 
-  <div style="margin-left: 40%;margin-top: 5%;">
-    <h5>หมวดหมู่</h5>
-    <select name="category" id="category" onchange="ChangeSelectList()" style="
-              margin: 0px;
-              height: 48px;
-              width: 282px;
-              padding: 8px 15px;
-              font-size: 17px;
-          ">
-      <option value="">กรุณาเลือกหมวดหมู่</option>
-      <option value="Registration">การลงทะเบียน</option>
-      <option value="Calendar">ปฏิทินการศึกษา</option>
-      <option value="Education_Documentary">การขอรับเอกสารการศึกษา</option>
-      <option value="Graduation">การสำเร็จการศึกษา</option>
-      <option value="Student_Card">บัตรนักศึกษา</option>
-      <option value="Application_study">การสมัครเรียน</option>
-      <option value="Tuition_fee">ค่าธรรมเนียมการศึกษา</option>
-      <option value="Resignation">การลาออก</option>
-      <option value="Leave">การลา</option>
-      <option value="Taking_leave_from_studies">การลาพักการศึกษา</option>
-      <option value="Student_Retirement">การพ้นสภาพการเป็นนักศึกษา</option>
-      <option value="Measurement">การวัดและประเมินผล</option>
-      <option value="">อื่น ๆ</option>
-    </select>
+      <table id="retable">
+
+        <tr>
+          <th>วันที่</th>
+          <th>หัวข้อ</th>
+          <th>หมายเหตุ</th>
+          <th>คำอธิบาย</th>
+          <th>สถานะ</th>
+          <th>คัดลอกข้อมูล</th>
+          <th>ลบข้อมูล</th>
+        </tr>
 
 
 
-    <h5>หัวข้อ</h5>
+      </table>
 
-
-    <select name="subcategory" id="subcategory" onchange="ChangeSelectList_1()"
-      style="height: 48px;width: 282px;padding: 8px 15px;font-size: 17px;">
-
-    </select>
-
-
+    </div>
   </div>
-  <div id="display" style="display:none; margin-left: 40%;margin-top: 5%;">
-    <select name="subcategory_1" id="subcategory_1"  
-    style="height: 48px;width: 282px;font-size: 17px;">
 
-  </select>
 
-  </div>
-  <br>
 
-  <center>
-  <input class="button button5" type="button" value="แสดง" id="submit" onclick="myFunction1()"></center>
 
+ 
 
 </body>
 
 <script>
 
+// When the user scrolls the page, execute myFunction
+window.onscroll = function() {myFunction()};
 
-  window.onscroll = function () { myFunction() };
+// Get the navbar
+var navbar = document.getElementById("navbar");
 
-  var navbar = document.getElementById("myHeader");
-  var sticky = navbar.offsetTop-80;
-  
-  function myFunction() {
-    if (window.pageYOffset > sticky) {
-     navbar.classList.add("sticky");
-    } else {
-      navbar.classList.remove("sticky");
-    }
+// Get the offset position of the navbar
+var sticky = navbar.offsetTop;
+
+// Add the sticky class to the navbar when you reach its scroll position. Remove "sticky" when you leave the scroll position
+function myFunction() {
+  if (window.pageYOffset >= sticky) {
+    navbar.classList.add("sticky")
+  } else {
+    navbar.classList.remove("sticky");
   }
+}
 </script>
-</script>
-</script>
+
 <!-- TODO: Add SDKs for Firebase products that you want to use
      https://firebase.google.com/docs/web/setup#available-libraries -->
 <script src="https://www.gstatic.com/firebasejs/7.7.0/firebase-app.js"></script>
