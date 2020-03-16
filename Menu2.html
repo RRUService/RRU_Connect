@@ -44,8 +44,7 @@
   body {
     margin: 0;
     font-family: Arial, Helvetica, sans-serif;
-    background-image: url("images/ไไ.jpg");
-    background-color: #cccccc;
+    background-color: #fff;
     width: 100%;
     height: 100%;
   }
@@ -103,14 +102,14 @@
 
 
 
-<body>   
+<body>
 
-<div class="header" id="myHeader">  
+<div id="navbar">  
+
 <div class="limiter">
-<br>
   <div>
   <center>
-  <img src="images/logo.png" style="width: 35%; height: 30%;" /></center>
+  <img src="images/logo4.jpg" style="width: 100%; height: 30%;" /></center>
   </div>
 
  <div class="bs-example">
@@ -206,18 +205,23 @@
 <script>
 
 
-  window.onscroll = function () { myFunction() };
+  // When the user scrolls the page, execute myFunction
+window.onscroll = function() {myFunction()};
 
-  var header = document.getElementById("myHeader");
-  var sticky = header.offsetTop;
+// Get the navbar
+var navbar = document.getElementById("navbar");
 
-  function myFunction() {
-    if (window.pageYOffset > sticky) {
-      header.classList.add("sticky");
-    } else {
-      header.classList.remove("sticky");
-    }
+// Get the offset position of the navbar
+var sticky = navbar.offsetTop;
+
+// Add the sticky class to the navbar when you reach its scroll position. Remove "sticky" when you leave the scroll position
+function myFunction() {
+  if (window.pageYOffset >= sticky) {
+    navbar.classList.add("sticky")
+  } else {
+    navbar.classList.remove("sticky");
   }
+}
 </script>
 </script>
 </script>
