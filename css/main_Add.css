@@ -437,7 +437,7 @@
   }
   
   .btn--red {
-    background: #ff4b5a;
+    background: #4caf50;
   }
   
   .btn--red:hover {
@@ -751,7 +751,7 @@
   
   .card-5 .card-heading {
     padding: 20px 0;
-    background: #d1a00d;
+    background: #4caf50;
     -webkit-border-top-left-radius: 10px;
     -moz-border-radius-topleft: 10px;
     border-top-left-radius: 10px;
