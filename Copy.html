@@ -15,7 +15,7 @@
         <link rel="stylesheet" href="https://www.w3schools.com/w3css/4/w3.css">
         <link href="css/main_Add.css" rel="stylesheet" media="all">
     
-
+        <link href='https://fonts.googleapis.com/css?family=Kanit&subset=thai,latin' rel='stylesheet' type='text/css'>
     <!--===============================================================================================-->
         
     </head>
@@ -69,7 +69,7 @@
     z-index: 100;
   }
   .button {
-    background-color: #555555;
+    background-color: #488b45;
     border: none;
     color: white;
     padding: 12px 28px;
@@ -79,31 +79,30 @@
     font-size: 16px;
     margin: 4px 2px;
     cursor: pointer;
-    z-index: 100;
   }
   .hidden{
     display: none;
   }
   .navbar {
   overflow: hidden;
-  background-color: #333;
-  z-index: 100;
+  background-color: #0d6907;
+
+ 
 }
 
 .navbar a {
   float: left;
   font-size: 16px;
   color: white;
-  text-align: center;
   padding: 14px 16px;
   text-decoration: none;
-  z-index: 100;
+  
 }
 
 .dropdown {
   float: left;
   overflow: hidden;
-  z-index: 100;
+ 
 }
 
 .dropdown .dropbtn {
@@ -111,24 +110,23 @@
   border: none;
   outline: none;
   color: white;
-  padding: 14px 16px;
+  padding: 14px 48px;
   background-color: inherit;
   font-family: inherit;
   margin: 0;
-  z-index: 100;
+  
 }
 
 .navbar a:hover, .dropdown:hover .dropbtn {
-  background-color: red;
+  background-color:  brown;
 }
 
 .dropdown-content {
   display: none;
-  position: fixed;
+  position:sticky;
   background-color: #f9f9f9;
   min-width: 160px;
-  box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
-  z-index: 100;
+  z-index: 1;
 }
 
 .dropdown-content a {
@@ -138,20 +136,50 @@
   text-decoration: none;
   display: block;
   text-align: left;
-  z-index: 100;
+  
 }
 
 .dropdown-content a:hover {
   background-color: #ddd;
-  z-index: 100;
 }
 
 .dropdown:hover .dropdown-content {
   display: block;
-  z-index: 100;
+  
 }
+hr.new5 {
+  border: 0;
+    border-top: 5px solid #01456a;
+    margin: 3px 0;
+    margin-top: -5%;
+    width: 57%;
+    margin-left: 29%;
+}
+
 </style>
-    <img src="images/logo4.jpg" style="width: 100%; height: 35%;">
+<div style="background-image: url(images/p.jpg) ;
+height: 100%; ">
+
+
+<div style="background-color: #66636342;margin: auto;width: 85%; height: 100%;">
+<div style="background-color: #f7f7f7;margin:auto; width: 90%;height: 100%;overflow: auto;">
+
+
+<div style="background-image:url(images/bg.jpg) ; width: 100%;height: 25%;">
+<div style=" width: 100%; height: 100%;">
+           <img src="images/ราชนครินทร์.png" style="width: 9%;height: 77%; margin-left: 18%;
+margin-top: 2%;">
+           <span
+             style="font-family: 'Kanit', sans-serif;font-size: 23px;font-weight: 900;color: #23560e;margin-left: 3%;">
+             ระบบจัดการข้อมูลแช็ตบ็อตสำหรับสนับสนุนงานวิชาการและงานทะเบียน
+             <hr class="new5">
+
+           </span>
+           <span
+             style="font-family: 'Kanit', sans-serif;font-size: 23px;font-weight: 900;color: #23560e;margin-left: 43%;">มหาวิทยาลัยราชภัฏราชนครินทร์</span>
+
+         </div>
+       </div>
 
 
   <div  id="myHeader">
@@ -162,8 +190,8 @@
           <i class="fa fa-caret-down"></i>
         </button>
         <div class="dropdown-content">
-          <a href="Graph.html">จำนวนครั้งของการสอบถามในแต่ละหมวดหมู่</a>
-          <a href="Graph_count.html">จำนวนความถูกต้องของคำตอบในแต่ละหมวดหมู่</a>
+          <a href="Graph_count.html">จำนวนครั้งของการสอบถามในแต่ละหมวดหมู่</a>
+          <a href="Graph.html">จำนวนความถูกต้องของคำตอบในแต่ละหมวดหมู่</a>
         </div>
       </div>
 
@@ -180,103 +208,99 @@
     </div>
 
   </div>
+  <div class="page-wrapper">
+    <div class="wrapper wrapper--w790">
+        <div class="card card-5">
+            <div class="card-heading">
+                <h2 class="title">การคัดลอกข้อมูล</h2>
+            </div>
 
-</div>
-</div>
-        
-
-        <div class="page-wrapper">
-            <div class="wrapper wrapper--w790">
-                <div class="card card-5">
-                    <div class="card-heading">
-                        <h2 class="title">การคัดลอกข้อมูล</h2>
-                    </div>
-                    <div class="card-body">
-                        <form method="POST">
+            <div class="card-body">
+                <form method="POST">
+                
+                    <div class="form-row m-b-55">
+                       
                         
-                            <div class="form-row m-b-55">
-                               
-                                
-                                <div class="value" style="margin-left: 50px;">
-                                    <div class="row row-space">
-                                        <div class="col-2">
-                                            <h4>วันที่</h4>
-                                            <div class="input-group-desc" >
-                                                <input class="input--style-5" type="text" id="date"   readonly="readonly">
-                                                <!-- <label class="label--desc">first name</label> -->
-                                            </div>
-                                        </div>
-                                      
+                        <div class="value" style="margin-left: 50px;">
+                            <div class="row row-space">
+                                <div class="col-2">
+                                    <h4>วันที่</h4>
+                                    <div class="input-group-desc" >
+                                        <input class="input--style-5" type="text" id="date"   readonly="readonly">
+                                        <!-- <label class="label--desc">first name</label> -->
                                     </div>
-
-                                    
                                 </div>
-                                <div class="value" style="margin-left: 50px;">
-                                    <div class="row row-space">
-                                        <div class="col-2">
-                                            <h4>หมายเหตุ</h4>
-                                            <div class="input-group-desc" >
-                                                <input class="input--style-5" type="text" id="Other"  readonly="readonly">
-                                                <!-- <label class="label--desc">first name</label> -->
-                                            </div>
-                                        </div>
-                                      
-                                    </div>
-
-                                    
-                                </div>
-
-                                <div class="value" style="margin-left: 50px;">
-                                    <div class="row row-space">
-                                        <div class="col-2">
-                                            <h4>หมวด</h4>
-                                            <div class="input-group" >
-                                                <input class="input--style-5" type="text" id="Category"  readonly="readonly">
-                                                <!-- <label class="label--desc">first name</label> -->
-                                            </div>
-                                        </div>
-                                        <div class="col-2">
-                                            <h4>หัวข้อ</h4>
-                                            <div class="input-group" >
-                                                <input class="input--style-5" type="text" id="Sub_category"  readonly="readonly">
-                                                <!-- <label class="label--desc">first name</label> -->
-                                            </div>
-                                        </div>
-                                    </div>
-
-                                    
-                                </div>
-                           
-                                <div class="value">
-                                    <div class="row row-space">
-                                        <div class="col-2">
-                                            <h4>คำอธิบาย</h4>
-                                            <div class="input-group-desc" class="content">
-                                                <textarea  type="text" rows="15" cols="100" id="description"  maxlength="100000"></textarea>
-                                                <!-- <label class="label--desc">first name</label> -->
-                                            </div>
-                                        </div>
-                                      
-                                    </div>
-
-                                    
-                                </div>
-
+                              
                             </div>
+
                             
-                                                       
+                        </div>
+                        <div class="value" style="margin-left: 50px;">
+                            <div class="row row-space">
+                                <div class="col-2">
+                                    <h4>หมายเหตุ</h4>
+                                    <div class="input-group-desc" >
+                                        <input class="input--style-5" type="text" id="Other"  readonly="readonly">
+                                        <!-- <label class="label--desc">first name</label> -->
+                                    </div>
+                                </div>
+                              
+                            </div>
+
                             
-                            <center><div>
-                                <input class="btn btn--radius-2 btn--red" style="
-                                width: 24%;" onclick="mySubmit()" value="บันทึกข้อมูล">
-                            </div></center>
-                        </form>
+                        </div>
+
+                        <div class="value" style="margin-left: 50px;">
+                            <div class="row row-space">
+                                <div class="col-2">
+                                    <h4>หมวด</h4>
+                                    <div class="input-group" >
+                                        <input class="input--style-5" type="text" id="Category"  readonly="readonly">
+                                        <!-- <label class="label--desc">first name</label> -->
+                                    </div>
+                                </div>
+                                <div class="col-2">
+                                    <h4>หัวข้อ</h4>
+                                    <div class="input-group" >
+                                        <input class="input--style-5" type="text" id="Sub_category"  readonly="readonly">
+                                        <!-- <label class="label--desc">first name</label> -->
+                                    </div>
+                                </div>
+                            </div>
+
+                            
+                        </div>
+                   
+                        <div class="value">
+                            <div class="row row-space">
+                                <div class="col-2">
+                                    <h4>คำอธิบาย</h4>
+                                    <div class="input-group-desc" class="content">
+                                        <textarea  type="text" rows="15" cols="100" id="description"  maxlength="100000"></textarea>
+                                        <!-- <label class="label--desc">first name</label> -->
+                                    </div>
+                                </div>
+                              
+                            </div>
+
+                            
+                        </div>
+
                     </div>
-                </div>
+                    
+                                               
+                    
+                  
+                        <input class="btn btn--radius-2 btn--red" style="
+                        width: 25%;" onclick="mySubmit()" value="บันทึกข้อมูล">
+                   
+                </form>
             </div>
         </div>
-    
-        <p id="demo"></p>
+
+</div>
+</div>
+
       </body>
     
  

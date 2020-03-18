@@ -59,13 +59,13 @@ function myFunction() {
     var iDiv = document.createElement('div');
     iDiv.id = 'chart';
     iDiv.className = 'block1';
-    document.getElementsByTagName('body')[0].appendChild(iDiv);
+    document.getElementById('ps').appendChild(iDiv);
 
       //สร้างตาราง
       var iDiv1 = document.createElement('div');
     iDiv1.id = 'content';
     iDiv1.className = 'block2';
-    document.getElementsByTagName('body')[0].appendChild(iDiv1);
+    document.getElementById('ps').appendChild(iDiv1);
 
         var options = {
             series: [{

@@ -21,6 +21,7 @@ p {
 		width:"200" ;
 		
 		
+		
 	}
 	/* Zebra striping */
 	tr:nth-of-type(odd) { 
@@ -38,7 +39,7 @@ p {
 		padding: 6px; 
 		border: 1px solid #ccc;
 		
-		
+		overflow: auto;
 		
 		
     }
