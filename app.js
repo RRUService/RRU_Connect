@@ -72,14 +72,14 @@ function ChangeSelectList() {
 	document.getElementById('display').style.display = 'none';
 	var DataCategory = DataList.options[DataList.selectedIndex].value; //ดึงค่าของ value หมวดหมู
 
-	console.log(DataCategory + "15");
+	// console.log(DataCategory + "15");
 	while (SubDataList.options.length) {
 		SubDataList.remove(0);
 	}
 
 	var Head = TopicData[DataCategory];
 
-	console.log(Head + "14");
+	// console.log(Head + "14");
 	if (Head) {
 
 		var i;
@@ -102,14 +102,14 @@ function ChangeSelectList_1() {
 
 	var DataCategory = DataList.options[DataList.selectedIndex].value;
 
-	console.log(Value_SubCategory + "11");
+	// console.log(Value_SubCategory + "11");
 	while (SubDataList_1.options.length) {
 		SubDataList_1.remove(0);
 	}
 	var x1 = document.getElementById("category"); //get id
 	var Index_Category1 = x1.selectedIndex;
 	Value_Category1 = x1[Index_Category1].value;
-	console.log(Value_Category1 + "12");
+	// console.log(Value_Category1 + "12");
 
 	//ค่าธรรมเนียมการศึกษา
 	if (Value_Category1 === 'Tuition_fee') {
@@ -222,9 +222,9 @@ function myFunction1() {
 
 
 
-	console.log(Value_Category + "22");
-	console.log(Value_SubCategory + "23");
-	console.log(Index_Subcategoy_1 + "24"); //Topic 1
+	// console.log(Value_Category + "22");
+	// console.log(Value_SubCategory + "23");
+	// console.log(Index_Subcategoy_1 + "24"); //Topic 1
 
 	//เป็นการทำให้กดปุ่มไม่ได้ กรณีที่ บอกว่า กรุณาเลือกหัวข้อ
 	if (Index_Subcategoy > 0 && Index_Category > 0) {
@@ -242,11 +242,14 @@ function myFunction1() {
 
 
 function getUrlVars() {
-	var vars = {};
-	var parts = window.location.href.replace(/[?&]+([^=&]+)=([^&]*)/gi, function (m, key, value) {
-		vars[key] = value;
-	});
-	return vars;
+    var vars = [], hash;
+    var hashes = window.location.href.slice(window.location.href.indexOf('?') + 1).split('&');
+    for (var i = 0; i < hashes.length; i++) {
+        hash = hashes[i].split('=');
+        vars.push(hash[0]);
+        vars[hash[0]] = hash[1];
+    }
+    return vars;
 }
 
 
@@ -254,11 +257,16 @@ var SubCategory_URL = getUrlVars()["id1"];// เลข index
 var Category_URL = getUrlVars()["id2"];
 var SubCategory_1_URL = getUrlVars()["id3"];
 var Data_Subcategory = TopicData[Category_URL][SubCategory_URL];
+
+console.log("id1 =" + SubCategory_URL);
+console.log("id2 = " + Category_URL );
+console.log("id3 =" + SubCategory_1_URL);
 if (SubCategory_1_URL == -1) {
 
 
 	db.collection(Category_URL).doc('Topic').collection(Data_Subcategory).orderBy("date", "desc").get().then((snapshot) => {
 		snapshot.forEach(doc => {
+			
 			showData(doc);
 
 		});
@@ -275,6 +283,7 @@ if (SubCategory_1_URL == -1) {
 		db.collection(Category_URL).doc(Data_Subcategory).collection(Data_Head).orderBy("date", "desc").get().then((snapshot) => {
 			snapshot.forEach(doc => {
 				showData(doc);
+				
 
 			});
 		});
@@ -283,6 +292,7 @@ if (SubCategory_1_URL == -1) {
 		db.collection(Category_URL).doc('Topic').collection(Data_Subcategory).doc(Data_Subcategory).collection(Data_Head).orderBy("date", "desc").get().then((snapshot) => {
 			snapshot.forEach(doc => {
 				showData(doc);
+				
 
 			});
 		});
@@ -292,10 +302,10 @@ if (SubCategory_1_URL == -1) {
 
 
 
-	console.log(Data_Head); //หัวข้อย่อยๆ
-	console.log("....." + Category_URL);
-	console.log(head_1 + "11");
-	console.log(Data_Subcategory);
+	// console.log(Data_Head); //หัวข้อย่อยๆ
+	// console.log("....." + Category_URL);
+	// console.log(head_1 + "11");
+	// console.log(Data_Subcategory);
 
 
 }
@@ -330,10 +340,10 @@ function showData(doc) {
 	
 
 
-	console.log(Data_Head + "33");
+	// console.log(Data_Head + "33");
 	cell1.innerHTML = today;
 	cell1.setAttribute('class', 'tend');
-	console.log(Data_Subcategory + "1234");
+	// console.log(Data_Subcategory + "1234");
 	
 
 
@@ -399,7 +409,7 @@ function showData(doc) {
 				cell5.innerHTML = "ไม่ถูกใช้งาน";
 			}
 	
-			console.log(DateLast_compare.getTime()+ "rjv" +">>>>>" + Date_compare.getTime());  //ดึงเวลาออกมาเปรียบเทียบ ต้องเอาวันที่ และเวลามาด้วย
+			// console.log(DateLast_compare.getTime()+ "rjv" +">>>>>" + Date_compare.getTime());  //ดึงเวลาออกมาเปรียบเทียบ ต้องเอาวันที่ และเวลามาด้วย
 	
 		});
 

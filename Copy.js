@@ -49,7 +49,7 @@ var Category_URL = getUrlVars()["id2"];//หมวดหมู่
 var index_Subcate = getUrlVars()["id3"];
 var index_Subcate1 = getUrlVars()["id4"];
 var Data_Subcategory = TopicData[Category_URL][index_Subcate]; //หัวข้อ
-
+console.log(index_Subcate1);
 var Category1;
 if (Category_URL == "Registration") {
     Category1 = "การลงทะเบียน";
@@ -155,7 +155,7 @@ function mySubmit() {
 
     var description = document.getElementById("description").value;
     console.log(description);
-    var r = confirm("คุณยืนยันที่จะลบข้อมูล?");
+    var r = confirm("คุณยืนยันที่จะคัดลอกข้อมูล?");
 
     if (r == true) {
         if (Category_URL == "Tuition_fee") {
@@ -167,7 +167,7 @@ function mySubmit() {
             })
                 .then(function () {
                     console.log("Document successfully updated!");
-                    location.href = "Menu2.html"
+                    location.href = "Showtable.html?id1=" + index_Subcate  + "&id2=" + Category_URL + "&id3=" + index_Subcate1;
                 })
                 .catch(function (error) {
                     // The document probably doesn't exist.
@@ -185,7 +185,7 @@ function mySubmit() {
             })
                 .then(function () {
                     console.log("Document successfully updated!");
-                    location.href = "Menu2.html"
+                    location.href = "Showtable.html?id1=" + index_Subcate  + "&id2=" + Category_URL + "&id3=" + index_Subcate1;
                 })
                 .catch(function (error) {
                     // The document probably doesn't exist.
@@ -201,7 +201,7 @@ function mySubmit() {
             })
                 .then(function () {
                     console.log("Document successfully updated!");
-                    location.href = "Menu2.html"
+                    location.href = "Showtable.html?id1=" + index_Subcate  + "&id2=" + Category_URL + "&id3=" + -1;
                 })
                 .catch(function (error) {
                     // The document probably doesn't exist.

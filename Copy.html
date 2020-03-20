@@ -11,11 +11,13 @@
         
        
         
-        
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <link rel="stylesheet" href="https://www.w3schools.com/w3css/4/w3.css">
         <link href="css/main_Add.css" rel="stylesheet" media="all">
     
         <link href='https://fonts.googleapis.com/css?family=Kanit&subset=thai,latin' rel='stylesheet' type='text/css'>
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.0/jquery.min.js"></script>
+        <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
     <!--===============================================================================================-->
         
     </head>
@@ -53,7 +55,6 @@
 
   .content {
     padding: 16px;
-    z-index: 100;
   }
 
   .sticky {
@@ -75,7 +76,7 @@
     padding: 12px 28px;
     text-align: center;
     text-decoration: none;
-    display: inline-block;
+    
     font-size: 16px;
     margin: 4px 2px;
     cursor: pointer;
@@ -84,8 +85,12 @@
     display: none;
   }
   .navbar {
-  overflow: hidden;
-  background-color: #0d6907;
+    overflow: hidden;
+    background-color: #0d6907;
+    display: block;
+    list-style-type: none;
+    text-align: center;
+    margin-top: 4%;
 
  
 }
@@ -153,36 +158,50 @@ hr.new5 {
     margin: 3px 0;
     margin-top: -5%;
     width: 57%;
-    margin-left: 29%;
+    margin-left: 13%;
 }
-
+.Logo {
+    width: 9%;
+    height: auto;
+    max-width: 500px;
+    margin-top: 2%;
+  }
+  
+  @media screen and (max-width:1300px) {
+  .wrapper,.page-wrapper,.card-body{
+    width:100%; /* The width is 100%, when the viewport is 800px or smaller */
+  }
+}
+@media screen and (max-width: 600px) {
+  .input--style-5,.content {
+    width: 100%;
+    margin-top: 0;
+  }
+}
 </style>
-<div style="background-image: url(images/p.jpg) ;
-height: 100%; ">
+<div style="background-image: url(images/p.jpg) ;width: 100%;
+height: 100%;">
 
 
 <div style="background-color: #66636342;margin: auto;width: 85%; height: 100%;">
 <div style="background-color: #f7f7f7;margin:auto; width: 90%;height: 100%;overflow: auto;">
 
 
-<div style="background-image:url(images/bg.jpg) ; width: 100%;height: 25%;">
-<div style=" width: 100%; height: 100%;">
-           <img src="images/ราชนครินทร์.png" style="width: 9%;height: 77%; margin-left: 18%;
-margin-top: 2%;">
-           <span
-             style="font-family: 'Kanit', sans-serif;font-size: 23px;font-weight: 900;color: #23560e;margin-left: 3%;">
-             ระบบจัดการข้อมูลแช็ตบ็อตสำหรับสนับสนุนงานวิชาการและงานทะเบียน
-             <hr class="new5">
+  <div style="background-image:url(images/bg.jpg) ; width: 100%;height: auto;">
+   
+      <center><img src="images/ราชนครินทร์.png" class="Logo">
+        <span
+          style="font-family: 'Kanit', sans-serif;font-size:1.5vw;;font-weight: 900;color: #23560e;margin-left: 3%;">
+          ระบบจัดการข้อมูลแช็ตบ็อตสำหรับสนับสนุนงานวิชาการและงานทะเบียน
+          <hr class="new5">
 
-           </span>
-           <span
-             style="font-family: 'Kanit', sans-serif;font-size: 23px;font-weight: 900;color: #23560e;margin-left: 43%;">มหาวิทยาลัยราชภัฏราชนครินทร์</span>
-
-         </div>
-       </div>
-
-
-  <div  id="myHeader">
+        </span>
+        <span
+          style="font-family: 'Kanit', sans-serif;font-size:1.5vw;font-weight: 900;color: #23560e;margin-left: 10%;">มหาวิทยาลัยราชภัฏราชนครินทร์</span>
+      </center>
+    
+  
+  <div id="myHeader">
     <div class="navbar">
       <a href="Menu2.html">หน้าหลัก</a>
       <div class="dropdown">
@@ -204,10 +223,13 @@ margin-top: 2%;">
         <div class="dropdown-content">
           <a href="index.html">Logout</a>
         </div>
-      </div> 
+      </div>
     </div>
 
   </div>
+</div>
+
+
   <div class="page-wrapper">
     <div class="wrapper wrapper--w790">
         <div class="card card-5">
@@ -297,7 +319,9 @@ margin-top: 2%;">
                 </form>
             </div>
         </div>
-
+    </div>
+</div>
+</div>
 </div>
 </div>
 

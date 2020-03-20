@@ -40,9 +40,9 @@ function myFunction() {
     
     docRef.get().then(function (doc) {
 
-            //console.log("Document data:", doc.data());
+            console.log("Document data:", doc.data());
             let key = Object.keys(doc.data());
-            let data = Object.values(doc.data());
+            let data = Object.values(doc.data()).sort(function(a, b){return b - a});
 
             console.log("key = " + key)
             console.log("data =" + data )
@@ -75,6 +75,7 @@ function myFunction() {
             chart: {
             type: 'bar',
             height: 350,
+            width:600
             
           },
           plotOptions: {
@@ -88,6 +89,9 @@ function myFunction() {
           },
           xaxis: {
             categories: key
+          },
+          title: {
+            text: 'จำนวนครั้งของการสอบถามในแต่ละหมวดหมู่'
           }
         
           };
@@ -103,15 +107,16 @@ function myFunction() {
     function showData(report_month, number) {
 
   
-
+  
       var MOUNTAINS = [];
       // เตรียมข้อมูล
       for (var i = 0; i < report_month.length; i++) {
     
         MOUNTAINS.push({ "name": report_month[i], "ถูก": number[i]});
+        
     
       }
-    
+      
     
       //draw table
       var table = document.createElement("table");
@@ -119,7 +124,7 @@ function myFunction() {
       var thead = document.createElement("thead");
       var tbody = document.createElement("tbody");
       var headRow = document.createElement("tr");
-      ["หัวข้อ", "จำนวนถูก"].forEach(function (el) {
+      ["หัวข้อ", "จำนวน"].forEach(function (el) {
         var th = document.createElement("th");
         th.appendChild(document.createTextNode(el));
         headRow.appendChild(th);
@@ -127,6 +132,7 @@ function myFunction() {
       thead.appendChild(headRow);
       table.appendChild(thead);
       MOUNTAINS.forEach(function (el) {
+      
         var tr = document.createElement("tr");
         for (var o in el) {
           var td = document.createElement("td");

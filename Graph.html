@@ -4,7 +4,7 @@
 <head>
   <title>ระบบจัดการข้อมูลแช็ตบ็อตสำหรับสนับสนุนงานวิชาการและงานทะเบียน</title>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
+  
   <!--===============================================================================================-->
 
     <link rel="icon" type="image/png" href="images/icons/favicon.ico" />
@@ -12,11 +12,12 @@
   <link rel="stylesheet" type="text/css" href="css/util.css">
   <link rel="stylesheet" type="text/css" href="css/main.css">
 
-  
+  <link rel="stylesheet" href="tablecaa.css">
 
   <link rel="stylesheet" href="https://www.w3schools.com/w3css/4/w3.css">
   <link href='https://fonts.googleapis.com/css?family=Kanit&subset=thai,latin' rel='stylesheet' type='text/css'>
-  
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.0/jquery.min.js"></script>
+  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
   
   <style>
 
@@ -35,28 +36,6 @@ body {
 
 
 
-table.gridtable {
-	font-family: verdana,arial,sans-serif;
-	font-size:11px;
-	color:#333333;
-	border-width: 1px;
-	border-color: #666666;
-	border-collapse: collapse;
-}
-table.gridtable th {
-	border-width: 1px;
-	padding: 8px;
-	border-style: solid;
-	border-color: #666666;
-	background-color: #dedede;
-}
-table.gridtable td {
-	border-width: 1px;
-	padding: 8px;
-	border-style: solid;
-	border-color: #666666;
-	background-color: #ffffff;
-}
 .button {
     background-color: #28a745;
     border: none;
@@ -79,39 +58,18 @@ table.gridtable td {
 
 
 #chart {
-    max-width: 650px;
-    margin: 35px auto;
-    margin-left: 27px;
-    margin-top: 88px;
+  float:left;
+  padding: 20px;
+   
 }
 #content {
-  margin: 31px auto;
-    margin-left: 62%;
-    margin-top: -500px;
+
+    float:left;
+    padding: 20px;
+    margin-top: 3%;
 }
 
-table.gridtable {
-  font-family: verdana,arial,sans-serif;
-  font-size:11px;
-  color:#333333;
-  border-width: 1px;
-  border-color: #666666;
-  border-collapse: collapse;
-}
-table.gridtable th {
-  border-width: 1px;
-  padding: 8px;
-  border-style: solid;
-  border-color: #666666;
-  background-color: #dedede;
-}
-table.gridtable td {
-  border-width: 1px;
-  padding: 8px;
-  border-style: solid;
-  border-color: #666666;
-  background-color: #ffffff;
-}
+
 .content {
     padding: 16px;
   }
@@ -132,8 +90,12 @@ table.gridtable td {
     display: none;
   }
   .navbar {
-  overflow: hidden;
-  background-color: #0d6907;
+    overflow: hidden;
+    background-color: #0d6907;
+    display: block;
+    list-style-type: none;
+    text-align: center;
+    margin-top: 4%;
 
  
 }
@@ -196,13 +158,26 @@ table.gridtable td {
   
 }
 hr.new5 {
-  border: 0;
+    border: 0;
     border-top: 5px solid #01456a;
     margin: 3px 0;
     margin-top: -5%;
     width: 57%;
-    margin-left: 29%;
+    margin-left: 13%;
+  }
+
+  .Logo {
+    width: 9%;
+    height: auto;
+    max-width: 500px;
+    margin-top: 2%;
+  }
+  div.col4 {
+ 
+    width: 100%;
 }
+
+
 
 
 
@@ -225,21 +200,21 @@ hr.new5 {
   <div style="background-color: #f7f7f7;margin:auto; width: 90%;height: 100%;overflow: auto;">
   
   
-  <div style="background-image:url(images/bg.jpg) ; width: 100%;height: 25%;">
-  <div style=" width: 100%; height: 100%;">
-             <img src="images/ราชนครินทร์.png" style="width: 9%;height: 77%; margin-left: 18%;
-  margin-top: 2%;">
-             <span
-               style="font-family: 'Kanit', sans-serif;font-size: 23px;font-weight: 900;color: #23560e;margin-left: 3%;">
-               ระบบจัดการข้อมูลแช็ตบ็อตสำหรับสนับสนุนงานวิชาการและงานทะเบียน
-               <hr class="new5">
-  
-             </span>
-             <span
-               style="font-family: 'Kanit', sans-serif;font-size: 23px;font-weight: 900;color: #23560e;margin-left: 43%;">มหาวิทยาลัยราชภัฏราชนครินทร์</span>
-  
-           </div>
-         </div>
+  <div style="background-image:url(images/bg.jpg) ; width: 100%;height: auto;">
+    <div style=" width: 100%;
+    height: 100%;">
+              <center><img src="images/ราชนครินทร์.png" class="Logo">
+                <span
+                  style="font-family: 'Kanit', sans-serif;font-size:1.5vw;;font-weight: 900;color: #23560e;margin-left: 3%;">
+                  ระบบจัดการข้อมูลแช็ตบ็อตสำหรับสนับสนุนงานวิชาการและงานทะเบียน
+                  <hr class="new5">
+    
+                </span>
+                <span
+                  style="font-family: 'Kanit', sans-serif;font-size:1.5vw;font-weight: 900;color: #23560e;margin-left: 10%;">มหาวิทยาลัยราชภัฏราชนครินทร์</span>
+              </center>
+            </div>
+         
 
 
   <div  id="myHeader">
@@ -251,7 +226,7 @@ hr.new5 {
         </button>
         <div class="dropdown-content">
           <a href="Graph_count.html">จำนวนครั้งของการสอบถามในแต่ละหมวดหมู่</a>
-          <a href="Graph.html">จำนวนความถูกต้องของคำตอบในแต่ละหมวดหมู่</a>
+          <a href="Graph.html">จำนวนการช่วยตอบคำถามของแช็ตบ็อต</a>
         </div>
       </div>
 
@@ -270,12 +245,12 @@ hr.new5 {
   </div>
 
 
-
+</div>
   
 
-<div style="margin-left: 40%;margin-top: 5%;">
-
-  <h5>วันที่</h5>
+<div class="col4" style="margin-top: 5%;">
+<center>
+  <h5 style="margin-left: -20%;">วันที่</h5>
   
   <input type="date" id="start" name="trip-start"  style="height: 48px;width: 282px;font-size: 18px;padding: 16px;background: #ccc;"
          value="yyyy-mm-dd"
@@ -284,7 +259,7 @@ hr.new5 {
 
 
 
-  <h5>หมวดหมู่</h5>
+  <h5 style="margin-left: -18%;">หมวดหมู่</h5>
   <select name="category" id="category" onchange="ChangeSelectList()" style="
             margin: 0px;
             height: 48px;
@@ -314,7 +289,7 @@ hr.new5 {
 
   <div id="display" style="display:none; ">
 
-  <h5>หัวข้อ</h5>
+  <h5 style="margin-left: -20%;">หัวข้อ</h5>
 
 
   <select name="subcategory" id="subcategory"
@@ -325,12 +300,15 @@ hr.new5 {
 </div>
 
 </div>
-
+</center>
 <input class="button button5" type="button" value="แสดง" id="submit" onclick="myFunction()">
-
-<div id="ps" ></div>
+<br>
+<br>
+<center>
+<div id="ps" style="margin-top: 8%;"></div></center>
 </div>
 </div>
+  </div>
   <!-- <div id="chart" style="display:none;"></div> -->
 </body>
 

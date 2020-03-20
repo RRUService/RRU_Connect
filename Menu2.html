@@ -15,6 +15,8 @@
 
   <link rel="stylesheet" href="https://www.w3schools.com/w3css/4/w3.css">
   <link href='https://fonts.googleapis.com/css?family=Kanit&subset=thai,latin' rel='stylesheet' type='text/css'>
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.0/jquery.min.js"></script>
+  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
 
 
   <!--===============================================================================================-->
@@ -92,6 +94,7 @@
     display: block;
     list-style-type: none;
     text-align: center;
+    margin-top: 4%;
   }
 
   .navbar a {
@@ -155,7 +158,14 @@
     margin: 3px 0;
     margin-top: -5%;
     width: 57%;
-    margin-left: 29%;
+    margin-left: 13%;
+  }
+
+  .Logo {
+    width: 9%;
+    height: auto;
+    max-width: 500px;
+    margin-top: 2%;
   }
 </style>
 
@@ -176,30 +186,24 @@
 
 
 
-    <div style="background-color: #66636342;
-margin: auto;
-width: 85%;
-height: 100%;">
-      <div style="background-color: #f7f7f7;margin:auto; width: 90%;
-height: 100%;">
-        <div style="background-image:url(images/bg.jpg) ; width: 100%;
-height: 25%;">
-
+    <div style="background-color: #66636342;margin: auto;width: 85%;height: 100%;">
+      <div style="background-color: #f7f7f7;margin:auto; width: 90%;height: 100%;">
+        <div style="background-image:url(images/bg.jpg) ; width: 100%;height: auto;">
+        
           <div style=" width: 100%;
 height: 100%;">
-            <img src="images/ราชนครินทร์.png" style="width: 9%;height: 77%; margin-left: 18%;
-margin-top: 2%;">
-            <span
-              style="font-family: 'Kanit', sans-serif;font-size: 23px;font-weight: 900;color: #23560e;margin-left: 3%;">
-              ระบบจัดการข้อมูลแช็ตบ็อตสำหรับสนับสนุนงานวิชาการและงานทะเบียน
-              <hr class="new5">
+            <center><img src="images/ราชนครินทร์.png" class="Logo">
+              <span
+                style="font-family: 'Kanit', sans-serif;font-size:1.5vw;;font-weight: 900;color: #23560e;margin-left: 3%;">
+                ระบบจัดการข้อมูลแช็ตบ็อตสำหรับสนับสนุนงานวิชาการและงานทะเบียน
+                <hr class="new5">
 
-            </span>
-            <span
-              style="font-family: 'Kanit', sans-serif;font-size: 23px;font-weight: 900;color: #23560e;margin-left: 43%;">มหาวิทยาลัยราชภัฏราชนครินทร์</span>
-
+              </span>
+              <span
+                style="font-family: 'Kanit', sans-serif;font-size:1.5vw;font-weight: 900;color: #23560e;margin-left: 10%;">มหาวิทยาลัยราชภัฏราชนครินทร์</span>
+            </center>
           </div>
-        </div>
+        
         <div id="myHeader">
           <div class="navbar">
             <a href="Menu2.html">หน้าหลัก</a>
@@ -209,7 +213,7 @@ margin-top: 2%;">
               </button>
               <div class="dropdown-content">
                 <a href="Graph_count.html">จำนวนครั้งของการสอบถามในแต่ละหมวดหมู่</a>
-                <a href="Graph.html">จำนวนความถูกต้องของคำตอบในแต่ละหมวดหมู่</a>
+                <a href="Graph.html">จำนวนการช่วยตอบคำถามของแช็ตบ็อต</a>
               </div>
             </div>
 
@@ -226,11 +230,11 @@ margin-top: 2%;">
           </div>
 
         </div>
-
+      </div>
 
         <div style="margin: auto;
   width: 200px;
-  height: 100px;
+  height: auto;
   position: absolute;
   top: 50%;
   left: 48%;
@@ -266,7 +270,7 @@ margin-top: 2%;">
 
 
           <h5>หัวข้อ</h5>
-          
+
 
 
           <select name="subcategory" id="subcategory" onchange="ChangeSelectList_1()"
@@ -275,9 +279,10 @@ margin-top: 2%;">
           </select>
 
 
-
-          <div id="display" style="display:none; margin-left: 40%;margin-top: 5%;">
-            <select name="subcategory_1" id="subcategory_1" style="height: 48px;width: 282px;font-size: 17px;">
+<br>
+<br>
+          <div id="display" style="display:none;">
+            <select name="subcategory_1" id="subcategory_1" style="height: 48px;width: 282px;padding: 8px 15px;font-size: 17px;">
 
             </select>
 

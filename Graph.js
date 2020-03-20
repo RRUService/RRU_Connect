@@ -125,15 +125,15 @@ function myFunction() {
       var raw_data = [];
 
 
-
+    
 
       data.forEach(function (doc) {
-
+       
         report_month.push(doc.id);//เก็บเดือนของรายงานไว้ในตัวแปร report_month //doc.id
         report.push(doc.data());//เก็บยอดขายของสินค้าแต่ละอันไว้ในตัวแปร report
 
       });
-
+     
       report.forEach(function (report_item) {
 
         Object.keys(report_item).forEach(function (key) {
@@ -265,7 +265,7 @@ function graph(report_month, raw_data) {
   var number = [];
 
 
-  console.log(report_month)
+  console.log("report_month" + report_month)
   console.log(raw_data)
   raw_data.forEach(function (raw_data_item, index) {
     data.push(raw_data_item.key);
@@ -277,39 +277,51 @@ function graph(report_month, raw_data) {
 
   var options = {
     series: [{
-      name: 'ถูก',
+      name: 'ไม่ช่วย',
       data: number[0]
     }, {
-      name: 'ไม่ถูก',
+      name: 'ช่วย',
       data: number[1]
     }],
     chart: {
-      type: 'bar',
-      height: 500
+    type: 'bar',
+    height: 350,
+    width:550,
+    stacked: true,
+    stackType: '100%'
+  },
+  plotOptions: {
+    bar: {
+      horizontal: true,
     },
-    plotOptions: {
-      bar: {
-        horizontal: true,
-
-      }
+  },
+  stroke: {
+    width: 1,
+    colors: ['#fff']
+  },
+  title: {
+    text: 'จำนวนการช่วยตอบคำถามของแช็ตบ็อต'
+  },
+  xaxis: {
+    categories: report_month,
+ 
+  },
+  yaxis: {
+    title: {
+      text: undefined
     },
-    dataLabels: {
-      enabled: true,
-      offsetX: -6,
-      style: {
-        fontSize: '12px',
-        colors: ['#fff']
-      }
-    },
-    stroke: {
-      show: true,
-      width: 1,
-      colors: ['#fff']
-    },
-    xaxis: {
-      categories: report_month
-    }
+  },
+ 
+  fill: {
+    opacity: 1
+  },
+  legend: {
+    position: 'top',
+    horizontalAlign: 'center',
+    offsetX: 40
+  }
   };
+
 
 
 
@@ -330,18 +342,19 @@ function showData(report_month, number) {
   // เตรียมข้อมูล
   for (var i = 0; i < report_month.length; i++) {
 
-    MOUNTAINS.push({ "name": report_month[i], "ถูก": number[0][i], "ไม่ถูก": number[1][i]})
+    MOUNTAINS.push({ "name": report_month[i], "ช่วย": number[0][i], "ไม่ช่วย": number[1][i]})
 
   }
 
 
+  
   //draw table
   var table = document.createElement("table");
   table.className = "gridtable";
   var thead = document.createElement("thead");
   var tbody = document.createElement("tbody");
   var headRow = document.createElement("tr");
-  ["หัวข้อ", "จำนวนถูก", "จำนวนไม่ถูก"].forEach(function (el) {
+  ["หัวข้อ", "จำนวนช่วย", "จำนวนไม่ช่วย"].forEach(function (el) {
     var th = document.createElement("th");
     th.appendChild(document.createTextNode(el));
     headRow.appendChild(th);
@@ -351,6 +364,7 @@ function showData(report_month, number) {
   MOUNTAINS.forEach(function (el) {
     var tr = document.createElement("tr");
     for (var o in el) {
+      
       var td = document.createElement("td");
       td.appendChild(document.createTextNode(el[o]))
       tr.appendChild(td);

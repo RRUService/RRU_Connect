@@ -16,7 +16,8 @@
   <link rel="stylesheet" href="https://www.w3schools.com/w3css/4/w3.css">
   <link href='https://fonts.googleapis.com/css?family=Kanit&subset=thai,latin' rel='stylesheet' type='text/css'>
 
-
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.0/jquery.min.js"></script>
+  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
   <!--===============================================================================================-->
 
 </head>
@@ -26,11 +27,10 @@
   }
 
   .wrapper {
-    margin: 0 auto;
-    padding: 50px;
-    max-width: 1300px;
+   
+    max-width: 100%;
+    height: auto;
     
-    padding-left: 80px;
 
   }
 
@@ -58,7 +58,7 @@
   }
 
   .content {
-    padding: 16px;
+    margin: 46px 32px;
   }
   .sticky {
     position: fixed;
@@ -93,6 +93,10 @@
   .navbar {
   overflow: hidden;
   background-color: #0d6907;
+  display: block;
+    list-style-type: none;
+    text-align: center;
+  margin-top: 4%;
 
  
 }
@@ -160,8 +164,14 @@ hr.new5 {
     margin: 3px 0;
     margin-top: -5%;
     width: 57%;
-    margin-left: 29%;
+    margin-left: 13%;
 }
+.Logo {
+    width: 9%;
+    height: auto;
+    max-width: 500px;
+    margin-top: 2%;
+  }
 
 
 
@@ -175,21 +185,21 @@ hr.new5 {
 
  <div style="background-color: #66636342;margin: auto;width: 85%; height: 100%;">
 <div style="background-color: #f7f7f7;margin:auto; width: 90%;height: 100%;overflow: auto;">
-<div style="background-image:url(images/bg.jpg) ; width: 100%;height: 25%;">
- <div style=" width: 100%; height: 100%;">
-             <img src="images/ราชนครินทร์.png" style="width: 9%;height: 77%; margin-left: 18%;
- margin-top: 2%;">
-             <span
-               style="font-family: 'Kanit', sans-serif;font-size: 23px;font-weight: 900;color: #23560e;margin-left: 3%;">
-               ระบบจัดการข้อมูลแช็ตบ็อตสำหรับสนับสนุนงานวิชาการและงานทะเบียน
-               <hr class="new5">
- 
-             </span>
-             <span
-               style="font-family: 'Kanit', sans-serif;font-size: 23px;font-weight: 900;color: #23560e;margin-left: 43%;">มหาวิทยาลัยราชภัฏราชนครินทร์</span>
- 
-           </div>
-         </div>
+<div  style="background-image:url(images/bg.jpg) ; width: auto;height: auto;">
+  <div style=" width: 100%;
+  height: 100%;">
+              <center><img src="images/ราชนครินทร์.png" class="Logo">
+                <span
+                  style="font-family: 'Kanit', sans-serif;font-size:1.5vw;;font-weight: 900;color: #23560e;margin-left: 3%;">
+                  ระบบจัดการข้อมูลแช็ตบ็อตสำหรับสนับสนุนงานวิชาการและงานทะเบียน
+                  <hr class="new5">
+  
+                </span>
+                <span
+                  style="font-family: 'Kanit', sans-serif;font-size:1.5vw;font-weight: 900;color: #23560e;margin-left: 10%;">มหาวิทยาลัยราชภัฏราชนครินทร์</span>
+              </center>
+            </div>
+         
 
 
   
@@ -201,7 +211,7 @@ hr.new5 {
         </button>
         <div class="dropdown-content">
           <a href="Graph_count.html">จำนวนครั้งของการสอบถามในแต่ละหมวดหมู่</a>
-          <a href="Graph_count.html">จำนวนความถูกต้องของคำตอบในแต่ละหมวดหมู่</a>
+          <a href="Graph_count.html">จำนวนการช่วยตอบคำถามของแช็ตบ็อต</a>
         </div>
       </div>
 
@@ -217,11 +227,11 @@ hr.new5 {
       </div> 
     </div>
 
+  </div>
 
 
 
-
-
+  <div style="overflow-x:auto;">
   <div class="content" >
     <div class="wrapper">
 
@@ -243,6 +253,7 @@ hr.new5 {
       </table>
 
     </div>
+  </div>
   </div>
 </div>
  </div>
