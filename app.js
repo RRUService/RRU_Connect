@@ -430,7 +430,7 @@ function showData(doc) {
 
 
 
-		var r = confirm("คุณยืนยันที่จะลบข้อมูล?");
+		var r = confirm("คุณยืนยันที่จะลบข้อมูลคำตอบนี้ใช่หรือไม่");
 		let a = 0;
 		if (r == true) {
 			let id = e.target.getAttribute('data-id');

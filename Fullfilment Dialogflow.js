@@ -14,32 +14,76 @@ process.env.DEBUG = "dialogflow:debug"; // enables lib debugging statements
 
 
 exports.dialogflowFirebaseFulfillment = functions.https.onRequest((request, response) => {
- 
+
     const agent = new WebhookClient({ request, response });
-    const payload = {
-        "type": "template",
-        "altText": "this is a confirm template",
-        "template": {
-            "type": "confirm",
-            "actions": [
-                {
-                    "type": "message",
-                    "label": "ถูก",
-                    "text": "ถูก"
-                },
-                {
-                    "type": "message",
-                    "label": "ไม่ถูก",
-                    "text": "ไม่ถูก"
-                }
-            ],
-            "text": "คุณได้รับคำตอบถูกต้องไหมคะ?"
-        }
-    };
+    let user_id = request.body.originalDetectIntentRequest.payload.data.source.userId;
+    let pay = {
+        "type": "imagemap",
+        "baseUrl": "https://s3-ap-southeast-1.amazonaws.com/img-in-th/9c33fe1533a8315572294fcdbe714231.jpg?_ignored=",
+        "altText": "แบบประเมินความพึงพอใจ",
+        "baseSize": {
+          "width": 1040,
+          "height": 554
+        },
+        "actions": [
+          {
+            "type": "message",
+            "area": {
+              "x": 19,
+              "y": 247,
+              "width": 163,
+              "height": 297
+            },
+            "text": "มีความพึงพอใจต่อระบบน้อยที่สุด"
+          },
+          {
+            "type": "message",
+            "area": {
+              "x": 237,
+              "y": 249,
+              "width": 155,
+              "height": 293
+            },
+            "text": "มีความพึงพอใจต่อระบบน้อย"
+          },
+          {
+            "type": "message",
+            "area": {
+              "x": 434,
+              "y": 252,
+              "width": 175,
+              "height": 289
+            },
+            "text": "มีความพึงพอใจต่อระบบปานกลาง"
+          },
+          {
+            "type": "message",
+            "area": {
+              "x": 650,
+              "y": 252,
+              "width": 154,
+              "height": 286
+            },
+            "text": "มีความพึงพอใจต่อระบบมาก"
+          },
+          {
+            "type": "message",
+            "area": {
+              "x": 855,
+              "y": 254,
+              "width": 164,
+              "height": 283
+            },
+            "text": "มีความพึงพอใจต่อระบบมากที่สุด"
+          }
+        ]
+        };
+    
+    
+        let pay1 = new Payload(`LINE`, pay, { sendAsMessage: true });
+
     let date = new Date();
-
     //Count_Accuracy
-
     let Count_Intent = admin.firestore().collection("Count_Intent").doc(date.toLocaleDateString());
 
 
@@ -55,32 +99,32 @@ exports.dialogflowFirebaseFulfillment = functions.https.onRequest((request, resp
                 "actions": [
                     {
                         "type": "message",
-                        "label": "ถูก",
-                        "text": "ได้รับคำตอบถูกต้องในเรื่องการเพิ่มรายวิชา"
+                        "label": "ใช่",
+                        "text": "ช่วยตอบคำถามในเรื่องการเพิ่มรายวิชา"
                     },
                     {
                         "type": "message",
-                        "label": "ไม่ถูก",
-                        "text": "ได้รับคำตอบไม่ถูกต้องในเรื่องการเพิ่มรายวิชา"
+                        "label": "ไม่ใช่",
+                        "text": "ไม่ช่วยตอบคำถามในเรื่องการเพิ่มรายวิชา"
                     }
                 ],
-                "text": "คุณได้รับคำตอบถูกต้องไหมคะ?"
+                "text": "น้องบ๊อตช่วยตอบคำถามของท่านใช่หรือไม่?"
             }
         };
 
         //ประกาศตัวแปร payload เพื่อแสดงออกหน้าจอ
         let payload่json = new Payload(`LINE`, payload, { sendAsMessage: true });
         let text = request.body.queryResult.queryText;
-        let c = 'ได้รับคำตอบถูกต้องในเรื่องการเพิ่มรายวิชา';
-        let b = 'ได้รับคำตอบไม่ถูกต้องในเรื่องการเพิ่มรายวิชา';
+        let c = 'ช่วยตอบคำถามในเรื่องการเพิ่มรายวิชา';
+        let b = 'ไม่ช่วยตอบคำถามในเรื่องการเพิ่มรายวิชา';
 
         //Count_Accuracy
         let Count_Accuracy = admin.firestore().collection("Count_Accuracy").doc(date.toLocaleDateString()).collection("การลงทะเบียน").doc("การเพิ่มรายวิชา");
         Count_Accuracy.get().then(function (docs) {
             if (!docs.exists) {
                 Count_Accuracy.set({
-                    ถูก: 0,
-                    ไม่ถูก: 0
+                    ใช่: 0,
+                    ไม่ใช่: 0
                 });
             }
 
@@ -88,13 +132,16 @@ exports.dialogflowFirebaseFulfillment = functions.https.onRequest((request, resp
 
 
         if (text === c) {
-            agent.add("ขอบคุณค่ะ");
+            agent.add("กรุณากดดาวเพื่อประเมินความพึงพอใจหลังการใช้ระบบ")
+            agent.add(pay1);
+            agent.add("กรุณากดดาวเพื่อประเมินความพึงพอใจหลังการใช้ระบบ")
+            agent.add(pay1);
             db.runTransaction(t => {
                 return t.get(Count_Accuracy).then(doc => {
-                    let newcount = doc.data().ถูก + 1;
+                    let newcount = doc.data().ใช่ + 1;
 
                     t.update(Count_Accuracy, {
-                        ถูก: newcount,
+                        ใช่: newcount,
 
                     });
                 });
@@ -109,10 +156,10 @@ exports.dialogflowFirebaseFulfillment = functions.https.onRequest((request, resp
             agent.add("กรุณากดปุ่มติดต่อเจ้าหน้าที่");
             db.runTransaction(t => {
                 return t.get(Count_Accuracy).then(doc => {
-                    let newcount = doc.data().ไม่ถูก + 1;
+                    let newcount = doc.data().ไม่ใช่ + 1;
 
                     t.update(Count_Accuracy, {
-                        ไม่ถูก: newcount,
+                        ไม่ใช่: newcount,
 
                     });
                 });
@@ -168,7 +215,6 @@ exports.dialogflowFirebaseFulfillment = functions.https.onRequest((request, resp
         }
     }
 
-
     //การถอน
     function Withdraw_credit_registration(agent) {
         //เลขcount เวลามีคนเข้ามาสอบถาม
@@ -181,23 +227,23 @@ exports.dialogflowFirebaseFulfillment = functions.https.onRequest((request, resp
                 "actions": [
                     {
                         "type": "message",
-                        "label": "ถูก",
-                        "text": "ได้รับคำตอบถูกต้องในเรื่องการถอนรายวิชา"
+                        "label": "ใช่",
+                        "text": "ช่วยตอบคำถามในเรื่องการถอนรายวิชา"
                     },
                     {
                         "type": "message",
-                        "label": "ไม่ถูก",
-                        "text": "ได้รับคำตอบไม่ถูกต้องในเรื่องการถอนรายวิชา"
+                        "label": "ไม่ใช่",
+                        "text": "ไม่ช่วยตอบคำถามในเรื่องการถอนรายวิชา"
                     }
                 ],
-                "text": "คุณได้รับคำตอบถูกต้องไหมคะ?"
+                "text": "น้องบ็อตช่วยตอบคำถามของท่านใช่หรือไม่?"
             }
         };
         //ประกาศตัวแปร payload เพื่อแสดงออกหน้าจอ
         let payload่json = new Payload(`LINE`, payload, { sendAsMessage: true });
         let text = request.body.queryResult.queryText;
-        let c = 'ได้รับคำตอบถูกต้องในเรื่องการถอนรายวิชา';
-        let b = 'ได้รับคำตอบไม่ถูกต้องในเรื่องการถอนรายวิชา';
+        let c = 'ช่วยตอบคำถามในเรื่องการถอนรายวิชา';
+        let b = 'ไม่ช่วยตอบคำถามในเรื่องการถอนรายวิชา';
 
 
         //Count_Accuracy
@@ -205,21 +251,22 @@ exports.dialogflowFirebaseFulfillment = functions.https.onRequest((request, resp
         Count_Accuracy.get().then(function (docs) {
             if (!docs.exists) {
                 Count_Accuracy.set({
-                    ถูก: 0,
-                    ไม่ถูก: 0
+                    ใช่: 0,
+                    ไม่ใช่: 0
                 });
             }
 
         });
 
         if (text === c) {
-            agent.add("ขอบคุณค่ะ");
+            agent.add("กรุณากดดาวเพื่อประเมินความพึงพอใจหลังการใช้ระบบ")
+            agent.add(pay1);
             db.runTransaction(t => {
                 return t.get(Count_Accuracy).then(doc => {
-                    let newcount = doc.data().ถูก + 1;
+                    let newcount = doc.data().ใช่ + 1;
 
                     t.update(Count_Accuracy, {
-                        ถูก: newcount,
+                        ใช่: newcount,
 
                     });
                 });
@@ -234,10 +281,10 @@ exports.dialogflowFirebaseFulfillment = functions.https.onRequest((request, resp
             agent.add("กรุณากดปุ่มติดต่อเจ้าหน้าที่");
             db.runTransaction(t => {
                 return t.get(Count_Accuracy).then(doc => {
-                    let newcount = doc.data().ไม่ถูก + 1;
+                    let newcount = doc.data().ไม่ใช่ + 1;
 
                     t.update(Count_Accuracy, {
-                        ไม่ถูก: newcount,
+                        ไม่ใช่: newcount,
 
                     });
                 });
@@ -303,45 +350,46 @@ exports.dialogflowFirebaseFulfillment = functions.https.onRequest((request, resp
                 "actions": [
                     {
                         "type": "message",
-                        "label": "ถูก",
-                        "text": "ได้รับคำตอบถูกต้องในเรื่องการยกเลิกรายวิชา"
+                        "label": "ใช่",
+                        "text": "ช่วยตอบคำถามในเรื่องการยกเลิกรายวิชา"
                     },
                     {
                         "type": "message",
-                        "label": "ไม่ถูก",
-                        "text": "ได้รับคำตอบไม่ถูกต้องในเรื่องการยกเลิกรายวิชา"
+                        "label": "ไม่ใช่",
+                        "text": "ไม่ช่วยตอบคำถามในเรื่องการยกเลิกรายวิชา"
                     }
                 ],
-                "text": "คุณได้รับคำตอบถูกต้องไหมคะ?"
+                "text": "น้องบ็อตช่วยตอบคำถามของท่านใช่หรือไม่?"
             }
         };
 
         //ประกาศตัวแปร payload เพื่อแสดงออกหน้าจอ
         let payload่json = new Payload(`LINE`, payload, { sendAsMessage: true });
         let text = request.body.queryResult.queryText;
-        let c = 'ได้รับคำตอบถูกต้องในเรื่องการยกเลิกรายวิชา';
-        let b = 'ได้รับคำตอบไม่ถูกต้องในเรื่องการยกเลิกรายวิชา';
+        let c = 'ช่วยตอบคำถามในเรื่องการยกเลิกรายวิชา';
+        let b = 'ไม่ช่วยตอบคำถามในเรื่องการยกเลิกรายวิชา';
 
         //Count_Accuracy
         let Count_Accuracy = admin.firestore().collection("Count_Accuracy").doc(date.toLocaleDateString()).collection("การลงทะเบียน").doc("การยกเลิกรายวิชา");
         Count_Accuracy.get().then(function (docs) {
             if (!docs.exists) {
                 Count_Accuracy.set({
-                    ถูก: 0,
-                    ไม่ถูก: 0
+                    ใช่: 0,
+                    ไม่ใช่: 0
                 });
             }
 
         });
 
         if (text === c) {
-            agent.add("ขอบคุณค่ะ");
+            agent.add("กรุณากดดาวเพื่อประเมินความพึงพอใจหลังการใช้ระบบ")
+            agent.add(pay1);
             db.runTransaction(t => {
                 return t.get(Count_Accuracy).then(doc => {
-                    let newcount = doc.data().ถูก + 1;
+                    let newcount = doc.data().ใช่ + 1;
 
                     t.update(Count_Accuracy, {
-                        ถูก: newcount,
+                        ใช่: newcount,
 
                     });
                 });
@@ -356,10 +404,10 @@ exports.dialogflowFirebaseFulfillment = functions.https.onRequest((request, resp
             agent.add("กรุณากดปุ่มติดต่อเจ้าหน้าที่");
             db.runTransaction(t => {
                 return t.get(Count_Accuracy).then(doc => {
-                    let newcount = doc.data().ไม่ถูก + 1;
+                    let newcount = doc.data().ไม่ใช่ + 1;
 
                     t.update(Count_Accuracy, {
-                        ไม่ถูก: newcount,
+                        ไม่ใช่: newcount,
 
                     });
                 });
@@ -431,16 +479,16 @@ exports.dialogflowFirebaseFulfillment = functions.https.onRequest((request, resp
                 "actions": [
                     {
                         "type": "message",
-                        "label": "ถูก",
-                        "text": "ได้รับคำตอบถูกต้องในเรื่องการลืมรหัสผ่าน"
+                        "label": "ใช่",
+                        "text": "ช่วยตอบคำถามในเรื่องการลืมรหัสผ่าน"
                     },
                     {
                         "type": "message",
-                        "label": "ไม่ถูก",
-                        "text": "ได้รับคำตอบไม่ถูกต้องในเรื่องการลืมรหัสผ่าน"
+                        "label": "ไม่ใช่",
+                        "text": "ไม่ช่วยตอบคำถามในเรื่องการลืมรหัสผ่าน"
                     }
                 ],
-                "text": "คุณได้รับคำตอบถูกต้องไหมคะ?"
+                "text": "น้องบ็อตช่วยตอบคำถามของท่านใช่หรือไม่?"
             }
         };
 
@@ -448,29 +496,30 @@ exports.dialogflowFirebaseFulfillment = functions.https.onRequest((request, resp
         //ประกาศตัวแปร payload เพื่อแสดงออกหน้าจอ
         let payload่json = new Payload(`LINE`, payload, { sendAsMessage: true });
         let text = request.body.queryResult.queryText;
-        let c = 'ได้รับคำตอบถูกต้องในเรื่องการลืมรหัสผ่าน';
-        let b = 'ได้รับคำตอบไม่ถูกต้องในเรื่องการลืมรหัสผ่าน';
+        let c = 'ช่วยตอบคำถามในเรื่องการลืมรหัสผ่าน';
+        let b = 'ไม่ช่วยตอบคำถามในเรื่องการลืมรหัสผ่าน';
 
         //Count_Accuracy
         let Count_Accuracy = admin.firestore().collection("Count_Accuracy").doc(date.toLocaleDateString()).collection("การลงทะเบียน").doc("การลืมรหัสผ่าน");
         Count_Accuracy.get().then(function (docs) {
             if (!docs.exists) {
                 Count_Accuracy.set({
-                    ถูก: 0,
-                    ไม่ถูก: 0
+                    ใช่: 0,
+                    ไม่ใช่: 0
                 });
             }
 
         });
 
         if (text === c) {
-            agent.add("ขอบคุณค่ะ");
+            agent.add("กรุณากดดาวเพื่อประเมินความพึงพอใจหลังการใช้ระบบ")
+            agent.add(pay1);
             db.runTransaction(t => {
                 return t.get(Count_Accuracy).then(doc => {
-                    let newcount = doc.data().ถูก + 1;
+                    let newcount = doc.data().ใช่ + 1;
 
                     t.update(Count_Accuracy, {
-                        ถูก: newcount,
+                        ใช่: newcount,
 
                     });
                 });
@@ -485,10 +534,10 @@ exports.dialogflowFirebaseFulfillment = functions.https.onRequest((request, resp
             agent.add("กรุณากดปุ่มติดต่อเจ้าหน้าที่");
             db.runTransaction(t => {
                 return t.get(Count_Accuracy).then(doc => {
-                    let newcount = doc.data().ไม่ถูก + 1;
+                    let newcount = doc.data().ไม่ใช่ + 1;
 
                     t.update(Count_Accuracy, {
-                        ไม่ถูก: newcount,
+                        ไม่ใช่: newcount,
 
                     });
                 });
@@ -554,45 +603,46 @@ exports.dialogflowFirebaseFulfillment = functions.https.onRequest((request, resp
                 "actions": [
                     {
                         "type": "message",
-                        "label": "ถูก",
-                        "text": "ได้รับคำตอบถูกต้องในเรื่องการลงทะเบียนไม่ได้"
+                        "label": "ใช่",
+                        "text": "ช่วยตอบคำถามในเรื่องการลงทะเบียนไม่ได้"
                     },
                     {
                         "type": "message",
-                        "label": "ไม่ถูก",
-                        "text": "ได้รับคำตอบไม่ถูกต้องในเรื่องการลงทะเบียนไม่ได้"
+                        "label": "ไม่ใช่",
+                        "text": "ไม่ช่วยตอบคำถามในเรื่องการลงทะเบียนไม่ได้"
                     }
                 ],
-                "text": "คุณได้รับคำตอบถูกต้องไหมคะ?"
+                "text": "น้องบ็อตช่วยตอบคำถามของท่านใช่หรือไม่?"
             }
         };
 
         //ประกาศตัวแปร payload เพื่อแสดงออกหน้าจอ
         let payload่json = new Payload(`LINE`, payload, { sendAsMessage: true });
         let text = request.body.queryResult.queryText;
-        let c = 'ได้รับคำตอบถูกต้องในเรื่องการลงทะเบียนไม่ได้';
-        let b = 'ได้รับคำตอบไม่ถูกต้องในเรื่องการลงทะเบียนไม่ได้';
+        let c = 'ช่วยตอบคำถามในเรื่องการลงทะเบียนไม่ได้';
+        let b = 'ไม่ช่วยตอบคำถามในเรื่องการลงทะเบียนไม่ได้';
 
         //Count_Accuracy
         let Count_Accuracy = admin.firestore().collection("Count_Accuracy").doc(date.toLocaleDateString()).collection("การลงทะเบียน").doc("การลงทะเบียนไม่ได้");
         Count_Accuracy.get().then(function (docs) {
             if (!docs.exists) {
                 Count_Accuracy.set({
-                    ถูก: 0,
-                    ไม่ถูก: 0
+                    ใช่: 0,
+                    ไม่ใช่: 0
                 });
             }
 
         });
 
         if (text === c) {
-            agent.add("ขอบคุณค่ะ");
+            agent.add("กรุณากดดาวเพื่อประเมินความพึงพอใจหลังการใช้ระบบ")
+            agent.add(pay1);
             db.runTransaction(t => {
                 return t.get(Count_Accuracy).then(doc => {
-                    let newcount = doc.data().ถูก + 1;
+                    let newcount = doc.data().ใช่ + 1;
 
                     t.update(Count_Accuracy, {
-                        ถูก: newcount,
+                        ใช่: newcount,
 
                     });
                 });
@@ -607,10 +657,10 @@ exports.dialogflowFirebaseFulfillment = functions.https.onRequest((request, resp
             agent.add("กรุณากดปุ่มติดต่อเจ้าหน้าที่");
             db.runTransaction(t => {
                 return t.get(Count_Accuracy).then(doc => {
-                    let newcount = doc.data().ไม่ถูก + 1;
+                    let newcount = doc.data().ไม่ใช่ + 1;
 
                     t.update(Count_Accuracy, {
-                        ไม่ถูก: newcount,
+                        ไม่ใช่: newcount,
 
                     });
                 });
@@ -676,32 +726,32 @@ exports.dialogflowFirebaseFulfillment = functions.https.onRequest((request, resp
                 "actions": [
                     {
                         "type": "message",
-                        "label": "ถูก",
-                        "text": "ได้รับคำตอบถูกต้องในเรื่องการขอเปิดรายวิชาเพิ่ม"
+                        "label": "ใช่",
+                        "text": "ช่วยตอบคำถามในเรื่องการขอเปิดรายวิชาเพิ่ม"
                     },
                     {
                         "type": "message",
-                        "label": "ไม่ถูก",
-                        "text": "ได้รับคำตอบไม่ถูกต้องในเรื่องการขอเปิดรายวิชาเพิ่ม"
+                        "label": "ไม่ใช่",
+                        "text": "ไม่ช่วยตอบคำถามในเรื่องการขอเปิดรายวิชาเพิ่ม"
                     }
                 ],
-                "text": "คุณได้รับคำตอบถูกต้องไหมคะ?"
+                "text": "น้องบ็อตช่วยตอบคำถามของท่านใช่หรือไม่?"
             }
         };
 
         //ประกาศตัวแปร payload เพื่อแสดงออกหน้าจอ
         let payload่json = new Payload(`LINE`, payload, { sendAsMessage: true });
         let text = request.body.queryResult.queryText;
-        let c = 'ได้รับคำตอบถูกต้องในเรื่องการขอเปิดรายวิชาเพิ่ม';
-        let b = 'ได้รับคำตอบไม่ถูกต้องในเรื่องการขอเปิดรายวิชาเพิ่ม';
+        let c = 'ช่วยตอบคำถามในเรื่องการขอเปิดรายวิชาเพิ่ม';
+        let b = 'ไม่ช่วยตอบคำถามในเรื่องการขอเปิดรายวิชาเพิ่ม';
 
         //Count_Accuracy
         let Count_Accuracy = admin.firestore().collection("Count_Accuracy").doc(date.toLocaleDateString()).collection("การลงทะเบียน").doc("การขอเปิดรายวิชาเพิ่ม");
         Count_Accuracy.get().then(function (docs) {
             if (!docs.exists) {
                 Count_Accuracy.set({
-                    ถูก: 0,
-                    ไม่ถูก: 0
+                    ใช่: 0,
+                    ไม่ใช่: 0
                 });
             }
 
@@ -709,13 +759,14 @@ exports.dialogflowFirebaseFulfillment = functions.https.onRequest((request, resp
 
 
         if (text === c) {
-            agent.add("ขอบคุณค่ะ");
+            agent.add("กรุณากดดาวเพื่อประเมินความพึงพอใจหลังการใช้ระบบ")
+            agent.add(pay1);
             db.runTransaction(t => {
                 return t.get(Count_Accuracy).then(doc => {
-                    let newcount = doc.data().ถูก + 1;
+                    let newcount = doc.data().ใช่ + 1;
 
                     t.update(Count_Accuracy, {
-                        ถูก: newcount,
+                        ใช่: newcount,
 
                     });
                 });
@@ -730,10 +781,10 @@ exports.dialogflowFirebaseFulfillment = functions.https.onRequest((request, resp
             agent.add("กรุณากดปุ่มติดต่อเจ้าหน้าที่");
             db.runTransaction(t => {
                 return t.get(Count_Accuracy).then(doc => {
-                    let newcount = doc.data().ไม่ถูก + 1;
+                    let newcount = doc.data().ไม่ใช่ + 1;
 
                     t.update(Count_Accuracy, {
-                        ไม่ถูก: newcount,
+                        ไม่ใช่: newcount,
 
                     });
                 });
@@ -797,32 +848,32 @@ exports.dialogflowFirebaseFulfillment = functions.https.onRequest((request, resp
                 "actions": [
                     {
                         "type": "message",
-                        "label": "ถูก",
-                        "text": "ได้รับคำตอบถูกต้องในเรื่องการลงทะเบียนซ้ำ"
+                        "label": "ใช่",
+                        "text": "ช่วยตอบคำถามในเรื่องการลงทะเบียนซ้ำ"
                     },
                     {
                         "type": "message",
-                        "label": "ไม่ถูก",
-                        "text": "ได้รับคำตอบไม่ถูกต้องในเรื่องการลงทะเบียนซ้ำ"
+                        "label": "ไม่ใช่",
+                        "text": "ไม่ช่วยตอบคำถามในเรื่องการลงทะเบียนซ้ำ"
                     }
                 ],
-                "text": "คุณได้รับคำตอบถูกต้องไหมคะ?"
+                "text": "น้องบ็อตช่วยตอบคำถามของท่านใช่หรือไม่?"
             }
         };
 
         //ประกาศตัวแปร payload เพื่อแสดงออกหน้าจอ
         let payload่json = new Payload(`LINE`, payload, { sendAsMessage: true });
         let text = request.body.queryResult.queryText;
-        let c = 'ได้รับคำตอบถูกต้องในเรื่องการลงทะเบียนซ้ำ';
-        let b = 'ได้รับคำตอบไม่ถูกต้องในเรื่องการลงทะเบียนซ้ำ';
+        let c = 'ช่วยตอบคำถามในเรื่องการลงทะเบียนซ้ำ';
+        let b = 'ไม่ช่วยตอบคำถามในเรื่องการลงทะเบียนซ้ำ';
 
         //Count_Accuracy
         let Count_Accuracy = admin.firestore().collection("Count_Accuracy").doc(date.toLocaleDateString()).collection("การลงทะเบียน").doc("การลงทะเบียนซ้ำ");
         Count_Accuracy.get().then(function (docs) {
             if (!docs.exists) {
                 Count_Accuracy.set({
-                    ถูก: 0,
-                    ไม่ถูก: 0
+                    ใช่: 0,
+                    ไม่ใช่: 0
                 });
             }
 
@@ -830,13 +881,14 @@ exports.dialogflowFirebaseFulfillment = functions.https.onRequest((request, resp
 
 
         if (text === c) {
-            agent.add("ขอบคุณค่ะ");
+            agent.add("กรุณากดดาวเพื่อประเมินความพึงพอใจหลังการใช้ระบบ")
+            agent.add(pay1);
             db.runTransaction(t => {
                 return t.get(Count_Accuracy).then(doc => {
-                    let newcount = doc.data().ถูก + 1;
+                    let newcount = doc.data().ใช่ + 1;
 
                     t.update(Count_Accuracy, {
-                        ถูก: newcount,
+                        ใช่: newcount,
 
                     });
                 });
@@ -851,10 +903,10 @@ exports.dialogflowFirebaseFulfillment = functions.https.onRequest((request, resp
             agent.add("กรุณากดปุ่มติดต่อเจ้าหน้าที่");
             db.runTransaction(t => {
                 return t.get(Count_Accuracy).then(doc => {
-                    let newcount = doc.data().ไม่ถูก + 1;
+                    let newcount = doc.data().ไม่ใช่ + 1;
 
                     t.update(Count_Accuracy, {
-                        ไม่ถูก: newcount,
+                        ไม่ใช่: newcount,
 
                     });
                 });
@@ -923,32 +975,32 @@ exports.dialogflowFirebaseFulfillment = functions.https.onRequest((request, resp
                 "actions": [
                     {
                         "type": "message",
-                        "label": "ถูก",
-                        "text": "ได้รับคำตอบถูกต้องในเรื่องหน่วยกิตที่ต้องสะสม"
+                        "label": "ใช่",
+                        "text": "ช่วยตอบคำถามในเรื่องหน่วยกิตที่ต้องสะสม"
                     },
                     {
                         "type": "message",
-                        "label": "ไม่ถูก",
-                        "text": "ได้รับคำตอบไม่ถูกต้องในเรื่องหน่วยกิตที่ต้องสะสม"
+                        "label": "ไม่ใช่",
+                        "text": "ไม่ช่วยตอบคำถามในเรื่องหน่วยกิตที่ต้องสะสม"
                     }
                 ],
-                "text": "คุณได้รับคำตอบถูกต้องไหมคะ?"
+                "text": "น้องบ็อตช่วยตอบคำถามของท่านใช่หรือไม่?"
             }
         };
 
         //ประกาศตัวแปร payload เพื่อแสดงออกหน้าจอ
         let payload่json = new Payload(`LINE`, payload, { sendAsMessage: true });
         let text = request.body.queryResult.queryText;
-        let c = 'ได้รับคำตอบถูกต้องในเรื่องหน่วยกิตที่ต้องสะสม';
-        let b = 'ได้รับคำตอบไม่ถูกต้องในเรื่องหน่วยกิตที่ต้องสะสม';
+        let c = 'ช่วยตอบคำถามในเรื่องหน่วยกิตที่ต้องสะสม';
+        let b = 'ไม่ช่วยตอบคำถามในเรื่องหน่วยกิตที่ต้องสะสม';
 
         //Count_Accuracy
         let Count_Accuracy = admin.firestore().collection("Count_Accuracy").doc(date.toLocaleDateString()).collection("การลงทะเบียน").doc("หน่วยกิตที่ต้องสะสม");
         Count_Accuracy.get().then(function (docs) {
             if (!docs.exists) {
                 Count_Accuracy.set({
-                    ถูก: 0,
-                    ไม่ถูก: 0
+                    ใช่: 0,
+                    ไม่ใช่: 0
                 });
             }
 
@@ -956,13 +1008,14 @@ exports.dialogflowFirebaseFulfillment = functions.https.onRequest((request, resp
 
 
         if (text === c) {
-            agent.add("ขอบคุณค่ะ");
+            agent.add("กรุณากดดาวเพื่อประเมินความพึงพอใจหลังการใช้ระบบ")
+            agent.add(pay1);
             db.runTransaction(t => {
                 return t.get(Count_Accuracy).then(doc => {
-                    let newcount = doc.data().ถูก + 1;
+                    let newcount = doc.data().ใช่ + 1;
 
                     t.update(Count_Accuracy, {
-                        ถูก: newcount,
+                        ใช่: newcount,
 
                     });
                 });
@@ -977,10 +1030,10 @@ exports.dialogflowFirebaseFulfillment = functions.https.onRequest((request, resp
             agent.add("กรุณากดปุ่มติดต่อเจ้าหน้าที่");
             db.runTransaction(t => {
                 return t.get(Count_Accuracy).then(doc => {
-                    let newcount = doc.data().ไม่ถูก + 1;
+                    let newcount = doc.data().ไม่ใช่ + 1;
 
                     t.update(Count_Accuracy, {
-                        ไม่ถูก: newcount,
+                        ไม่ใช่: newcount,
 
                     });
                 });
@@ -1046,32 +1099,32 @@ exports.dialogflowFirebaseFulfillment = functions.https.onRequest((request, resp
                 "actions": [
                     {
                         "type": "message",
-                        "label": "ถูก",
-                        "text": "ได้รับคำตอบถูกต้องในเรื่องระยะเวลาในการศึกษา 4 ปี"
+                        "label": "ใช่",
+                        "text": "ช่วยตอบคำถามในเรื่องระยะเวลาในการศึกษา 4 ปี"
                     },
                     {
                         "type": "message",
-                        "label": "ไม่ถูก",
-                        "text": "ได้รับคำตอบไม่ถูกต้องในเรื่องระยะเวลาในการศึกษา 4 ปี"
+                        "label": "ไม่ใช่",
+                        "text": "ไม่ช่วยตอบคำถามในเรื่องระยะเวลาในการศึกษา 4 ปี"
                     }
                 ],
-                "text": "คุณได้รับคำตอบถูกต้องไหมคะ?"
+                "text": "น้องบ็อตช่วยตอบคำถามของท่านใช่หรือไม่?"
             }
         };
 
         //ประกาศตัวแปร payload เพื่อแสดงออกหน้าจอ
         let payload่json = new Payload(`LINE`, payload, { sendAsMessage: true });
         let text = request.body.queryResult.queryText;
-        let c = 'ได้รับคำตอบถูกต้องในเรื่องระยะเวลาในการศึกษา 4 ปี';
-        let b = 'ได้รับคำตอบไม่ถูกต้องในเรื่องระยะเวลาในการศึกษา 4 ปี';
+        let c = 'ช่วยตอบคำถามในเรื่องระยะเวลาในการศึกษา 4 ปี';
+        let b = 'ไม่ช่วยตอบคำถามในเรื่องระยะเวลาในการศึกษา 4 ปี';
 
         //Count_Accuracy
         let Count_Accuracy = admin.firestore().collection("Count_Accuracy").doc(date.toLocaleDateString()).collection("การลงทะเบียน").doc("ระยะเวลาในการศึกษา 4 ปี");
         Count_Accuracy.get().then(function (docs) {
             if (!docs.exists) {
                 Count_Accuracy.set({
-                    ถูก: 0,
-                    ไม่ถูก: 0
+                    ใช่: 0,
+                    ไม่ใช่: 0
                 });
             }
 
@@ -1079,13 +1132,14 @@ exports.dialogflowFirebaseFulfillment = functions.https.onRequest((request, resp
 
 
         if (text === c) {
-            agent.add("ขอบคุณค่ะ");
+            agent.add("กรุณากดดาวเพื่อประเมินความพึงพอใจหลังการใช้ระบบ")
+            agent.add(pay1);
             db.runTransaction(t => {
                 return t.get(Count_Accuracy).then(doc => {
-                    let newcount = doc.data().ถูก + 1;
+                    let newcount = doc.data().ใช่ + 1;
 
                     t.update(Count_Accuracy, {
-                        ถูก: newcount,
+                        ใช่: newcount,
 
                     });
                 });
@@ -1100,10 +1154,10 @@ exports.dialogflowFirebaseFulfillment = functions.https.onRequest((request, resp
             agent.add("กรุณากดปุ่มติดต่อเจ้าหน้าที่");
             db.runTransaction(t => {
                 return t.get(Count_Accuracy).then(doc => {
-                    let newcount = doc.data().ไม่ถูก + 1;
+                    let newcount = doc.data().ไม่ใช่ + 1;
 
                     t.update(Count_Accuracy, {
-                        ไม่ถูก: newcount,
+                        ไม่ใช่: newcount,
 
                     });
                 });
@@ -1168,32 +1222,32 @@ exports.dialogflowFirebaseFulfillment = functions.https.onRequest((request, resp
                 "actions": [
                     {
                         "type": "message",
-                        "label": "ถูก",
-                        "text": "ได้รับคำตอบถูกต้องในเรื่องระยะเวลาในการศึกษา 5 ปี"
+                        "label": "ใช่",
+                        "text": "ช่วยตอบคำถามในเรื่องระยะเวลาในการศึกษา 5 ปี"
                     },
                     {
                         "type": "message",
-                        "label": "ไม่ถูก",
-                        "text": "ได้รับคำตอบไม่ถูกต้องในเรื่องระยะเวลาในการศึกษา 5 ปี"
+                        "label": "ไม่ใช่",
+                        "text": "ไม่ช่วยตอบคำถามในเรื่องระยะเวลาในการศึกษา 5 ปี"
                     }
                 ],
-                "text": "คุณได้รับคำตอบถูกต้องไหมคะ?"
+                "text": "น้องบ็อตช่วยตอบคำถามของท่านใช่หรือไม่?"
             }
         };
 
         //ประกาศตัวแปร payload เพื่อแสดงออกหน้าจอ
         let payload่json = new Payload(`LINE`, payload, { sendAsMessage: true });
         let text = request.body.queryResult.queryText;
-        let c = 'ได้รับคำตอบถูกต้องในเรื่องระยะเวลาในการศึกษา 5 ปี';
-        let b = 'ได้รับคำตอบไม่ถูกต้องในเรื่องระยะเวลาในการศึกษา 5 ปี';
+        let c = 'ช่วยตอบคำถามในเรื่องระยะเวลาในการศึกษา 5 ปี';
+        let b = 'ไม่ช่วยตอบคำถามในเรื่องระยะเวลาในการศึกษา 5 ปี';
 
         //Count_Accuracy
         let Count_Accuracy = admin.firestore().collection("Count_Accuracy").doc(date.toLocaleDateString()).collection("การลงทะเบียน").doc("ระยะเวลาในการศึกษา 5 ปี");
         Count_Accuracy.get().then(function (docs) {
             if (!docs.exists) {
                 Count_Accuracy.set({
-                    ถูก: 0,
-                    ไม่ถูก: 0
+                    ใช่: 0,
+                    ไม่ใช่: 0
                 });
             }
 
@@ -1201,13 +1255,14 @@ exports.dialogflowFirebaseFulfillment = functions.https.onRequest((request, resp
 
 
         if (text === c) {
-            agent.add("ขอบคุณค่ะ");
+            agent.add("กรุณากดดาวเพื่อประเมินความพึงพอใจหลังการใช้ระบบ")
+            agent.add(pay1);
             db.runTransaction(t => {
                 return t.get(Count_Accuracy).then(doc => {
-                    let newcount = doc.data().ถูก + 1;
+                    let newcount = doc.data().ใช่ + 1;
 
                     t.update(Count_Accuracy, {
-                        ถูก: newcount,
+                        ใช่: newcount,
 
                     });
                 });
@@ -1222,10 +1277,10 @@ exports.dialogflowFirebaseFulfillment = functions.https.onRequest((request, resp
             agent.add("กรุณากดปุ่มติดต่อเจ้าหน้าที่");
             db.runTransaction(t => {
                 return t.get(Count_Accuracy).then(doc => {
-                    let newcount = doc.data().ไม่ถูก + 1;
+                    let newcount = doc.data().ไม่ใช่ + 1;
 
                     t.update(Count_Accuracy, {
-                        ไม่ถูก: newcount,
+                        ไม่ใช่: newcount,
 
                     });
                 });
@@ -1291,32 +1346,32 @@ exports.dialogflowFirebaseFulfillment = functions.https.onRequest((request, resp
                 "actions": [
                     {
                         "type": "message",
-                        "label": "ถูก",
-                        "text": "ได้รับคำตอบถูกต้องในเรื่องหลักสูตรปริญญาตรีต่อเนื่อง"
+                        "label": "ใช่",
+                        "text": "ช่วยตอบคำถามในเรื่องหลักสูตรปริญญาตรีต่อเนื่อง"
                     },
                     {
                         "type": "message",
-                        "label": "ไม่ถูก",
-                        "text": "ได้รับคำตอบไม่ถูกต้องในเรื่องหลักสูตรปริญญาตรีต่อเนื่อง"
+                        "label": "ไม่ใช่",
+                        "text": "ไม่ช่วยตอบคำถามในเรื่องหลักสูตรปริญญาตรีต่อเนื่อง"
                     }
                 ],
-                "text": "คุณได้รับคำตอบถูกต้องไหมคะ?"
+                "text": "น้องบ็อตช่วยตอบคำถามของท่านใช่หรือไม่?"
             }
         };
 
         //ประกาศตัวแปร payload เพื่อแสดงออกหน้าจอ
         let payload่json = new Payload(`LINE`, payload, { sendAsMessage: true });
         let text = request.body.queryResult.queryText;
-        let c = 'ได้รับคำตอบถูกต้องในเรื่องหลักสูตรปริญญาตรีต่อเนื่อง';
-        let b = 'ได้รับคำตอบไม่ถูกต้องในเรื่องหลักสูตรปริญญาตรีต่อเนื่อง';
+        let c = 'ช่วยตอบคำถามในเรื่องหลักสูตรปริญญาตรีต่อเนื่อง';
+        let b = 'ไม่ช่วยตอบคำถามในเรื่องหลักสูตรปริญญาตรีต่อเนื่อง';
 
         //Count_Accuracy
         let Count_Accuracy = admin.firestore().collection("Count_Accuracy").doc(date.toLocaleDateString()).collection("การลงทะเบียน").doc("หลักสูตรปริญญาตรีต่อเนื่อง");
         Count_Accuracy.get().then(function (docs) {
             if (!docs.exists) {
                 Count_Accuracy.set({
-                    ถูก: 0,
-                    ไม่ถูก: 0
+                    ใช่: 0,
+                    ไม่ใช่: 0
                 });
             }
 
@@ -1324,13 +1379,14 @@ exports.dialogflowFirebaseFulfillment = functions.https.onRequest((request, resp
 
 
         if (text === c) {
-            agent.add("ขอบคุณค่ะ");
+            agent.add("กรุณากดดาวเพื่อประเมินความพึงพอใจหลังการใช้ระบบ")
+            agent.add(pay1);
             db.runTransaction(t => {
                 return t.get(Count_Accuracy).then(doc => {
-                    let newcount = doc.data().ถูก + 1;
+                    let newcount = doc.data().ใช่ + 1;
 
                     t.update(Count_Accuracy, {
-                        ถูก: newcount,
+                        ใช่: newcount,
 
                     });
                 });
@@ -1345,10 +1401,10 @@ exports.dialogflowFirebaseFulfillment = functions.https.onRequest((request, resp
             agent.add("กรุณากดปุ่มติดต่อเจ้าหน้าที่");
             db.runTransaction(t => {
                 return t.get(Count_Accuracy).then(doc => {
-                    let newcount = doc.data().ไม่ถูก + 1;
+                    let newcount = doc.data().ไม่ใช่ + 1;
 
                     t.update(Count_Accuracy, {
-                        ไม่ถูก: newcount,
+                        ไม่ใช่: newcount,
 
                     });
                 });
@@ -1411,32 +1467,32 @@ exports.dialogflowFirebaseFulfillment = functions.https.onRequest((request, resp
                 "actions": [
                     {
                         "type": "message",
-                        "label": "ถูก",
-                        "text": "ได้รับคำตอบถูกต้องในเรื่องการลงทะเบียนเรียน"
+                        "label": "ใช่",
+                        "text": "ช่วยตอบคำถามในเรื่องการลงทะเบียนเรียน"
                     },
                     {
                         "type": "message",
-                        "label": "ไม่ถูก",
-                        "text": "ได้รับคำตอบไม่ถูกต้องในเรื่องการลงทะเบียนเรียน"
+                        "label": "ไม่ใช่",
+                        "text": "ไม่ช่วยตอบคำถามในเรื่องการลงทะเบียนเรียน"
                     }
                 ],
-                "text": "คุณได้รับคำตอบถูกต้องไหมคะ?"
+                "text": "น้องบ็อตช่วยตอบคำถามของท่านใช่หรือไม่?"
             }
         };
 
         //ประกาศตัวแปร payload เพื่อแสดงออกหน้าจอ
         let payload่json = new Payload(`LINE`, payload, { sendAsMessage: true });
         let text = request.body.queryResult.queryText;
-        let c = 'ได้รับคำตอบถูกต้องในเรื่องการลงทะเบียนเรียน';
-        let b = 'ได้รับคำตอบไม่ถูกต้องในเรื่องการลงทะเบียนเรียน';
+        let c = 'ช่วยตอบคำถามในเรื่องการลงทะเบียนเรียน';
+        let b = 'ไม่ช่วยตอบคำถามในเรื่องการลงทะเบียนเรียน';
 
         //Count_Accuracy
         let Count_Accuracy = admin.firestore().collection("Count_Accuracy").doc(date.toLocaleDateString()).collection("การลงทะเบียน").doc("การลงทะเบียนเรียน");
         Count_Accuracy.get().then(function (docs) {
             if (!docs.exists) {
                 Count_Accuracy.set({
-                    ถูก: 0,
-                    ไม่ถูก: 0
+                    ใช่: 0,
+                    ไม่ใช่: 0
                 });
             }
 
@@ -1444,13 +1500,14 @@ exports.dialogflowFirebaseFulfillment = functions.https.onRequest((request, resp
 
 
         if (text === c) {
-            agent.add("ขอบคุณค่ะ");
+            agent.add("กรุณากดดาวเพื่อประเมินความพึงพอใจหลังการใช้ระบบ")
+            agent.add(pay1);
             db.runTransaction(t => {
                 return t.get(Count_Accuracy).then(doc => {
-                    let newcount = doc.data().ถูก + 1;
+                    let newcount = doc.data().ใช่ + 1;
 
                     t.update(Count_Accuracy, {
-                        ถูก: newcount,
+                        ใช่: newcount,
 
                     });
                 });
@@ -1465,10 +1522,10 @@ exports.dialogflowFirebaseFulfillment = functions.https.onRequest((request, resp
             agent.add("กรุณากดปุ่มติดต่อเจ้าหน้าที่");
             db.runTransaction(t => {
                 return t.get(Count_Accuracy).then(doc => {
-                    let newcount = doc.data().ไม่ถูก + 1;
+                    let newcount = doc.data().ไม่ใช่ + 1;
 
                     t.update(Count_Accuracy, {
-                        ไม่ถูก: newcount,
+                        ไม่ใช่: newcount,
 
                     });
                 });
@@ -1537,32 +1594,32 @@ exports.dialogflowFirebaseFulfillment = functions.https.onRequest((request, resp
                 "actions": [
                     {
                         "type": "message",
-                        "label": "ถูก",
-                        "text": "ได้รับคำตอบถูกต้องในเรื่องการลากิจ"
+                        "label": "ใช่",
+                        "text": "ช่วยตอบคำถามในเรื่องการลากิจ"
                     },
                     {
                         "type": "message",
-                        "label": "ไม่ถูก",
-                        "text": "ได้รับคำตอบไม่ถูกต้องในเรื่องการลากิจ"
+                        "label": "ไม่ใช่",
+                        "text": "ไม่ช่วยตอบคำถามในเรื่องการลากิจ"
                     }
                 ],
-                "text": "คุณได้รับคำตอบถูกต้องไหมคะ?"
+                "text": "น้องบ็อตช่วยตอบคำถามของท่านใช่หรือไม่?"
             }
         };
 
         //ประกาศตัวแปร payload เพื่อแสดงออกหน้าจอ
         let payload่json = new Payload(`LINE`, payload, { sendAsMessage: true });
         let text = request.body.queryResult.queryText;
-        let c = 'ได้รับคำตอบถูกต้องในเรื่องการลากิจ';
-        let b = 'ได้รับคำตอบไม่ถูกต้องในเรื่องการลากิจ';
+        let c = 'ช่วยตอบคำถามในเรื่องการลากิจ';
+        let b = 'ไม่ช่วยตอบคำถามในเรื่องการลากิจ';
 
         //Count_Accuracy
         let Count_Accuracy = admin.firestore().collection("Count_Accuracy").doc(date.toLocaleDateString()).collection("การลา").doc("การลากิจ");
         Count_Accuracy.get().then(function (docs) {
             if (!docs.exists) {
                 Count_Accuracy.set({
-                    ถูก: 0,
-                    ไม่ถูก: 0
+                    ใช่: 0,
+                    ไม่ใช่: 0
                 });
             }
 
@@ -1570,13 +1627,14 @@ exports.dialogflowFirebaseFulfillment = functions.https.onRequest((request, resp
 
 
         if (text === c) {
-            agent.add("ขอบคุณค่ะ");
+            agent.add("กรุณากดดาวเพื่อประเมินความพึงพอใจหลังการใช้ระบบ")
+            agent.add(pay1);
             db.runTransaction(t => {
                 return t.get(Count_Accuracy).then(doc => {
-                    let newcount = doc.data().ถูก + 1;
+                    let newcount = doc.data().ใช่ + 1;
 
                     t.update(Count_Accuracy, {
-                        ถูก: newcount,
+                        ใช่: newcount,
 
                     });
                 });
@@ -1591,10 +1649,10 @@ exports.dialogflowFirebaseFulfillment = functions.https.onRequest((request, resp
             agent.add("กรุณากดปุ่มติดต่อเจ้าหน้าที่");
             db.runTransaction(t => {
                 return t.get(Count_Accuracy).then(doc => {
-                    let newcount = doc.data().ไม่ถูก + 1;
+                    let newcount = doc.data().ไม่ใช่ + 1;
 
                     t.update(Count_Accuracy, {
-                        ไม่ถูก: newcount,
+                        ไม่ใช่: newcount,
 
                     });
                 });
@@ -1658,32 +1716,32 @@ exports.dialogflowFirebaseFulfillment = functions.https.onRequest((request, resp
                 "actions": [
                     {
                         "type": "message",
-                        "label": "ถูก",
-                        "text": "ได้รับคำตอบถูกต้องในเรื่องการลาป่วย"
+                        "label": "ใช่",
+                        "text": "ช่วยตอบคำถามในเรื่องการลาป่วย"
                     },
                     {
                         "type": "message",
-                        "label": "ไม่ถูก",
-                        "text": "ได้รับคำตอบไม่ถูกต้องในเรื่องการลาป่วย"
+                        "label": "ไม่ใช่",
+                        "text": "ไม่ช่วยตอบคำถามในเรื่องการลาป่วย"
                     }
                 ],
-                "text": "คุณได้รับคำตอบถูกต้องไหมคะ?"
+                "text": "น้องบ็อตช่วยตอบคำถามของท่านใช่หรือไม่?"
             }
         };
 
         //ประกาศตัวแปร payload เพื่อแสดงออกหน้าจอ
         let payload่json = new Payload(`LINE`, payload, { sendAsMessage: true });
         let text = request.body.queryResult.queryText;
-        let c = 'ได้รับคำตอบถูกต้องในเรื่องการลาป่วย';
-        let b = 'ได้รับคำตอบไม่ถูกต้องในเรื่องการลาป่วย';
+        let c = 'ช่วยตอบคำถามในเรื่องการลาป่วย';
+        let b = 'ไม่ช่วยตอบคำถามในเรื่องการลาป่วย';
 
         //Count_Accuracy
         let Count_Accuracy = admin.firestore().collection("Count_Accuracy").doc(date.toLocaleDateString()).collection("การลา").doc("การลาป่วย");
         Count_Accuracy.get().then(function (docs) {
             if (!docs.exists) {
                 Count_Accuracy.set({
-                    ถูก: 0,
-                    ไม่ถูก: 0
+                    ใช่: 0,
+                    ไม่ใช่: 0
                 });
             }
 
@@ -1691,13 +1749,14 @@ exports.dialogflowFirebaseFulfillment = functions.https.onRequest((request, resp
 
 
         if (text === c) {
-            agent.add("ขอบคุณค่ะ");
+            agent.add("กรุณากดดาวเพื่อประเมินความพึงพอใจหลังการใช้ระบบ")
+            agent.add(pay1);
             db.runTransaction(t => {
                 return t.get(Count_Accuracy).then(doc => {
-                    let newcount = doc.data().ถูก + 1;
+                    let newcount = doc.data().ใช่ + 1;
 
                     t.update(Count_Accuracy, {
-                        ถูก: newcount,
+                        ใช่: newcount,
 
                     });
                 });
@@ -1712,10 +1771,10 @@ exports.dialogflowFirebaseFulfillment = functions.https.onRequest((request, resp
             agent.add("กรุณากดปุ่มติดต่อเจ้าหน้าที่");
             db.runTransaction(t => {
                 return t.get(Count_Accuracy).then(doc => {
-                    let newcount = doc.data().ไม่ถูก + 1;
+                    let newcount = doc.data().ไม่ใช่ + 1;
 
                     t.update(Count_Accuracy, {
-                        ไม่ถูก: newcount,
+                        ไม่ใช่: newcount,
 
                     });
                 });
@@ -1781,32 +1840,32 @@ exports.dialogflowFirebaseFulfillment = functions.https.onRequest((request, resp
                 "actions": [
                     {
                         "type": "message",
-                        "label": "ถูก",
-                        "text": "ได้รับคำตอบถูกต้องในเรื่องบัตรหายหรือชำรุด"
+                        "label": "ใช่",
+                        "text": "ช่วยตอบคำถามในเรื่องบัตรหายหรือชำรุด"
                     },
                     {
                         "type": "message",
-                        "label": "ไม่ถูก",
-                        "text": "ได้รับคำตอบไม่ถูกต้องในเรื่องบัตรหายหรือชำรุด"
+                        "label": "ไม่ใช่",
+                        "text": "ไม่ช่วยตอบคำถามในเรื่องบัตรหายหรือชำรุด"
                     }
                 ],
-                "text": "คุณได้รับคำตอบถูกต้องไหมคะ?"
+                "text": "น้องบ็อตช่วยตอบคำถามของท่านใช่หรือไม่?"
             }
         };
 
         //ประกาศตัวแปร payload เพื่อแสดงออกหน้าจอ
         let payload่json = new Payload(`LINE`, payload, { sendAsMessage: true });
         let text = request.body.queryResult.queryText;
-        let c = 'ได้รับคำตอบถูกต้องในเรื่องบัตรหายหรือชำรุด';
-        let b = 'ได้รับคำตอบไม่ถูกต้องในเรื่องบัตรหายหรือชำรุด';
+        let c = 'ช่วยตอบคำถามในเรื่องบัตรหายหรือชำรุด';
+        let b = 'ไม่ช่วยตอบคำถามในเรื่องบัตรหายหรือชำรุด';
 
         //Count_Accuracy
         let Count_Accuracy = admin.firestore().collection("Count_Accuracy").doc(date.toLocaleDateString()).collection("บัตรนักศึกษา").doc("บัตรหายหรือชำรุด");
         Count_Accuracy.get().then(function (docs) {
             if (!docs.exists) {
                 Count_Accuracy.set({
-                    ถูก: 0,
-                    ไม่ถูก: 0
+                    ใช่: 0,
+                    ไม่ใช่: 0
                 });
             }
 
@@ -1814,13 +1873,14 @@ exports.dialogflowFirebaseFulfillment = functions.https.onRequest((request, resp
 
 
         if (text === c) {
-            agent.add("ขอบคุณค่ะ");
+            agent.add("กรุณากดดาวเพื่อประเมินความพึงพอใจหลังการใช้ระบบ")
+            agent.add(pay1);
             db.runTransaction(t => {
                 return t.get(Count_Accuracy).then(doc => {
-                    let newcount = doc.data().ถูก + 1;
+                    let newcount = doc.data().ใช่ + 1;
 
                     t.update(Count_Accuracy, {
-                        ถูก: newcount,
+                        ใช่: newcount,
 
                     });
                 });
@@ -1835,10 +1895,10 @@ exports.dialogflowFirebaseFulfillment = functions.https.onRequest((request, resp
             agent.add("กรุณากดปุ่มติดต่อเจ้าหน้าที่");
             db.runTransaction(t => {
                 return t.get(Count_Accuracy).then(doc => {
-                    let newcount = doc.data().ไม่ถูก + 1;
+                    let newcount = doc.data().ไม่ใช่ + 1;
 
                     t.update(Count_Accuracy, {
-                        ไม่ถูก: newcount,
+                        ไม่ใช่: newcount,
 
                     });
                 });
@@ -1903,32 +1963,32 @@ exports.dialogflowFirebaseFulfillment = functions.https.onRequest((request, resp
                 "actions": [
                     {
                         "type": "message",
-                        "label": "ถูก",
-                        "text": "ได้รับคำตอบถูกต้องในเรื่องการเปลี่ยนแปลงข้อมูลในบัตร"
+                        "label": "ใช่",
+                        "text": "ช่วยตอบคำถามในเรื่องการเปลี่ยนแปลงข้อมูลในบัตร"
                     },
                     {
                         "type": "message",
-                        "label": "ไม่ถูก",
-                        "text": "ได้รับคำตอบไม่ถูกต้องในเรื่องการเปลี่ยนแปลงข้อมูลในบัตร"
+                        "label": "ไม่ใช่",
+                        "text": "ไม่ช่วยตอบคำถามในเรื่องการเปลี่ยนแปลงข้อมูลในบัตร"
                     }
                 ],
-                "text": "คุณได้รับคำตอบถูกต้องไหมคะ?"
+                "text": "น้องบ็อตช่วยตอบคำถามของท่านใช่หรือไม่?"
             }
         };
 
         //ประกาศตัวแปร payload เพื่อแสดงออกหน้าจอ
         let payload่json = new Payload(`LINE`, payload, { sendAsMessage: true });
         let text = request.body.queryResult.queryText;
-        let c = 'ได้รับคำตอบถูกต้องในเรื่องการเปลี่ยนแปลงข้อมูลในบัตร';
-        let b = 'ได้รับคำตอบไม่ถูกต้องในเรื่องการเปลี่ยนแปลงข้อมูลในบัตร';
+        let c = 'ช่วยตอบคำถามในเรื่องการเปลี่ยนแปลงข้อมูลในบัตร';
+        let b = 'ไม่ช่วยตอบคำถามในเรื่องการเปลี่ยนแปลงข้อมูลในบัตร';
 
         //Count_Accuracy
         let Count_Accuracy = admin.firestore().collection("Count_Accuracy").doc(date.toLocaleDateString()).collection("บัตรนักศึกษา").doc("การเปลี่ยนแปลงข้อมูลในบัตร");
         Count_Accuracy.get().then(function (docs) {
             if (!docs.exists) {
                 Count_Accuracy.set({
-                    ถูก: 0,
-                    ไม่ถูก: 0
+                    ใช่: 0,
+                    ไม่ใช่: 0
                 });
             }
 
@@ -1936,13 +1996,14 @@ exports.dialogflowFirebaseFulfillment = functions.https.onRequest((request, resp
 
 
         if (text === c) {
-            agent.add("ขอบคุณค่ะ");
+            agent.add("กรุณากดดาวเพื่อประเมินความพึงพอใจหลังการใช้ระบบ")
+            agent.add(pay1);
             db.runTransaction(t => {
                 return t.get(Count_Accuracy).then(doc => {
-                    let newcount = doc.data().ถูก + 1;
+                    let newcount = doc.data().ใช่ + 1;
 
                     t.update(Count_Accuracy, {
-                        ถูก: newcount,
+                        ใช่: newcount,
 
                     });
                 });
@@ -1957,10 +2018,10 @@ exports.dialogflowFirebaseFulfillment = functions.https.onRequest((request, resp
             agent.add("กรุณากดปุ่มติดต่อเจ้าหน้าที่");
             db.runTransaction(t => {
                 return t.get(Count_Accuracy).then(doc => {
-                    let newcount = doc.data().ไม่ถูก + 1;
+                    let newcount = doc.data().ไม่ใช่ + 1;
 
                     t.update(Count_Accuracy, {
-                        ไม่ถูก: newcount,
+                        ไม่ใช่: newcount,
 
                     });
                 });
@@ -2025,32 +2086,32 @@ exports.dialogflowFirebaseFulfillment = functions.https.onRequest((request, resp
                 "actions": [
                     {
                         "type": "message",
-                        "label": "ถูก",
-                        "text": "ได้รับคำตอบถูกต้องในเรื่องเกรดเฉลี่ยสะสม"
+                        "label": "ใช่",
+                        "text": "ช่วยตอบคำถามในเรื่องเกรดเฉลี่ยสะสม"
                     },
                     {
                         "type": "message",
-                        "label": "ไม่ถูก",
-                        "text": "ได้รับคำตอบไม่ถูกต้องในเรื่องเกรดเฉลี่ยสะสม"
+                        "label": "ไม่ใช่",
+                        "text": "ไม่ช่วยตอบคำถามในเรื่องเกรดเฉลี่ยสะสม"
                     }
                 ],
-                "text": "คุณได้รับคำตอบถูกต้องไหมคะ?"
+                "text": "น้องบ็อตช่วยตอบคำถามของท่านใช่หรือไม่?"
             }
         };
 
         //ประกาศตัวแปร payload เพื่อแสดงออกหน้าจอ
         let payload่json = new Payload(`LINE`, payload, { sendAsMessage: true });
         let text = request.body.queryResult.queryText;
-        let c = 'ได้รับคำตอบถูกต้องในเรื่องเกรดเฉลี่ยสะสม';
-        let b = 'ได้รับคำตอบไม่ถูกต้องในเรื่องเกรดเฉลี่ยสะสม';
+        let c = 'ช่วยตอบคำถามในเรื่องเกรดเฉลี่ยสะสม';
+        let b = 'ไม่ช่วยตอบคำถามในเรื่องเกรดเฉลี่ยสะสม';
 
         //Count_Accuracy
         let Count_Accuracy = admin.firestore().collection("Count_Accuracy").doc(date.toLocaleDateString()).collection("การสำเร็จการศึกษา").doc("เกรดเฉลี่ยสะสม");
         Count_Accuracy.get().then(function (docs) {
             if (!docs.exists) {
                 Count_Accuracy.set({
-                    ถูก: 0,
-                    ไม่ถูก: 0
+                    ใช่: 0,
+                    ไม่ใช่: 0
                 });
             }
 
@@ -2058,13 +2119,14 @@ exports.dialogflowFirebaseFulfillment = functions.https.onRequest((request, resp
 
 
         if (text === c) {
-            agent.add("ขอบคุณค่ะ");
+            agent.add("กรุณากดดาวเพื่อประเมินความพึงพอใจหลังการใช้ระบบ")
+            agent.add(pay1);
             db.runTransaction(t => {
                 return t.get(Count_Accuracy).then(doc => {
-                    let newcount = doc.data().ถูก + 1;
+                    let newcount = doc.data().ใช่ + 1;
 
                     t.update(Count_Accuracy, {
-                        ถูก: newcount,
+                        ใช่: newcount,
 
                     });
                 });
@@ -2079,10 +2141,10 @@ exports.dialogflowFirebaseFulfillment = functions.https.onRequest((request, resp
             agent.add("กรุณากดปุ่มติดต่อเจ้าหน้าที่");
             db.runTransaction(t => {
                 return t.get(Count_Accuracy).then(doc => {
-                    let newcount = doc.data().ไม่ถูก + 1;
+                    let newcount = doc.data().ไม่ใช่ + 1;
 
                     t.update(Count_Accuracy, {
-                        ไม่ถูก: newcount,
+                        ไม่ใช่: newcount,
 
                     });
                 });
@@ -2145,32 +2207,32 @@ exports.dialogflowFirebaseFulfillment = functions.https.onRequest((request, resp
                 "actions": [
                     {
                         "type": "message",
-                        "label": "ถูก",
-                        "text": "ได้รับคำตอบถูกต้องในเรื่องการแจ้งขอสำเร็จการศึกษา"
+                        "label": "ใช่",
+                        "text": "ช่วยตอบคำถามในเรื่องการแจ้งขอสำเร็จการศึกษา"
                     },
                     {
                         "type": "message",
-                        "label": "ไม่ถูก",
-                        "text": "ได้รับคำตอบไม่ถูกต้องในเรื่องการแจ้งขอสำเร็จการศึกษา"
+                        "label": "ไม่ใช่",
+                        "text": "ไม่ช่วยตอบคำถามในเรื่องการแจ้งขอสำเร็จการศึกษา"
                     }
                 ],
-                "text": "คุณได้รับคำตอบถูกต้องไหมคะ?"
+                "text": "น้องบ็อตช่วยตอบคำถามของท่านใช่หรือไม่?"
             }
         };
 
         //ประกาศตัวแปร payload เพื่อแสดงออกหน้าจอ
         let payload่json = new Payload(`LINE`, payload, { sendAsMessage: true });
         let text = request.body.queryResult.queryText;
-        let c = 'ได้รับคำตอบถูกต้องในเรื่องการแจ้งขอสำเร็จการศึกษา';
-        let b = 'ได้รับคำตอบไม่ถูกต้องในเรื่องการแจ้งขอสำเร็จการศึกษา';
+        let c = 'ช่วยตอบคำถามในเรื่องการแจ้งขอสำเร็จการศึกษา';
+        let b = 'ไม่ช่วยตอบคำถามในเรื่องการแจ้งขอสำเร็จการศึกษา';
 
         //Count_Accuracy
         let Count_Accuracy = admin.firestore().collection("Count_Accuracy").doc(date.toLocaleDateString()).collection("การสำเร็จการศึกษา").doc("การแจ้งขอสำเร็จการศึกษา");
         Count_Accuracy.get().then(function (docs) {
             if (!docs.exists) {
                 Count_Accuracy.set({
-                    ถูก: 0,
-                    ไม่ถูก: 0
+                    ใช่: 0,
+                    ไม่ใช่: 0
                 });
             }
 
@@ -2178,13 +2240,14 @@ exports.dialogflowFirebaseFulfillment = functions.https.onRequest((request, resp
 
 
         if (text === c) {
-            agent.add("ขอบคุณค่ะ");
+            agent.add("กรุณากดดาวเพื่อประเมินความพึงพอใจหลังการใช้ระบบ")
+            agent.add(pay1);
             db.runTransaction(t => {
                 return t.get(Count_Accuracy).then(doc => {
-                    let newcount = doc.data().ถูก + 1;
+                    let newcount = doc.data().ใช่ + 1;
 
                     t.update(Count_Accuracy, {
-                        ถูก: newcount,
+                        ใช่: newcount,
 
                     });
                 });
@@ -2199,10 +2262,10 @@ exports.dialogflowFirebaseFulfillment = functions.https.onRequest((request, resp
             agent.add("กรุณากดปุ่มติดต่อเจ้าหน้าที่");
             db.runTransaction(t => {
                 return t.get(Count_Accuracy).then(doc => {
-                    let newcount = doc.data().ไม่ถูก + 1;
+                    let newcount = doc.data().ไม่ใช่ + 1;
 
                     t.update(Count_Accuracy, {
-                        ไม่ถูก: newcount,
+                        ไม่ใช่: newcount,
 
                     });
                 });
@@ -2268,32 +2331,32 @@ exports.dialogflowFirebaseFulfillment = functions.https.onRequest((request, resp
                 "actions": [
                     {
                         "type": "message",
-                        "label": "ถูก",
-                        "text": "ได้รับคำตอบถูกต้องในเรื่องการขอแก้ไขข้อมูลเอกสารจบ"
+                        "label": "ใช่",
+                        "text": "ช่วยตอบคำถามในเรื่องการขอแก้ไขข้อมูลเอกสารจบ"
                     },
                     {
                         "type": "message",
-                        "label": "ไม่ถูก",
-                        "text": "ได้รับคำตอบไม่ถูกต้องในเรื่องการขอแก้ไขข้อมูลเอกสารจบ"
+                        "label": "ไม่ใช่",
+                        "text": "ไม่ช่วยตอบคำถามในเรื่องการขอแก้ไขข้อมูลเอกสารจบ"
                     }
                 ],
-                "text": "คุณได้รับคำตอบถูกต้องไหมคะ?"
+                "text": "น้องบ็อตช่วยตอบคำถามของท่านใช่หรือไม่?"
             }
         };
 
         //ประกาศตัวแปร payload เพื่อแสดงออกหน้าจอ
         let payload่json = new Payload(`LINE`, payload, { sendAsMessage: true });
         let text = request.body.queryResult.queryText;
-        let c = 'ได้รับคำตอบถูกต้องในเรื่องการขอแก้ไขข้อมูลเอกสารจบ';
-        let b = 'ได้รับคำตอบไม่ถูกต้องในเรื่องการขอแก้ไขข้อมูลเอกสารจบ';
+        let c = 'ช่วยตอบคำถามในเรื่องการขอแก้ไขข้อมูลเอกสารจบ';
+        let b = 'ไม่ช่วยตอบคำถามในเรื่องการขอแก้ไขข้อมูลเอกสารจบ';
 
         //Count_Accuracy
         let Count_Accuracy = admin.firestore().collection("Count_Accuracy").doc(date.toLocaleDateString()).collection("การสำเร็จการศึกษา").doc("การขอแก้ไขข้อมูลเอกสารจบ");
         Count_Accuracy.get().then(function (docs) {
             if (!docs.exists) {
                 Count_Accuracy.set({
-                    ถูก: 0,
-                    ไม่ถูก: 0
+                    ใช่: 0,
+                    ไม่ใช่: 0
                 });
             }
 
@@ -2301,13 +2364,14 @@ exports.dialogflowFirebaseFulfillment = functions.https.onRequest((request, resp
 
 
         if (text === c) {
-            agent.add("ขอบคุณค่ะ");
+            agent.add("กรุณากดดาวเพื่อประเมินความพึงพอใจหลังการใช้ระบบ")
+            agent.add(pay1);
             db.runTransaction(t => {
                 return t.get(Count_Accuracy).then(doc => {
-                    let newcount = doc.data().ถูก + 1;
+                    let newcount = doc.data().ใช่ + 1;
 
                     t.update(Count_Accuracy, {
-                        ถูก: newcount,
+                        ใช่: newcount,
 
                     });
                 });
@@ -2322,10 +2386,10 @@ exports.dialogflowFirebaseFulfillment = functions.https.onRequest((request, resp
             agent.add("กรุณากดปุ่มติดต่อเจ้าหน้าที่");
             db.runTransaction(t => {
                 return t.get(Count_Accuracy).then(doc => {
-                    let newcount = doc.data().ไม่ถูก + 1;
+                    let newcount = doc.data().ไม่ใช่ + 1;
 
                     t.update(Count_Accuracy, {
-                        ไม่ถูก: newcount,
+                        ไม่ใช่: newcount,
 
                     });
                 });
@@ -2391,32 +2455,32 @@ exports.dialogflowFirebaseFulfillment = functions.https.onRequest((request, resp
                 "actions": [
                     {
                         "type": "message",
-                        "label": "ถูก",
-                        "text": "ได้รับคำตอบถูกต้องในเรื่องการได้รับเกียรตินิยม"
+                        "label": "ใช่",
+                        "text": "ช่วยตอบคำถามในเรื่องการได้รับเกียรตินิยม"
                     },
                     {
                         "type": "message",
-                        "label": "ไม่ถูก",
-                        "text": "ได้รับคำตอบไม่ถูกต้องในเรื่องการได้รับเกียรตินิยม"
+                        "label": "ไม่ใช่",
+                        "text": "ไม่ช่วยตอบคำถามในเรื่องการได้รับเกียรตินิยม"
                     }
                 ],
-                "text": "คุณได้รับคำตอบถูกต้องไหมคะ?"
+                "text": "น้องบ็อตช่วยตอบคำถามของท่านใช่หรือไม่?"
             }
         };
 
         //ประกาศตัวแปร payload เพื่อแสดงออกหน้าจอ
         let payload่json = new Payload(`LINE`, payload, { sendAsMessage: true });
         let text = request.body.queryResult.queryText;
-        let c = 'ได้รับคำตอบถูกต้องในเรื่องการได้รับเกียรตินิยม';
-        let b = 'ได้รับคำตอบไม่ถูกต้องในเรื่องการได้รับเกียรตินิยม';
+        let c = 'ช่วยตอบคำถามในเรื่องการได้รับเกียรตินิยม';
+        let b = 'ไม่ช่วยตอบคำถามในเรื่องการได้รับเกียรตินิยม';
 
         //Count_Accuracy
         let Count_Accuracy = admin.firestore().collection("Count_Accuracy").doc(date.toLocaleDateString()).collection("การสำเร็จการศึกษา").doc("การได้รับเกียรตินิยม");
         Count_Accuracy.get().then(function (docs) {
             if (!docs.exists) {
                 Count_Accuracy.set({
-                    ถูก: 0,
-                    ไม่ถูก: 0
+                    ใช่: 0,
+                    ไม่ใช่: 0
                 });
             }
 
@@ -2424,13 +2488,14 @@ exports.dialogflowFirebaseFulfillment = functions.https.onRequest((request, resp
 
 
         if (text === c) {
-            agent.add("ขอบคุณค่ะ");
+            agent.add("กรุณากดดาวเพื่อประเมินความพึงพอใจหลังการใช้ระบบ")
+            agent.add(pay1);
             db.runTransaction(t => {
                 return t.get(Count_Accuracy).then(doc => {
-                    let newcount = doc.data().ถูก + 1;
+                    let newcount = doc.data().ใช่ + 1;
 
                     t.update(Count_Accuracy, {
-                        ถูก: newcount,
+                        ใช่: newcount,
 
                     });
                 });
@@ -2445,10 +2510,10 @@ exports.dialogflowFirebaseFulfillment = functions.https.onRequest((request, resp
             agent.add("กรุณากดปุ่มติดต่อเจ้าหน้าที่");
             db.runTransaction(t => {
                 return t.get(Count_Accuracy).then(doc => {
-                    let newcount = doc.data().ไม่ถูก + 1;
+                    let newcount = doc.data().ไม่ใช่ + 1;
 
                     t.update(Count_Accuracy, {
-                        ไม่ถูก: newcount,
+                        ไม่ใช่: newcount,
 
                     });
                 });
@@ -2512,32 +2577,32 @@ exports.dialogflowFirebaseFulfillment = functions.https.onRequest((request, resp
                 "actions": [
                     {
                         "type": "message",
-                        "label": "ถูก",
-                        "text": "ได้รับคำตอบถูกต้องในเรื่องการอนุมัติจบ"
+                        "label": "ใช่",
+                        "text": "ช่วยตอบคำถามในเรื่องการอนุมัติจบ"
                     },
                     {
                         "type": "message",
-                        "label": "ไม่ถูก",
-                        "text": "ได้รับคำตอบไม่ถูกต้องในเรื่องการอนุมัติจบ"
+                        "label": "ไม่ใช่",
+                        "text": "ไม่ช่วยตอบคำถามในเรื่องการอนุมัติจบ"
                     }
                 ],
-                "text": "คุณได้รับคำตอบถูกต้องไหมคะ?"
+                "text": "น้องบ็อตช่วยตอบคำถามของท่านใช่หรือไม่?"
             }
         };
 
         //ประกาศตัวแปร payload เพื่อแสดงออกหน้าจอ
         let payload่json = new Payload(`LINE`, payload, { sendAsMessage: true });
         let text = request.body.queryResult.queryText;
-        let c = 'ได้รับคำตอบถูกต้องในเรื่องการอนุมัติจบ';
-        let b = 'ได้รับคำตอบไม่ถูกต้องในเรื่องการอนุมัติจบ';
+        let c = 'ช่วยตอบคำถามในเรื่องการอนุมัติจบ';
+        let b = 'ไม่ช่วยตอบคำถามในเรื่องการอนุมัติจบ';
 
         //Count_Accuracy
         let Count_Accuracy = admin.firestore().collection("Count_Accuracy").doc(date.toLocaleDateString()).collection("การสำเร็จการศึกษา").doc("การอนุมัติจบ");
         Count_Accuracy.get().then(function (docs) {
             if (!docs.exists) {
                 Count_Accuracy.set({
-                    ถูก: 0,
-                    ไม่ถูก: 0
+                    ใช่: 0,
+                    ไม่ใช่: 0
                 });
             }
 
@@ -2545,13 +2610,14 @@ exports.dialogflowFirebaseFulfillment = functions.https.onRequest((request, resp
 
 
         if (text === c) {
-            agent.add("ขอบคุณค่ะ");
+            agent.add("กรุณากดดาวเพื่อประเมินความพึงพอใจหลังการใช้ระบบ")
+            agent.add(pay1);
             db.runTransaction(t => {
                 return t.get(Count_Accuracy).then(doc => {
-                    let newcount = doc.data().ถูก + 1;
+                    let newcount = doc.data().ใช่ + 1;
 
                     t.update(Count_Accuracy, {
-                        ถูก: newcount,
+                        ใช่: newcount,
 
                     });
                 });
@@ -2566,10 +2632,10 @@ exports.dialogflowFirebaseFulfillment = functions.https.onRequest((request, resp
             agent.add("กรุณากดปุ่มติดต่อเจ้าหน้าที่");
             db.runTransaction(t => {
                 return t.get(Count_Accuracy).then(doc => {
-                    let newcount = doc.data().ไม่ถูก + 1;
+                    let newcount = doc.data().ไม่ใช่ + 1;
 
                     t.update(Count_Accuracy, {
-                        ไม่ถูก: newcount,
+                        ไม่ใช่: newcount,
 
                     });
                 });
@@ -2636,32 +2702,32 @@ exports.dialogflowFirebaseFulfillment = functions.https.onRequest((request, resp
                 "actions": [
                     {
                         "type": "message",
-                        "label": "ถูก",
-                        "text": "ได้รับคำตอบถูกต้องในเรื่องขั้นตอนการลาออก"
+                        "label": "ใช่",
+                        "text": "ช่วยตอบคำถามในเรื่องขั้นตอนการลาออก"
                     },
                     {
                         "type": "message",
-                        "label": "ไม่ถูก",
-                        "text": "ได้รับคำตอบไม่ถูกต้องในเรื่องขั้นตอนการลาออก"
+                        "label": "ไม่ใช่",
+                        "text": "ไม่ช่วยตอบคำถามในเรื่องขั้นตอนการลาออก"
                     }
                 ],
-                "text": "คุณได้รับคำตอบถูกต้องไหมคะ?"
+                "text": "น้องบ็อตช่วยตอบคำถามของท่านใช่หรือไม่?"
             }
         };
 
         //ประกาศตัวแปร payload เพื่อแสดงออกหน้าจอ
         let payload่json = new Payload(`LINE`, payload, { sendAsMessage: true });
         let text = request.body.queryResult.queryText;
-        let c = 'ได้รับคำตอบถูกต้องในเรื่องขั้นตอนการลาออก';
-        let b = 'ได้รับคำตอบไม่ถูกต้องในเรื่องขั้นตอนการลาออก';
+        let c = 'ช่วยตอบคำถามในเรื่องขั้นตอนการลาออก';
+        let b = 'ไม่ช่วยตอบคำถามในเรื่องขั้นตอนการลาออก';
 
         //Count_Accuracy
         let Count_Accuracy = admin.firestore().collection("Count_Accuracy").doc(date.toLocaleDateString()).collection("การลาออก").doc("ขั้นตอนการลาออก");
         Count_Accuracy.get().then(function (docs) {
             if (!docs.exists) {
                 Count_Accuracy.set({
-                    ถูก: 0,
-                    ไม่ถูก: 0
+                    ใช่: 0,
+                    ไม่ใช่: 0
                 });
             }
 
@@ -2669,13 +2735,14 @@ exports.dialogflowFirebaseFulfillment = functions.https.onRequest((request, resp
 
 
         if (text === c) {
-            agent.add("ขอบคุณค่ะ");
+            agent.add("กรุณากดดาวเพื่อประเมินความพึงพอใจหลังการใช้ระบบ")
+            agent.add(pay1);
             db.runTransaction(t => {
                 return t.get(Count_Accuracy).then(doc => {
-                    let newcount = doc.data().ถูก + 1;
+                    let newcount = doc.data().ใช่ + 1;
 
                     t.update(Count_Accuracy, {
-                        ถูก: newcount,
+                        ใช่: newcount,
 
                     });
                 });
@@ -2690,10 +2757,10 @@ exports.dialogflowFirebaseFulfillment = functions.https.onRequest((request, resp
             agent.add("กรุณากดปุ่มติดต่อเจ้าหน้าที่");
             db.runTransaction(t => {
                 return t.get(Count_Accuracy).then(doc => {
-                    let newcount = doc.data().ไม่ถูก + 1;
+                    let newcount = doc.data().ไม่ใช่ + 1;
 
                     t.update(Count_Accuracy, {
-                        ไม่ถูก: newcount,
+                        ไม่ใช่: newcount,
 
                     });
                 });
@@ -2757,32 +2824,32 @@ exports.dialogflowFirebaseFulfillment = functions.https.onRequest((request, resp
                 "actions": [
                     {
                         "type": "message",
-                        "label": "ถูก",
-                        "text": "ได้รับคำตอบถูกต้องในเรื่องการยกเลิกการลาออก"
+                        "label": "ใช่",
+                        "text": "ช่วยตอบคำถามในเรื่องการยกเลิกการลาออก"
                     },
                     {
                         "type": "message",
-                        "label": "ไม่ถูก",
-                        "text": "ได้รับคำตอบไม่ถูกต้องในเรื่องการยกเลิกการลาออก"
+                        "label": "ไม่ใช่",
+                        "text": "ไม่ช่วยตอบคำถามในเรื่องการยกเลิกการลาออก"
                     }
                 ],
-                "text": "คุณได้รับคำตอบถูกต้องไหมคะ?"
+                "text": "น้องบ็อตช่วยตอบคำถามของท่านใช่หรือไม่?"
             }
         };
 
         //ประกาศตัวแปร payload เพื่อแสดงออกหน้าจอ
         let payload่json = new Payload(`LINE`, payload, { sendAsMessage: true });
         let text = request.body.queryResult.queryText;
-        let c = 'ได้รับคำตอบถูกต้องในเรื่องการยกเลิกการลาออก';
-        let b = 'ได้รับคำตอบไม่ถูกต้องในเรื่องการยกเลิกการลาออก';
+        let c = 'ช่วยตอบคำถามในเรื่องการยกเลิกการลาออก';
+        let b = 'ไม่ช่วยตอบคำถามในเรื่องการยกเลิกการลาออก';
 
         //Count_Accuracy
         let Count_Accuracy = admin.firestore().collection("Count_Accuracy").doc(date.toLocaleDateString()).collection("การลาออก").doc("การยกเลิกการลาออก");
         Count_Accuracy.get().then(function (docs) {
             if (!docs.exists) {
                 Count_Accuracy.set({
-                    ถูก: 0,
-                    ไม่ถูก: 0
+                    ใช่: 0,
+                    ไม่ใช่: 0
                 });
             }
 
@@ -2790,13 +2857,14 @@ exports.dialogflowFirebaseFulfillment = functions.https.onRequest((request, resp
 
 
         if (text === c) {
-            agent.add("ขอบคุณค่ะ");
+            agent.add("กรุณากดดาวเพื่อประเมินความพึงพอใจหลังการใช้ระบบ")
+            agent.add(pay1);
             db.runTransaction(t => {
                 return t.get(Count_Accuracy).then(doc => {
-                    let newcount = doc.data().ถูก + 1;
+                    let newcount = doc.data().ใช่ + 1;
 
                     t.update(Count_Accuracy, {
-                        ถูก: newcount,
+                        ใช่: newcount,
 
                     });
                 });
@@ -2811,10 +2879,10 @@ exports.dialogflowFirebaseFulfillment = functions.https.onRequest((request, resp
             agent.add("กรุณากดปุ่มติดต่อเจ้าหน้าที่");
             db.runTransaction(t => {
                 return t.get(Count_Accuracy).then(doc => {
-                    let newcount = doc.data().ไม่ถูก + 1;
+                    let newcount = doc.data().ไม่ใช่ + 1;
 
                     t.update(Count_Accuracy, {
-                        ไม่ถูก: newcount,
+                        ไม่ใช่: newcount,
 
                     });
                 });
@@ -2879,32 +2947,32 @@ exports.dialogflowFirebaseFulfillment = functions.https.onRequest((request, resp
                 "actions": [
                     {
                         "type": "message",
-                        "label": "ถูก",
-                        "text": "ได้รับคำตอบถูกต้องในเรื่องการขอย้ายสถานศึกษา"
+                        "label": "ใช่",
+                        "text": "ช่วยตอบคำถามในเรื่องการขอย้ายสถานศึกษา"
                     },
                     {
                         "type": "message",
-                        "label": "ไม่ถูก",
-                        "text": "ได้รับคำตอบไม่ถูกต้องในเรื่องการขอย้ายสถานศึกษา"
+                        "label": "ไม่ใช่",
+                        "text": "ไม่ช่วยตอบคำถามในเรื่องการขอย้ายสถานศึกษา"
                     }
                 ],
-                "text": "คุณได้รับคำตอบถูกต้องไหมคะ?"
+                "text": "น้องบ็อตช่วยตอบคำถามของท่านใช่หรือไม่?"
             }
         };
 
         //ประกาศตัวแปร payload เพื่อแสดงออกหน้าจอ
         let payload่json = new Payload(`LINE`, payload, { sendAsMessage: true });
         let text = request.body.queryResult.queryText;
-        let c = 'ได้รับคำตอบถูกต้องในเรื่องการขอย้ายสถานศึกษา';
-        let b = 'ได้รับคำตอบไม่ถูกต้องในเรื่องการขอย้ายสถานศึกษา';
+        let c = 'ช่วยตอบคำถามในเรื่องการขอย้ายสถานศึกษา';
+        let b = 'ไม่ช่วยตอบคำถามในเรื่องการขอย้ายสถานศึกษา';
 
         //Count_Accuracy
         let Count_Accuracy = admin.firestore().collection("Count_Accuracy").doc(date.toLocaleDateString()).collection("การลาออก").doc("การขอย้ายสถานศึกษา");
         Count_Accuracy.get().then(function (docs) {
             if (!docs.exists) {
                 Count_Accuracy.set({
-                    ถูก: 0,
-                    ไม่ถูก: 0
+                    ใช่: 0,
+                    ไม่ใช่: 0
                 });
             }
 
@@ -2912,13 +2980,14 @@ exports.dialogflowFirebaseFulfillment = functions.https.onRequest((request, resp
 
 
         if (text === c) {
-            agent.add("ขอบคุณค่ะ");
+            agent.add("กรุณากดดาวเพื่อประเมินความพึงพอใจหลังการใช้ระบบ")
+            agent.add(pay1);
             db.runTransaction(t => {
                 return t.get(Count_Accuracy).then(doc => {
-                    let newcount = doc.data().ถูก + 1;
+                    let newcount = doc.data().ใช่ + 1;
 
                     t.update(Count_Accuracy, {
-                        ถูก: newcount,
+                        ใช่: newcount,
 
                     });
                 });
@@ -2933,10 +3002,10 @@ exports.dialogflowFirebaseFulfillment = functions.https.onRequest((request, resp
             agent.add("กรุณากดปุ่มติดต่อเจ้าหน้าที่");
             db.runTransaction(t => {
                 return t.get(Count_Accuracy).then(doc => {
-                    let newcount = doc.data().ไม่ถูก + 1;
+                    let newcount = doc.data().ไม่ใช่ + 1;
 
                     t.update(Count_Accuracy, {
-                        ไม่ถูก: newcount,
+                        ไม่ใช่: newcount,
 
                     });
                 });
@@ -3004,32 +3073,32 @@ exports.dialogflowFirebaseFulfillment = functions.https.onRequest((request, resp
                 "actions": [
                     {
                         "type": "message",
-                        "label": "ถูก",
-                        "text": "ได้รับคำตอบถูกต้องในเรื่องเกรดเฉลี่ยขั้นต่ำของภาคปกติ"
+                        "label": "ใช่",
+                        "text": "ช่วยตอบคำถามในเรื่องเกรดเฉลี่ยขั้นต่ำของภาคปกติ"
                     },
                     {
                         "type": "message",
-                        "label": "ไม่ถูก",
-                        "text": "ได้รับคำตอบไม่ถูกต้องในเรื่องเกรดเฉลี่ยขั้นต่ำของภาคปกติ"
+                        "label": "ไม่ใช่",
+                        "text": "ไม่ช่วยตอบคำถามในเรื่องเกรดเฉลี่ยขั้นต่ำของภาคปกติ"
                     }
                 ],
-                "text": "คุณได้รับคำตอบถูกต้องไหมคะ?"
+                "text": "น้องบ็อตช่วยตอบคำถามของท่านใช่หรือไม่?"
             }
         };
 
         //ประกาศตัวแปร payload เพื่อแสดงออกหน้าจอ
         let payload่json = new Payload(`LINE`, payload, { sendAsMessage: true });
         let text = request.body.queryResult.queryText;
-        let c = 'ได้รับคำตอบถูกต้องในเรื่องเกรดเฉลี่ยขั้นต่ำของภาคปกติ';
-        let b = 'ได้รับคำตอบไม่ถูกต้องในเรื่องเกรดเฉลี่ยขั้นต่ำของภาคปกติ';
+        let c = 'ช่วยตอบคำถามในเรื่องเกรดเฉลี่ยขั้นต่ำของภาคปกติ';
+        let b = 'ไม่ช่วยตอบคำถามในเรื่องเกรดเฉลี่ยขั้นต่ำของภาคปกติ';
 
         //Count_Accuracy
         let Count_Accuracy = admin.firestore().collection("Count_Accuracy").doc(date.toLocaleDateString()).collection("การพ้นสภาพการเป็นนักศึกษา").doc("เกรดเฉลี่ยขั้นต่ำของภาคปกติ");
         Count_Accuracy.get().then(function (docs) {
             if (!docs.exists) {
                 Count_Accuracy.set({
-                    ถูก: 0,
-                    ไม่ถูก: 0
+                    ใช่: 0,
+                    ไม่ใช่: 0
                 });
             }
 
@@ -3037,13 +3106,14 @@ exports.dialogflowFirebaseFulfillment = functions.https.onRequest((request, resp
 
 
         if (text === c) {
-            agent.add("ขอบคุณค่ะ");
+            agent.add("กรุณากดดาวเพื่อประเมินความพึงพอใจหลังการใช้ระบบ")
+            agent.add(pay1);
             db.runTransaction(t => {
                 return t.get(Count_Accuracy).then(doc => {
-                    let newcount = doc.data().ถูก + 1;
+                    let newcount = doc.data().ใช่ + 1;
 
                     t.update(Count_Accuracy, {
-                        ถูก: newcount,
+                        ใช่: newcount,
 
                     });
                 });
@@ -3058,10 +3128,10 @@ exports.dialogflowFirebaseFulfillment = functions.https.onRequest((request, resp
             agent.add("กรุณากดปุ่มติดต่อเจ้าหน้าที่");
             db.runTransaction(t => {
                 return t.get(Count_Accuracy).then(doc => {
-                    let newcount = doc.data().ไม่ถูก + 1;
+                    let newcount = doc.data().ไม่ใช่ + 1;
 
                     t.update(Count_Accuracy, {
-                        ไม่ถูก: newcount,
+                        ไม่ใช่: newcount,
 
                     });
                 });
@@ -3125,32 +3195,32 @@ exports.dialogflowFirebaseFulfillment = functions.https.onRequest((request, resp
                 "actions": [
                     {
                         "type": "message",
-                        "label": "ถูก",
-                        "text": "ได้รับคำตอบถูกต้องในเรื่องเกรดเฉลี่ยขั้นต่ำของภาคพิเศษ"
+                        "label": "ใช่",
+                        "text": "ช่วยตอบคำถามในเรื่องเกรดเฉลี่ยขั้นต่ำของภาคพิเศษ"
                     },
                     {
                         "type": "message",
-                        "label": "ไม่ถูก",
-                        "text": "ได้รับคำตอบไม่ถูกต้องในเรื่องเกรดเฉลี่ยขั้นต่ำของภาคพิเศษ"
+                        "label": "ไม่ใช่",
+                        "text": "ไม่ช่วยตอบคำถามในเรื่องเกรดเฉลี่ยขั้นต่ำของภาคพิเศษ"
                     }
                 ],
-                "text": "คุณได้รับคำตอบถูกต้องไหมคะ?"
+                "text": "น้องบ็อตช่วยตอบคำถามของท่านใช่หรือไม่?"
             }
         };
 
         //ประกาศตัวแปร payload เพื่อแสดงออกหน้าจอ
         let payload่json = new Payload(`LINE`, payload, { sendAsMessage: true });
         let text = request.body.queryResult.queryText;
-        let c = 'ได้รับคำตอบถูกต้องในเรื่องเกรดเฉลี่ยขั้นต่ำของภาคพิเศษ';
-        let b = 'ได้รับคำตอบไม่ถูกต้องในเรื่องเกรดเฉลี่ยขั้นต่ำของภาคพิเศษ';
+        let c = 'ช่วยตอบคำถามในเรื่องเกรดเฉลี่ยขั้นต่ำของภาคพิเศษ';
+        let b = 'ไม่ช่วยตอบคำถามในเรื่องเกรดเฉลี่ยขั้นต่ำของภาคพิเศษ';
 
         //Count_Accuracy
         let Count_Accuracy = admin.firestore().collection("Count_Accuracy").doc(date.toLocaleDateString()).collection("การพ้นสภาพการเป็นนักศึกษา").doc("เกรดเฉลี่ยขั้นต่ำของภาคพิเศษ");
         Count_Accuracy.get().then(function (docs) {
             if (!docs.exists) {
                 Count_Accuracy.set({
-                    ถูก: 0,
-                    ไม่ถูก: 0
+                    ใช่: 0,
+                    ไม่ใช่: 0
                 });
             }
 
@@ -3158,13 +3228,14 @@ exports.dialogflowFirebaseFulfillment = functions.https.onRequest((request, resp
 
 
         if (text === c) {
-            agent.add("ขอบคุณค่ะ");
+            agent.add("กรุณากดดาวเพื่อประเมินความพึงพอใจหลังการใช้ระบบ")
+            agent.add(pay1);
             db.runTransaction(t => {
                 return t.get(Count_Accuracy).then(doc => {
-                    let newcount = doc.data().ถูก + 1;
+                    let newcount = doc.data().ใช่ + 1;
 
                     t.update(Count_Accuracy, {
-                        ถูก: newcount,
+                        ใช่: newcount,
 
                     });
                 });
@@ -3179,10 +3250,10 @@ exports.dialogflowFirebaseFulfillment = functions.https.onRequest((request, resp
             agent.add("กรุณากดปุ่มติดต่อเจ้าหน้าที่");
             db.runTransaction(t => {
                 return t.get(Count_Accuracy).then(doc => {
-                    let newcount = doc.data().ไม่ถูก + 1;
+                    let newcount = doc.data().ไม่ใช่ + 1;
 
                     t.update(Count_Accuracy, {
-                        ไม่ถูก: newcount,
+                        ไม่ใช่: newcount,
 
                     });
                 });
@@ -3246,32 +3317,32 @@ exports.dialogflowFirebaseFulfillment = functions.https.onRequest((request, resp
                 "actions": [
                     {
                         "type": "message",
-                        "label": "ถูก",
-                        "text": "ได้รับคำตอบถูกต้องในเรื่องกรณีการพ้นสภาพการเป็นนักศึกษา"
+                        "label": "ใช่",
+                        "text": "ช่วยตอบคำถามในเรื่องกรณีการพ้นสภาพการเป็นนักศึกษา"
                     },
                     {
                         "type": "message",
-                        "label": "ไม่ถูก",
-                        "text": "ได้รับคำตอบไม่ถูกต้องในเรื่องกรณีการพ้นสภาพการเป็นนักศึกษา"
+                        "label": "ไม่ใช่",
+                        "text": "ไม่ช่วยตอบคำถามในเรื่องกรณีการพ้นสภาพการเป็นนักศึกษา"
                     }
                 ],
-                "text": "คุณได้รับคำตอบถูกต้องไหมคะ?"
+                "text": "น้องบ็อตช่วยตอบคำถามของท่านใช่หรือไม่?"
             }
         };
 
         //ประกาศตัวแปร payload เพื่อแสดงออกหน้าจอ
         let payload่json = new Payload(`LINE`, payload, { sendAsMessage: true });
         let text = request.body.queryResult.queryText;
-        let c = 'ได้รับคำตอบถูกต้องในเรื่องกรณีการพ้นสภาพการเป็นนักศึกษา';
-        let b = 'ได้รับคำตอบไม่ถูกต้องในเรื่องกรณีการพ้นสภาพการเป็นนักศึกษา';
+        let c = 'ช่วยตอบคำถามในเรื่องกรณีการพ้นสภาพการเป็นนักศึกษา';
+        let b = 'ไม่ช่วยตอบคำถามในเรื่องกรณีการพ้นสภาพการเป็นนักศึกษา';
 
         //Count_Accuracy
         let Count_Accuracy = admin.firestore().collection("Count_Accuracy").doc(date.toLocaleDateString()).collection("การพ้นสภาพการเป็นนักศึกษา").doc("กรณีการพ้นสภาพการเป็นนักศึกษา");
         Count_Accuracy.get().then(function (docs) {
             if (!docs.exists) {
                 Count_Accuracy.set({
-                    ถูก: 0,
-                    ไม่ถูก: 0
+                    ใช่: 0,
+                    ไม่ใช่: 0
                 });
             }
 
@@ -3279,13 +3350,14 @@ exports.dialogflowFirebaseFulfillment = functions.https.onRequest((request, resp
 
 
         if (text === c) {
-            agent.add("ขอบคุณค่ะ");
+            agent.add("กรุณากดดาวเพื่อประเมินความพึงพอใจหลังการใช้ระบบ")
+            agent.add(pay1);
             db.runTransaction(t => {
                 return t.get(Count_Accuracy).then(doc => {
-                    let newcount = doc.data().ถูก + 1;
+                    let newcount = doc.data().ใช่ + 1;
 
                     t.update(Count_Accuracy, {
-                        ถูก: newcount,
+                        ใช่: newcount,
 
                     });
                 });
@@ -3300,10 +3372,10 @@ exports.dialogflowFirebaseFulfillment = functions.https.onRequest((request, resp
             agent.add("กรุณากดปุ่มติดต่อเจ้าหน้าที่");
             db.runTransaction(t => {
                 return t.get(Count_Accuracy).then(doc => {
-                    let newcount = doc.data().ไม่ถูก + 1;
+                    let newcount = doc.data().ไม่ใช่ + 1;
 
                     t.update(Count_Accuracy, {
-                        ไม่ถูก: newcount,
+                        ไม่ใช่: newcount,
 
                     });
                 });
@@ -3367,32 +3439,32 @@ exports.dialogflowFirebaseFulfillment = functions.https.onRequest((request, resp
                 "actions": [
                     {
                         "type": "message",
-                        "label": "ถูก",
-                        "text": "ได้รับคำตอบถูกต้องในเรื่องการดำเนินการเมื่อพ้นสภาพการเป็นนักศึกษา"
+                        "label": "ใช่",
+                        "text": "ช่วยตอบคำถามในเรื่องการดำเนินการเมื่อพ้นสภาพการเป็นนักศึกษา"
                     },
                     {
                         "type": "message",
-                        "label": "ไม่ถูก",
-                        "text": "ได้รับคำตอบไม่ถูกต้องในเรื่องการดำเนินการเมื่อพ้นสภาพการเป็นนักศึกษา"
+                        "label": "ไม่ใช่",
+                        "text": "ไม่ช่วยตอบคำถามในเรื่องการดำเนินการเมื่อพ้นสภาพการเป็นนักศึกษา"
                     }
                 ],
-                "text": "คุณได้รับคำตอบถูกต้องไหมคะ?"
+                "text": "น้องบ็อตช่วยตอบคำถามของท่านใช่หรือไม่?"
             }
         };
 
         //ประกาศตัวแปร payload เพื่อแสดงออกหน้าจอ
         let payload่json = new Payload(`LINE`, payload, { sendAsMessage: true });
         let text = request.body.queryResult.queryText;
-        let c = 'ได้รับคำตอบถูกต้องในเรื่องการดำเนินการเมื่อพ้นสภาพการเป็นนักศึกษา';
-        let b = 'ได้รับคำตอบไม่ถูกต้องในเรื่องการดำเนินการเมื่อพ้นสภาพการเป็นนักศึกษา';
+        let c = 'ช่วยตอบคำถามในเรื่องการดำเนินการเมื่อพ้นสภาพการเป็นนักศึกษา';
+        let b = 'ไม่ช่วยตอบคำถามในเรื่องการดำเนินการเมื่อพ้นสภาพการเป็นนักศึกษา';
 
         //Count_Accuracy
         let Count_Accuracy = admin.firestore().collection("Count_Accuracy").doc(date.toLocaleDateString()).collection("การพ้นสภาพการเป็นนักศึกษา").doc("การดำเนินการเมื่อพ้นสภาพการเป็นนักศึกษา");
         Count_Accuracy.get().then(function (docs) {
             if (!docs.exists) {
                 Count_Accuracy.set({
-                    ถูก: 0,
-                    ไม่ถูก: 0
+                    ใช่: 0,
+                    ไม่ใช่: 0
                 });
             }
 
@@ -3400,13 +3472,14 @@ exports.dialogflowFirebaseFulfillment = functions.https.onRequest((request, resp
 
 
         if (text === c) {
-            agent.add("ขอบคุณค่ะ");
+            agent.add("กรุณากดดาวเพื่อประเมินความพึงพอใจหลังการใช้ระบบ")
+            agent.add(pay1);
             db.runTransaction(t => {
                 return t.get(Count_Accuracy).then(doc => {
-                    let newcount = doc.data().ถูก + 1;
+                    let newcount = doc.data().ใช่ + 1;
 
                     t.update(Count_Accuracy, {
-                        ถูก: newcount,
+                        ใช่: newcount,
 
                     });
                 });
@@ -3421,10 +3494,10 @@ exports.dialogflowFirebaseFulfillment = functions.https.onRequest((request, resp
             agent.add("กรุณากดปุ่มติดต่อเจ้าหน้าที่");
             db.runTransaction(t => {
                 return t.get(Count_Accuracy).then(doc => {
-                    let newcount = doc.data().ไม่ถูก + 1;
+                    let newcount = doc.data().ไม่ใช่ + 1;
 
                     t.update(Count_Accuracy, {
-                        ไม่ถูก: newcount,
+                        ไม่ใช่: newcount,
 
                     });
                 });
@@ -3491,32 +3564,32 @@ exports.dialogflowFirebaseFulfillment = functions.https.onRequest((request, resp
                 "actions": [
                     {
                         "type": "message",
-                        "label": "ถูก",
-                        "text": "ได้รับคำตอบถูกต้องในเรื่องเกรดไม่ออก"
+                        "label": "ใช่",
+                        "text": "ช่วยตอบคำถามในเรื่องเกรดไม่ออก"
                     },
                     {
                         "type": "message",
-                        "label": "ไม่ถูก",
-                        "text": "ได้รับคำตอบไม่ถูกต้องในเรื่องเกรดไม่ออก"
+                        "label": "ไม่ใช่",
+                        "text": "ไม่ช่วยตอบคำถามในเรื่องเกรดไม่ออก"
                     }
                 ],
-                "text": "คุณได้รับคำตอบถูกต้องไหมคะ?"
+                "text": "น้องบ็อตช่วยตอบคำถามของท่านใช่หรือไม่?"
             }
         };
 
         //ประกาศตัวแปร payload เพื่อแสดงออกหน้าจอ
         let payload่json = new Payload(`LINE`, payload, { sendAsMessage: true });
         let text = request.body.queryResult.queryText;
-        let c = 'ได้รับคำตอบถูกต้องในเรื่องเกรดไม่ออก';
-        let b = 'ได้รับคำตอบไม่ถูกต้องในเรื่องเกรดไม่ออก';
+        let c = 'ช่วยตอบคำถามในเรื่องเกรดไม่ออก';
+        let b = 'ไม่ช่วยตอบคำถามในเรื่องเกรดไม่ออก';
 
         //Count_Accuracy
         let Count_Accuracy = admin.firestore().collection("Count_Accuracy").doc(date.toLocaleDateString()).collection("การวัดและการประเมินผล").doc("เกรดไม่ออก");
         Count_Accuracy.get().then(function (docs) {
             if (!docs.exists) {
                 Count_Accuracy.set({
-                    ถูก: 0,
-                    ไม่ถูก: 0
+                    ใช่: 0,
+                    ไม่ใช่: 0
                 });
             }
 
@@ -3524,13 +3597,14 @@ exports.dialogflowFirebaseFulfillment = functions.https.onRequest((request, resp
 
 
         if (text === c) {
-            agent.add("ขอบคุณค่ะ");
+            agent.add("กรุณากดดาวเพื่อประเมินความพึงพอใจหลังการใช้ระบบ")
+            agent.add(pay1);
             db.runTransaction(t => {
                 return t.get(Count_Accuracy).then(doc => {
-                    let newcount = doc.data().ถูก + 1;
+                    let newcount = doc.data().ใช่ + 1;
 
                     t.update(Count_Accuracy, {
-                        ถูก: newcount,
+                        ใช่: newcount,
 
                     });
                 });
@@ -3545,10 +3619,10 @@ exports.dialogflowFirebaseFulfillment = functions.https.onRequest((request, resp
             agent.add("กรุณากดปุ่มติดต่อเจ้าหน้าที่");
             db.runTransaction(t => {
                 return t.get(Count_Accuracy).then(doc => {
-                    let newcount = doc.data().ไม่ถูก + 1;
+                    let newcount = doc.data().ไม่ใช่ + 1;
 
                     t.update(Count_Accuracy, {
-                        ไม่ถูก: newcount,
+                        ไม่ใช่: newcount,
 
                     });
                 });
@@ -3612,32 +3686,32 @@ exports.dialogflowFirebaseFulfillment = functions.https.onRequest((request, resp
                 "actions": [
                     {
                         "type": "message",
-                        "label": "ถูก",
-                        "text": "ได้รับคำตอบถูกต้องในเรื่องการแก้ I"
+                        "label": "ใช่",
+                        "text": "ช่วยตอบคำถามในเรื่องการแก้ I"
                     },
                     {
                         "type": "message",
-                        "label": "ไม่ถูก",
-                        "text": "ได้รับคำตอบไม่ถูกต้องในเรื่องการแก้ I"
+                        "label": "ไม่ใช่",
+                        "text": "ไม่ช่วยตอบคำถามในเรื่องการแก้ I"
                     }
                 ],
-                "text": "คุณได้รับคำตอบถูกต้องไหมคะ?"
+                "text": "น้องบ็อตช่วยตอบคำถามของท่านใช่หรือไม่?"
             }
         };
 
         //ประกาศตัวแปร payload เพื่อแสดงออกหน้าจอ
         let payload่json = new Payload(`LINE`, payload, { sendAsMessage: true });
         let text = request.body.queryResult.queryText;
-        let c = 'ได้รับคำตอบถูกต้องในเรื่องการแก้ I';
-        let b = 'ได้รับคำตอบไม่ถูกต้องในเรื่องการแก้ I';
+        let c = 'ช่วยตอบคำถามในเรื่องการแก้ I';
+        let b = 'ไม่ช่วยตอบคำถามในเรื่องการแก้ I';
 
         //Count_Accuracy
         let Count_Accuracy = admin.firestore().collection("Count_Accuracy").doc(date.toLocaleDateString()).collection("การวัดและการประเมินผล").doc("การแก้ I");
         Count_Accuracy.get().then(function (docs) {
             if (!docs.exists) {
                 Count_Accuracy.set({
-                    ถูก: 0,
-                    ไม่ถูก: 0
+                    ใช่: 0,
+                    ไม่ใช่: 0
                 });
             }
 
@@ -3645,13 +3719,14 @@ exports.dialogflowFirebaseFulfillment = functions.https.onRequest((request, resp
 
 
         if (text === c) {
-            agent.add("ขอบคุณค่ะ");
+            agent.add("กรุณากดดาวเพื่อประเมินความพึงพอใจหลังการใช้ระบบ")
+            agent.add(pay1);
             db.runTransaction(t => {
                 return t.get(Count_Accuracy).then(doc => {
-                    let newcount = doc.data().ถูก + 1;
+                    let newcount = doc.data().ใช่ + 1;
 
                     t.update(Count_Accuracy, {
-                        ถูก: newcount,
+                        ใช่: newcount,
 
                     });
                 });
@@ -3666,10 +3741,10 @@ exports.dialogflowFirebaseFulfillment = functions.https.onRequest((request, resp
             agent.add("กรุณากดปุ่มติดต่อเจ้าหน้าที่");
             db.runTransaction(t => {
                 return t.get(Count_Accuracy).then(doc => {
-                    let newcount = doc.data().ไม่ถูก + 1;
+                    let newcount = doc.data().ไม่ใช่ + 1;
 
                     t.update(Count_Accuracy, {
-                        ไม่ถูก: newcount,
+                        ไม่ใช่: newcount,
 
                     });
                 });
@@ -3734,32 +3809,32 @@ exports.dialogflowFirebaseFulfillment = functions.https.onRequest((request, resp
                 "actions": [
                     {
                         "type": "message",
-                        "label": "ถูก",
-                        "text": "ได้รับคำตอบถูกต้องในเรื่องการยื่นคำร้องลาพักการศึกษา"
+                        "label": "ใช่",
+                        "text": "ช่วยตอบคำถามในเรื่องการยื่นคำร้องลาพักการศึกษา"
                     },
                     {
                         "type": "message",
-                        "label": "ไม่ถูก",
-                        "text": "ได้รับคำตอบไม่ถูกต้องในเรื่องการยื่นคำร้องลาพักการศึกษา"
+                        "label": "ไม่ใช่",
+                        "text": "ไม่ช่วยตอบคำถามในเรื่องการยื่นคำร้องลาพักการศึกษา"
                     }
                 ],
-                "text": "คุณได้รับคำตอบถูกต้องไหมคะ?"
+                "text": "น้องบ็อตช่วยตอบคำถามของท่านใช่หรือไม่?"
             }
         };
 
         //ประกาศตัวแปร payload เพื่อแสดงออกหน้าจอ
         let payload่json = new Payload(`LINE`, payload, { sendAsMessage: true });
         let text = request.body.queryResult.queryText;
-        let c = 'ได้รับคำตอบถูกต้องในเรื่องการยื่นคำร้องลาพักการศึกษา';
-        let b = 'ได้รับคำตอบไม่ถูกต้องในเรื่องการยื่นคำร้องลาพักการศึกษา';
+        let c = 'ช่วยตอบคำถามในเรื่องการยื่นคำร้องลาพักการศึกษา';
+        let b = 'ไม่ช่วยตอบคำถามในเรื่องการยื่นคำร้องลาพักการศึกษา';
 
         //Count_Accuracy
         let Count_Accuracy = admin.firestore().collection("Count_Accuracy").doc(date.toLocaleDateString()).collection("การลาพักการศึกษา").doc("การยื่นคำร้องลาพักการศึกษา");
         Count_Accuracy.get().then(function (docs) {
             if (!docs.exists) {
                 Count_Accuracy.set({
-                    ถูก: 0,
-                    ไม่ถูก: 0
+                    ใช่: 0,
+                    ไม่ใช่: 0
                 });
             }
 
@@ -3767,13 +3842,14 @@ exports.dialogflowFirebaseFulfillment = functions.https.onRequest((request, resp
 
 
         if (text === c) {
-            agent.add("ขอบคุณค่ะ");
+            agent.add("กรุณากดดาวเพื่อประเมินความพึงพอใจหลังการใช้ระบบ")
+            agent.add(pay1);
             db.runTransaction(t => {
                 return t.get(Count_Accuracy).then(doc => {
-                    let newcount = doc.data().ถูก + 1;
+                    let newcount = doc.data().ใช่ + 1;
 
                     t.update(Count_Accuracy, {
-                        ถูก: newcount,
+                        ใช่: newcount,
 
                     });
                 });
@@ -3788,10 +3864,10 @@ exports.dialogflowFirebaseFulfillment = functions.https.onRequest((request, resp
             agent.add("กรุณากดปุ่มติดต่อเจ้าหน้าที่");
             db.runTransaction(t => {
                 return t.get(Count_Accuracy).then(doc => {
-                    let newcount = doc.data().ไม่ถูก + 1;
+                    let newcount = doc.data().ไม่ใช่ + 1;
 
                     t.update(Count_Accuracy, {
-                        ไม่ถูก: newcount,
+                        ไม่ใช่: newcount,
 
                     });
                 });
@@ -3856,32 +3932,32 @@ exports.dialogflowFirebaseFulfillment = functions.https.onRequest((request, resp
                 "actions": [
                     {
                         "type": "message",
-                        "label": "ถูก",
-                        "text": "ได้รับคำตอบถูกต้องในเรื่องระเบียบการลาพักการศึกษา"
+                        "label": "ใช่",
+                        "text": "ช่วยตอบคำถามในเรื่องระเบียบการลาพักการศึกษา"
                     },
                     {
                         "type": "message",
-                        "label": "ไม่ถูก",
-                        "text": "ได้รับคำตอบไม่ถูกต้องในเรื่องระเบียบการลาพักการศึกษา"
+                        "label": "ไม่ใช่",
+                        "text": "ไม่ช่วยตอบคำถามในเรื่องระเบียบการลาพักการศึกษา"
                     }
                 ],
-                "text": "คุณได้รับคำตอบถูกต้องไหมคะ?"
+                "text": "น้องบ็อตช่วยตอบคำถามของท่านใช่หรือไม่?"
             }
         };
 
         //ประกาศตัวแปร payload เพื่อแสดงออกหน้าจอ
         let payload่json = new Payload(`LINE`, payload, { sendAsMessage: true });
         let text = request.body.queryResult.queryText;
-        let c = 'ได้รับคำตอบถูกต้องในเรื่องระเบียบการลาพักการศึกษา';
-        let b = 'ได้รับคำตอบไม่ถูกต้องในเรื่องระเบียบการลาพักการศึกษา';
+        let c = 'ช่วยตอบคำถามในเรื่องระเบียบการลาพักการศึกษา';
+        let b = 'ไม่ช่วยตอบคำถามในเรื่องระเบียบการลาพักการศึกษา';
 
         //Count_Accuracy
         let Count_Accuracy = admin.firestore().collection("Count_Accuracy").doc(date.toLocaleDateString()).collection("การลาพักการศึกษา").doc("ระเบียบการลาพักการศึกษา");
         Count_Accuracy.get().then(function (docs) {
             if (!docs.exists) {
                 Count_Accuracy.set({
-                    ถูก: 0,
-                    ไม่ถูก: 0
+                    ใช่: 0,
+                    ไม่ใช่: 0
                 });
             }
 
@@ -3889,13 +3965,14 @@ exports.dialogflowFirebaseFulfillment = functions.https.onRequest((request, resp
 
 
         if (text === c) {
-            agent.add("ขอบคุณค่ะ");
+            agent.add("กรุณากดดาวเพื่อประเมินความพึงพอใจหลังการใช้ระบบ")
+            agent.add(pay1);
             db.runTransaction(t => {
                 return t.get(Count_Accuracy).then(doc => {
-                    let newcount = doc.data().ถูก + 1;
+                    let newcount = doc.data().ใช่ + 1;
 
                     t.update(Count_Accuracy, {
-                        ถูก: newcount,
+                        ใช่: newcount,
 
                     });
                 });
@@ -3910,10 +3987,10 @@ exports.dialogflowFirebaseFulfillment = functions.https.onRequest((request, resp
             agent.add("กรุณากดปุ่มติดต่อเจ้าหน้าที่");
             db.runTransaction(t => {
                 return t.get(Count_Accuracy).then(doc => {
-                    let newcount = doc.data().ไม่ถูก + 1;
+                    let newcount = doc.data().ไม่ใช่ + 1;
 
                     t.update(Count_Accuracy, {
-                        ไม่ถูก: newcount,
+                        ไม่ใช่: newcount,
 
                     });
                 });
@@ -3977,32 +4054,32 @@ exports.dialogflowFirebaseFulfillment = functions.https.onRequest((request, resp
                 "actions": [
                     {
                         "type": "message",
-                        "label": "ถูก",
-                        "text": "ได้รับคำตอบถูกต้องในเรื่องค่าธรรมเนียมการลาพักการศึกษา"
+                        "label": "ใช่",
+                        "text": "ช่วยตอบคำถามในเรื่องค่าธรรมเนียมการลาพักการศึกษา"
                     },
                     {
                         "type": "message",
-                        "label": "ไม่ถูก",
-                        "text": "ได้รับคำตอบไม่ถูกต้องในเรื่องค่าธรรมเนียมการลาพักการศึกษา"
+                        "label": "ไม่ใช่",
+                        "text": "ไม่ช่วยตอบคำถามในเรื่องค่าธรรมเนียมการลาพักการศึกษา"
                     }
                 ],
-                "text": "คุณได้รับคำตอบถูกต้องไหมคะ?"
+                "text": "น้องบ็อตช่วยตอบคำถามของท่านใช่หรือไม่?"
             }
         };
 
         //ประกาศตัวแปร payload เพื่อแสดงออกหน้าจอ
         let payload่json = new Payload(`LINE`, payload, { sendAsMessage: true });
         let text = request.body.queryResult.queryText;
-        let c = 'ได้รับคำตอบถูกต้องในเรื่องค่าธรรมเนียมการลาพักการศึกษา';
-        let b = 'ได้รับคำตอบไม่ถูกต้องในเรื่องค่าธรรมเนียมการลาพักการศึกษา';
+        let c = 'ช่วยตอบคำถามในเรื่องค่าธรรมเนียมการลาพักการศึกษา';
+        let b = 'ไม่ช่วยตอบคำถามในเรื่องค่าธรรมเนียมการลาพักการศึกษา';
 
         //Count_Accuracy
         let Count_Accuracy = admin.firestore().collection("Count_Accuracy").doc(date.toLocaleDateString()).collection("การลาพักการศึกษา").doc("ค่าธรรมเนียมการลาพักการศึกษา");
         Count_Accuracy.get().then(function (docs) {
             if (!docs.exists) {
                 Count_Accuracy.set({
-                    ถูก: 0,
-                    ไม่ถูก: 0
+                    ใช่: 0,
+                    ไม่ใช่: 0
                 });
             }
 
@@ -4010,13 +4087,14 @@ exports.dialogflowFirebaseFulfillment = functions.https.onRequest((request, resp
 
 
         if (text === c) {
-            agent.add("ขอบคุณค่ะ");
+            agent.add("กรุณากดดาวเพื่อประเมินความพึงพอใจหลังการใช้ระบบ")
+            agent.add(pay1);
             db.runTransaction(t => {
                 return t.get(Count_Accuracy).then(doc => {
-                    let newcount = doc.data().ถูก + 1;
+                    let newcount = doc.data().ใช่ + 1;
 
                     t.update(Count_Accuracy, {
-                        ถูก: newcount,
+                        ใช่: newcount,
 
                     });
                 });
@@ -4031,10 +4109,10 @@ exports.dialogflowFirebaseFulfillment = functions.https.onRequest((request, resp
             agent.add("กรุณากดปุ่มติดต่อเจ้าหน้าที่");
             db.runTransaction(t => {
                 return t.get(Count_Accuracy).then(doc => {
-                    let newcount = doc.data().ไม่ถูก + 1;
+                    let newcount = doc.data().ไม่ใช่ + 1;
 
                     t.update(Count_Accuracy, {
-                        ไม่ถูก: newcount,
+                        ไม่ใช่: newcount,
 
                     });
                 });
@@ -4100,32 +4178,32 @@ exports.dialogflowFirebaseFulfillment = functions.https.onRequest((request, resp
                 "actions": [
                     {
                         "type": "message",
-                        "label": "ถูก",
-                        "text": "ได้รับคำตอบถูกต้องในเรื่องใบรับรองการเป็นนักศึกษา"
+                        "label": "ใช่",
+                        "text": "ช่วยตอบคำถามในเรื่องใบรับรองการเป็นนักศึกษา"
                     },
                     {
                         "type": "message",
-                        "label": "ไม่ถูก",
-                        "text": "ได้รับคำตอบไม่ถูกต้องในเรื่องใบรับรองการเป็นนักศึกษา"
+                        "label": "ไม่ใช่",
+                        "text": "ไม่ช่วยตอบคำถามในเรื่องใบรับรองการเป็นนักศึกษา"
                     }
                 ],
-                "text": "คุณได้รับคำตอบถูกต้องไหมคะ?"
+                "text": "น้องบ็อตช่วยตอบคำถามของท่านใช่หรือไม่?"
             }
         };
 
         //ประกาศตัวแปร payload เพื่อแสดงออกหน้าจอ
         let payload่json = new Payload(`LINE`, payload, { sendAsMessage: true });
         let text = request.body.queryResult.queryText;
-        let c = 'ได้รับคำตอบถูกต้องในเรื่องใบรับรองการเป็นนักศึกษา';
-        let b = 'ได้รับคำตอบไม่ถูกต้องในเรื่องใบรับรองการเป็นนักศึกษา';
+        let c = 'ช่วยตอบคำถามในเรื่องใบรับรองการเป็นนักศึกษา';
+        let b = 'ไม่ช่วยตอบคำถามในเรื่องใบรับรองการเป็นนักศึกษา';
 
         //Count_Accuracy
         let Count_Accuracy = admin.firestore().collection("Count_Accuracy").doc(date.toLocaleDateString()).collection("การขอรับเอกสารการศึกษา").doc("ใบรับรองการเป็นนักศึกษา");
         Count_Accuracy.get().then(function (docs) {
             if (!docs.exists) {
                 Count_Accuracy.set({
-                    ถูก: 0,
-                    ไม่ถูก: 0
+                    ใช่: 0,
+                    ไม่ใช่: 0
                 });
             }
 
@@ -4133,13 +4211,14 @@ exports.dialogflowFirebaseFulfillment = functions.https.onRequest((request, resp
 
 
         if (text === c) {
-            agent.add("ขอบคุณค่ะ");
+            agent.add("กรุณากดดาวเพื่อประเมินความพึงพอใจหลังการใช้ระบบ")
+            agent.add(pay1);
             db.runTransaction(t => {
                 return t.get(Count_Accuracy).then(doc => {
-                    let newcount = doc.data().ถูก + 1;
+                    let newcount = doc.data().ใช่ + 1;
 
                     t.update(Count_Accuracy, {
-                        ถูก: newcount,
+                        ใช่: newcount,
 
                     });
                 });
@@ -4154,10 +4233,10 @@ exports.dialogflowFirebaseFulfillment = functions.https.onRequest((request, resp
             agent.add("กรุณากดปุ่มติดต่อเจ้าหน้าที่");
             db.runTransaction(t => {
                 return t.get(Count_Accuracy).then(doc => {
-                    let newcount = doc.data().ไม่ถูก + 1;
+                    let newcount = doc.data().ไม่ใช่ + 1;
 
                     t.update(Count_Accuracy, {
-                        ไม่ถูก: newcount,
+                        ไม่ใช่: newcount,
 
                     });
                 });
@@ -4222,32 +4301,32 @@ exports.dialogflowFirebaseFulfillment = functions.https.onRequest((request, resp
                 "actions": [
                     {
                         "type": "message",
-                        "label": "ถูก",
-                        "text": "ได้รับคำตอบถูกต้องในเรื่องใบรับรองผลการเรียน"
+                        "label": "ใช่",
+                        "text": "ช่วยตอบคำถามในเรื่องใบรับรองผลการเรียน"
                     },
                     {
                         "type": "message",
-                        "label": "ไม่ถูก",
-                        "text": "ได้รับคำตอบไม่ถูกต้องในเรื่องใบรับรองผลการเรียน"
+                        "label": "ไม่ใช่",
+                        "text": "ไม่ช่วยตอบคำถามในเรื่องใบรับรองผลการเรียน"
                     }
                 ],
-                "text": "คุณได้รับคำตอบถูกต้องไหมคะ?"
+                "text": "น้องบ็อตช่วยตอบคำถามของท่านใช่หรือไม่?"
             }
         };
 
         //ประกาศตัวแปร payload เพื่อแสดงออกหน้าจอ
         let payload่json = new Payload(`LINE`, payload, { sendAsMessage: true });
         let text = request.body.queryResult.queryText;
-        let c = 'ได้รับคำตอบถูกต้องในเรื่องใบรับรองผลการเรียน';
-        let b = 'ได้รับคำตอบไม่ถูกต้องในเรื่องใบรับรองผลการเรียน';
+        let c = 'ช่วยตอบคำถามในเรื่องใบรับรองผลการเรียน';
+        let b = 'ไม่ช่วยตอบคำถามในเรื่องใบรับรองผลการเรียน';
 
         //Count_Accuracy
         let Count_Accuracy = admin.firestore().collection("Count_Accuracy").doc(date.toLocaleDateString()).collection("การขอรับเอกสารการศึกษา").doc("ใบรับรองผลการเรียน");
         Count_Accuracy.get().then(function (docs) {
             if (!docs.exists) {
                 Count_Accuracy.set({
-                    ถูก: 0,
-                    ไม่ถูก: 0
+                    ใช่: 0,
+                    ไม่ใช่: 0
                 });
             }
 
@@ -4255,13 +4334,14 @@ exports.dialogflowFirebaseFulfillment = functions.https.onRequest((request, resp
 
 
         if (text === c) {
-            agent.add("ขอบคุณค่ะ");
+            agent.add("กรุณากดดาวเพื่อประเมินความพึงพอใจหลังการใช้ระบบ")
+            agent.add(pay1);
             db.runTransaction(t => {
                 return t.get(Count_Accuracy).then(doc => {
-                    let newcount = doc.data().ถูก + 1;
+                    let newcount = doc.data().ใช่ + 1;
 
                     t.update(Count_Accuracy, {
-                        ถูก: newcount,
+                        ใช่: newcount,
 
                     });
                 });
@@ -4276,10 +4356,10 @@ exports.dialogflowFirebaseFulfillment = functions.https.onRequest((request, resp
             agent.add("กรุณากดปุ่มติดต่อเจ้าหน้าที่");
             db.runTransaction(t => {
                 return t.get(Count_Accuracy).then(doc => {
-                    let newcount = doc.data().ไม่ถูก + 1;
+                    let newcount = doc.data().ไม่ใช่ + 1;
 
                     t.update(Count_Accuracy, {
-                        ไม่ถูก: newcount,
+                        ไม่ใช่: newcount,
 
                     });
                 });
@@ -4343,32 +4423,32 @@ exports.dialogflowFirebaseFulfillment = functions.https.onRequest((request, resp
                 "actions": [
                     {
                         "type": "message",
-                        "label": "ถูก",
-                        "text": "ได้รับคำตอบถูกต้องในเรื่องใบขอรับปริญญาย้อนหลัง"
+                        "label": "ใช่",
+                        "text": "ช่วยตอบคำถามในเรื่องใบขอรับปริญญาย้อนหลัง"
                     },
                     {
                         "type": "message",
-                        "label": "ไม่ถูก",
-                        "text": "ได้รับคำตอบไม่ถูกต้องในเรื่องใบขอรับปริญญาย้อนหลัง"
+                        "label": "ไม่ใช่",
+                        "text": "ไม่ช่วยตอบคำถามในเรื่องใบขอรับปริญญาย้อนหลัง"
                     }
                 ],
-                "text": "คุณได้รับคำตอบถูกต้องไหมคะ?"
+                "text": "น้องบ็อตช่วยตอบคำถามของท่านใช่หรือไม่?"
             }
         };
 
         //ประกาศตัวแปร payload เพื่อแสดงออกหน้าจอ
         let payload่json = new Payload(`LINE`, payload, { sendAsMessage: true });
         let text = request.body.queryResult.queryText;
-        let c = 'ได้รับคำตอบถูกต้องในเรื่องใบขอรับปริญญาย้อนหลัง';
-        let b = 'ได้รับคำตอบไม่ถูกต้องในเรื่องใบขอรับปริญญาย้อนหลัง';
+        let c = 'ช่วยตอบคำถามในเรื่องใบขอรับปริญญาย้อนหลัง';
+        let b = 'ไม่ช่วยตอบคำถามในเรื่องใบขอรับปริญญาย้อนหลัง';
 
         //Count_Accuracy
         let Count_Accuracy = admin.firestore().collection("Count_Accuracy").doc(date.toLocaleDateString()).collection("การขอรับเอกสารการศึกษา").doc("ใบขอรับปริญญาย้อนหลัง");
         Count_Accuracy.get().then(function (docs) {
             if (!docs.exists) {
                 Count_Accuracy.set({
-                    ถูก: 0,
-                    ไม่ถูก: 0
+                    ใช่: 0,
+                    ไม่ใช่: 0
                 });
             }
 
@@ -4376,13 +4456,14 @@ exports.dialogflowFirebaseFulfillment = functions.https.onRequest((request, resp
 
 
         if (text === c) {
-            agent.add("ขอบคุณค่ะ");
+            agent.add("กรุณากดดาวเพื่อประเมินความพึงพอใจหลังการใช้ระบบ")
+            agent.add(pay1);
             db.runTransaction(t => {
                 return t.get(Count_Accuracy).then(doc => {
-                    let newcount = doc.data().ถูก + 1;
+                    let newcount = doc.data().ใช่ + 1;
 
                     t.update(Count_Accuracy, {
-                        ถูก: newcount,
+                        ใช่: newcount,
 
                     });
                 });
@@ -4397,10 +4478,10 @@ exports.dialogflowFirebaseFulfillment = functions.https.onRequest((request, resp
             agent.add("กรุณากดปุ่มติดต่อเจ้าหน้าที่");
             db.runTransaction(t => {
                 return t.get(Count_Accuracy).then(doc => {
-                    let newcount = doc.data().ไม่ถูก + 1;
+                    let newcount = doc.data().ไม่ใช่ + 1;
 
                     t.update(Count_Accuracy, {
-                        ไม่ถูก: newcount,
+                        ไม่ใช่: newcount,
 
                     });
                 });
@@ -4463,32 +4544,32 @@ exports.dialogflowFirebaseFulfillment = functions.https.onRequest((request, resp
                 "actions": [
                     {
                         "type": "message",
-                        "label": "ถูก",
-                        "text": "ได้รับคำตอบถูกต้องในเรื่องระยะเวลาการขอเอกสาร"
+                        "label": "ใช่",
+                        "text": "ช่วยตอบคำถามในเรื่องระยะเวลาการขอเอกสาร"
                     },
                     {
                         "type": "message",
-                        "label": "ไม่ถูก",
-                        "text": "ได้รับคำตอบไม่ถูกต้องในเรื่องระยะเวลาการขอเอกสาร"
+                        "label": "ไม่ใช่",
+                        "text": "ไม่ช่วยตอบคำถามในเรื่องระยะเวลาการขอเอกสาร"
                     }
                 ],
-                "text": "คุณได้รับคำตอบถูกต้องไหมคะ?"
+                "text": "น้องบ็อตช่วยตอบคำถามของท่านใช่หรือไม่?"
             }
         };
 
         //ประกาศตัวแปร payload เพื่อแสดงออกหน้าจอ
         let payload่json = new Payload(`LINE`, payload, { sendAsMessage: true });
         let text = request.body.queryResult.queryText;
-        let c = 'ได้รับคำตอบถูกต้องในเรื่องระยะเวลาการขอเอกสาร';
-        let b = 'ได้รับคำตอบไม่ถูกต้องในเรื่องระยะเวลาการขอเอกสาร';
+        let c = 'ช่วยตอบคำถามในเรื่องระยะเวลาการขอเอกสาร';
+        let b = 'ไม่ช่วยตอบคำถามในเรื่องระยะเวลาการขอเอกสาร';
 
         //Count_Accuracy
         let Count_Accuracy = admin.firestore().collection("Count_Accuracy").doc(date.toLocaleDateString()).collection("การขอรับเอกสารการศึกษา").doc("ระยะเวลาการขอเอกสาร");
         Count_Accuracy.get().then(function (docs) {
             if (!docs.exists) {
                 Count_Accuracy.set({
-                    ถูก: 0,
-                    ไม่ถูก: 0
+                    ใช่: 0,
+                    ไม่ใช่: 0
                 });
             }
 
@@ -4496,13 +4577,14 @@ exports.dialogflowFirebaseFulfillment = functions.https.onRequest((request, resp
 
 
         if (text === c) {
-            agent.add("ขอบคุณค่ะ");
+            agent.add("กรุณากดดาวเพื่อประเมินความพึงพอใจหลังการใช้ระบบ")
+            agent.add(pay1);
             db.runTransaction(t => {
                 return t.get(Count_Accuracy).then(doc => {
-                    let newcount = doc.data().ถูก + 1;
+                    let newcount = doc.data().ใช่ + 1;
 
                     t.update(Count_Accuracy, {
-                        ถูก: newcount,
+                        ใช่: newcount,
 
                     });
                 });
@@ -4517,10 +4599,10 @@ exports.dialogflowFirebaseFulfillment = functions.https.onRequest((request, resp
             agent.add("กรุณากดปุ่มติดต่อเจ้าหน้าที่");
             db.runTransaction(t => {
                 return t.get(Count_Accuracy).then(doc => {
-                    let newcount = doc.data().ไม่ถูก + 1;
+                    let newcount = doc.data().ไม่ใช่ + 1;
 
                     t.update(Count_Accuracy, {
-                        ไม่ถูก: newcount,
+                        ไม่ใช่: newcount,
 
                     });
                 });
@@ -4584,32 +4666,32 @@ exports.dialogflowFirebaseFulfillment = functions.https.onRequest((request, resp
                 "actions": [
                     {
                         "type": "message",
-                        "label": "ถูก",
-                        "text": "ได้รับคำตอบถูกต้องในเรื่องปัญหาการรับเอกสาร"
+                        "label": "ใช่",
+                        "text": "ช่วยตอบคำถามในเรื่องปัญหาการรับเอกสาร"
                     },
                     {
                         "type": "message",
-                        "label": "ไม่ถูก",
-                        "text": "ได้รับคำตอบไม่ถูกต้องในเรื่องปัญหาการรับเอกสาร"
+                        "label": "ไม่ใช่",
+                        "text": "ไม่ช่วยตอบคำถามในเรื่องปัญหาการรับเอกสาร"
                     }
                 ],
-                "text": "คุณได้รับคำตอบถูกต้องไหมคะ?"
+                "text": "น้องบ็อตช่วยตอบคำถามของท่านใช่หรือไม่?"
             }
         };
 
         //ประกาศตัวแปร payload เพื่อแสดงออกหน้าจอ
         let payload่json = new Payload(`LINE`, payload, { sendAsMessage: true });
         let text = request.body.queryResult.queryText;
-        let c = 'ได้รับคำตอบถูกต้องในเรื่องปัญหาการรับเอกสาร';
-        let b = 'ได้รับคำตอบไม่ถูกต้องในเรื่องปัญหาการรับเอกสาร';
+        let c = 'ช่วยตอบคำถามในเรื่องปัญหาการรับเอกสาร';
+        let b = 'ไม่ช่วยตอบคำถามในเรื่องปัญหาการรับเอกสาร';
 
         //Count_Accuracy
         let Count_Accuracy = admin.firestore().collection("Count_Accuracy").doc(date.toLocaleDateString()).collection("การขอรับเอกสารการศึกษา").doc("ปัญหาการรับเอกสาร");
         Count_Accuracy.get().then(function (docs) {
             if (!docs.exists) {
                 Count_Accuracy.set({
-                    ถูก: 0,
-                    ไม่ถูก: 0
+                    ใช่: 0,
+                    ไม่ใช่: 0
                 });
             }
 
@@ -4617,13 +4699,14 @@ exports.dialogflowFirebaseFulfillment = functions.https.onRequest((request, resp
 
 
         if (text === c) {
-            agent.add("ขอบคุณค่ะ");
+            agent.add("กรุณากดดาวเพื่อประเมินความพึงพอใจหลังการใช้ระบบ")
+            agent.add(pay1);
             db.runTransaction(t => {
                 return t.get(Count_Accuracy).then(doc => {
-                    let newcount = doc.data().ถูก + 1;
+                    let newcount = doc.data().ใช่ + 1;
 
                     t.update(Count_Accuracy, {
-                        ถูก: newcount,
+                        ใช่: newcount,
 
                     });
                 });
@@ -4638,10 +4721,10 @@ exports.dialogflowFirebaseFulfillment = functions.https.onRequest((request, resp
             agent.add("กรุณากดปุ่มติดต่อเจ้าหน้าที่");
             db.runTransaction(t => {
                 return t.get(Count_Accuracy).then(doc => {
-                    let newcount = doc.data().ไม่ถูก + 1;
+                    let newcount = doc.data().ไม่ใช่ + 1;
 
                     t.update(Count_Accuracy, {
-                        ไม่ถูก: newcount,
+                        ไม่ใช่: newcount,
 
                     });
                 });
@@ -4707,32 +4790,32 @@ exports.dialogflowFirebaseFulfillment = functions.https.onRequest((request, resp
                 "actions": [
                     {
                         "type": "message",
-                        "label": "ถูก",
-                        "text": "ได้รับคำตอบถูกต้องในเรื่องปฎิทินภาคการศึกษาปกติ"
+                        "label": "ใช่",
+                        "text": "ช่วยตอบคำถามในเรื่องปฎิทินภาคการศึกษาปกติ"
                     },
                     {
                         "type": "message",
-                        "label": "ไม่ถูก",
-                        "text": "ได้รับคำตอบไม่ถูกต้องในเรื่องปฎิทินภาคการศึกษาปกติ"
+                        "label": "ไม่ใช่",
+                        "text": "ไม่ช่วยตอบคำถามในเรื่องปฎิทินภาคการศึกษาปกติ"
                     }
                 ],
-                "text": "คุณได้รับคำตอบถูกต้องไหมคะ?"
+                "text": "น้องบ็อตช่วยตอบคำถามของท่านใช่หรือไม่?"
             }
         };
 
         //ประกาศตัวแปร payload เพื่อแสดงออกหน้าจอ
         let payload่json = new Payload(`LINE`, payload, { sendAsMessage: true });
         let text = request.body.queryResult.queryText;
-        let c = 'ได้รับคำตอบถูกต้องในเรื่องปฎิทินภาคการศึกษาปกติ';
-        let b = 'ได้รับคำตอบไม่ถูกต้องในเรื่องปฎิทินภาคการศึกษาปกติ';
+        let c = 'ช่วยตอบคำถามในเรื่องปฎิทินภาคการศึกษาปกติ';
+        let b = 'ไม่ช่วยตอบคำถามในเรื่องปฎิทินภาคการศึกษาปกติ';
 
         //Count_Accuracy
         let Count_Accuracy = admin.firestore().collection("Count_Accuracy").doc(date.toLocaleDateString()).collection("ปฏิทินการศึกษา").doc("ภาคการศึกษาปกติ");
         Count_Accuracy.get().then(function (docs) {
             if (!docs.exists) {
                 Count_Accuracy.set({
-                    ถูก: 0,
-                    ไม่ถูก: 0
+                    ใช่: 0,
+                    ไม่ใช่: 0
                 });
             }
 
@@ -4740,13 +4823,14 @@ exports.dialogflowFirebaseFulfillment = functions.https.onRequest((request, resp
 
 
         if (text === c) {
-            agent.add("ขอบคุณค่ะ");
+            agent.add("กรุณากดดาวเพื่อประเมินความพึงพอใจหลังการใช้ระบบ")
+            agent.add(pay1);
             db.runTransaction(t => {
                 return t.get(Count_Accuracy).then(doc => {
-                    let newcount = doc.data().ถูก + 1;
+                    let newcount = doc.data().ใช่ + 1;
 
                     t.update(Count_Accuracy, {
-                        ถูก: newcount,
+                        ใช่: newcount,
 
                     });
                 });
@@ -4761,10 +4845,10 @@ exports.dialogflowFirebaseFulfillment = functions.https.onRequest((request, resp
             agent.add("กรุณากดปุ่มติดต่อเจ้าหน้าที่");
             db.runTransaction(t => {
                 return t.get(Count_Accuracy).then(doc => {
-                    let newcount = doc.data().ไม่ถูก + 1;
+                    let newcount = doc.data().ไม่ใช่ + 1;
 
                     t.update(Count_Accuracy, {
-                        ไม่ถูก: newcount,
+                        ไม่ใช่: newcount,
 
                     });
                 });
@@ -4827,32 +4911,32 @@ exports.dialogflowFirebaseFulfillment = functions.https.onRequest((request, resp
                 "actions": [
                     {
                         "type": "message",
-                        "label": "ถูก",
-                        "text": "ได้รับคำตอบถูกต้องในเรื่องปฎิทินภาคการศึกษาพิเศษ"
+                        "label": "ใช่",
+                        "text": "ช่วยตอบคำถามในเรื่องปฎิทินภาคการศึกษาพิเศษ"
                     },
                     {
                         "type": "message",
-                        "label": "ไม่ถูก",
-                        "text": "ได้รับคำตอบไม่ถูกต้องในเรื่องปฎิทินภาคการศึกษาพิเศษ"
+                        "label": "ไม่ใช่",
+                        "text": "ไม่ช่วยตอบคำถามในเรื่องปฎิทินภาคการศึกษาพิเศษ"
                     }
                 ],
-                "text": "คุณได้รับคำตอบถูกต้องไหมคะ?"
+                "text": "น้องบ็อตช่วยตอบคำถามของท่านใช่หรือไม่?"
             }
         };
 
         //ประกาศตัวแปร payload เพื่อแสดงออกหน้าจอ
         let payload่json = new Payload(`LINE`, payload, { sendAsMessage: true });
         let text = request.body.queryResult.queryText;
-        let c = 'ได้รับคำตอบถูกต้องในเรื่องปฎิทินภาคการศึกษาพิเศษ';
-        let b = 'ได้รับคำตอบไม่ถูกต้องในเรื่องปฎิทินภาคการศึกษาพิเศษ';
+        let c = 'ช่วยตอบคำถามในเรื่องปฎิทินภาคการศึกษาพิเศษ';
+        let b = 'ไม่ช่วยตอบคำถามในเรื่องปฎิทินภาคการศึกษาพิเศษ';
 
         //Count_Accuracy
         let Count_Accuracy = admin.firestore().collection("Count_Accuracy").doc(date.toLocaleDateString()).collection("ปฏิทินการศึกษา").doc("ภาคการศึกษาพิเศษ");
         Count_Accuracy.get().then(function (docs) {
             if (!docs.exists) {
                 Count_Accuracy.set({
-                    ถูก: 0,
-                    ไม่ถูก: 0
+                    ใช่: 0,
+                    ไม่ใช่: 0
                 });
             }
 
@@ -4860,13 +4944,14 @@ exports.dialogflowFirebaseFulfillment = functions.https.onRequest((request, resp
 
 
         if (text === c) {
-            agent.add("ขอบคุณค่ะ");
+            agent.add("กรุณากดดาวเพื่อประเมินความพึงพอใจหลังการใช้ระบบ")
+            agent.add(pay1);
             db.runTransaction(t => {
                 return t.get(Count_Accuracy).then(doc => {
-                    let newcount = doc.data().ถูก + 1;
+                    let newcount = doc.data().ใช่ + 1;
 
                     t.update(Count_Accuracy, {
-                        ถูก: newcount,
+                        ใช่: newcount,
 
                     });
                 });
@@ -4881,10 +4966,10 @@ exports.dialogflowFirebaseFulfillment = functions.https.onRequest((request, resp
             agent.add("กรุณากดปุ่มติดต่อเจ้าหน้าที่");
             db.runTransaction(t => {
                 return t.get(Count_Accuracy).then(doc => {
-                    let newcount = doc.data().ไม่ถูก + 1;
+                    let newcount = doc.data().ไม่ใช่ + 1;
 
                     t.update(Count_Accuracy, {
-                        ไม่ถูก: newcount,
+                        ไม่ใช่: newcount,
 
                     });
                 });
@@ -4948,32 +5033,32 @@ exports.dialogflowFirebaseFulfillment = functions.https.onRequest((request, resp
                 "actions": [
                     {
                         "type": "message",
-                        "label": "ถูก",
-                        "text": "ได้รับคำตอบถูกต้องในเรื่องปฎิทินภาคการศึกษาฤดูร้อน"
+                        "label": "ใช่",
+                        "text": "ช่วยตอบคำถามในเรื่องปฎิทินภาคการศึกษาฤดูร้อน"
                     },
                     {
                         "type": "message",
-                        "label": "ไม่ถูก",
-                        "text": "ได้รับคำตอบไม่ถูกต้องในเรื่องปฎิทินภาคการศึกษาฤดูร้อน"
+                        "label": "ไม่ใช่",
+                        "text": "ไม่ช่วยตอบคำถามในเรื่องปฎิทินภาคการศึกษาฤดูร้อน"
                     }
                 ],
-                "text": "คุณได้รับคำตอบถูกต้องไหมคะ?"
+                "text": "น้องบ็อตช่วยตอบคำถามของท่านใช่หรือไม่?"
             }
         };
 
         //ประกาศตัวแปร payload เพื่อแสดงออกหน้าจอ
         let payload่json = new Payload(`LINE`, payload, { sendAsMessage: true });
         let text = request.body.queryResult.queryText;
-        let c = 'ได้รับคำตอบถูกต้องในเรื่องปฎิทินภาคการศึกษาฤดูร้อน';
-        let b = 'ได้รับคำตอบไม่ถูกต้องในเรื่องปฎิทินภาคการศึกษาฤดูร้อน';
+        let c = 'ช่วยตอบคำถามในเรื่องปฎิทินภาคการศึกษาฤดูร้อน';
+        let b = 'ไม่ช่วยตอบคำถามในเรื่องปฎิทินภาคการศึกษาฤดูร้อน';
 
         //Count_Accuracy
         let Count_Accuracy = admin.firestore().collection("Count_Accuracy").doc(date.toLocaleDateString()).collection("ปฏิทินการศึกษา").doc("ภาคการศึกษาฤดูร้อน");
         Count_Accuracy.get().then(function (docs) {
             if (!docs.exists) {
                 Count_Accuracy.set({
-                    ถูก: 0,
-                    ไม่ถูก: 0
+                    ใช่: 0,
+                    ไม่ใช่: 0
                 });
             }
 
@@ -4981,13 +5066,14 @@ exports.dialogflowFirebaseFulfillment = functions.https.onRequest((request, resp
 
 
         if (text === c) {
-            agent.add("ขอบคุณค่ะ");
+            agent.add("กรุณากดดาวเพื่อประเมินความพึงพอใจหลังการใช้ระบบ")
+            agent.add(pay1);
             db.runTransaction(t => {
                 return t.get(Count_Accuracy).then(doc => {
-                    let newcount = doc.data().ถูก + 1;
+                    let newcount = doc.data().ใช่ + 1;
 
                     t.update(Count_Accuracy, {
-                        ถูก: newcount,
+                        ใช่: newcount,
 
                     });
                 });
@@ -5002,10 +5088,10 @@ exports.dialogflowFirebaseFulfillment = functions.https.onRequest((request, resp
             agent.add("กรุณากดปุ่มติดต่อเจ้าหน้าที่");
             db.runTransaction(t => {
                 return t.get(Count_Accuracy).then(doc => {
-                    let newcount = doc.data().ไม่ถูก + 1;
+                    let newcount = doc.data().ไม่ใช่ + 1;
 
                     t.update(Count_Accuracy, {
-                        ไม่ถูก: newcount,
+                        ไม่ใช่: newcount,
 
                     });
                 });
@@ -5070,32 +5156,32 @@ exports.dialogflowFirebaseFulfillment = functions.https.onRequest((request, resp
                 "actions": [
                     {
                         "type": "message",
-                        "label": "ถูก",
-                        "text": "ได้รับคำตอบถูกต้องในเรื่องการสมัครเรียนภาคการศึกษาปกติ"
+                        "label": "ใช่",
+                        "text": "ช่วยตอบคำถามในเรื่องการสมัครเรียนภาคการศึกษาปกติ"
                     },
                     {
                         "type": "message",
-                        "label": "ไม่ถูก",
-                        "text": "ได้รับคำตอบไม่ถูกต้องในเรื่องการสมัครเรียนภาคการศึกษาปกติ"
+                        "label": "ไม่ใช่",
+                        "text": "ไม่ช่วยตอบคำถามในเรื่องการสมัครเรียนภาคการศึกษาปกติ"
                     }
                 ],
-                "text": "คุณได้รับคำตอบถูกต้องไหมคะ?"
+                "text": "น้องบ็อตช่วยตอบคำถามของท่านใช่หรือไม่?"
             }
         };
 
         //ประกาศตัวแปร payload เพื่อแสดงออกหน้าจอ
         let payload่json = new Payload(`LINE`, payload, { sendAsMessage: true });
         let text = request.body.queryResult.queryText;
-        let c = 'ได้รับคำตอบถูกต้องในเรื่องการสมัครเรียนภาคการศึกษาปกติ';
-        let b = 'ได้รับคำตอบไม่ถูกต้องในเรื่องการสมัครเรียนภาคการศึกษาปกติ';
+        let c = 'ช่วยตอบคำถามในเรื่องการสมัครเรียนภาคการศึกษาปกติ';
+        let b = 'ไม่ช่วยตอบคำถามในเรื่องการสมัครเรียนภาคการศึกษาปกติ';
 
         //Count_Accuracy
         let Count_Accuracy = admin.firestore().collection("Count_Accuracy").doc(date.toLocaleDateString()).collection("การสมัครเรียน").doc("ภาคการศึกษาปกติ");
         Count_Accuracy.get().then(function (docs) {
             if (!docs.exists) {
                 Count_Accuracy.set({
-                    ถูก: 0,
-                    ไม่ถูก: 0
+                    ใช่: 0,
+                    ไม่ใช่: 0
                 });
             }
 
@@ -5103,13 +5189,14 @@ exports.dialogflowFirebaseFulfillment = functions.https.onRequest((request, resp
 
 
         if (text === c) {
-            agent.add("ขอบคุณค่ะ");
+            agent.add("กรุณากดดาวเพื่อประเมินความพึงพอใจหลังการใช้ระบบ")
+            agent.add(pay1);
             db.runTransaction(t => {
                 return t.get(Count_Accuracy).then(doc => {
-                    let newcount = doc.data().ถูก + 1;
+                    let newcount = doc.data().ใช่ + 1;
 
                     t.update(Count_Accuracy, {
-                        ถูก: newcount,
+                        ใช่: newcount,
 
                     });
                 });
@@ -5124,10 +5211,10 @@ exports.dialogflowFirebaseFulfillment = functions.https.onRequest((request, resp
             agent.add("กรุณากดปุ่มติดต่อเจ้าหน้าที่");
             db.runTransaction(t => {
                 return t.get(Count_Accuracy).then(doc => {
-                    let newcount = doc.data().ไม่ถูก + 1;
+                    let newcount = doc.data().ไม่ใช่ + 1;
 
                     t.update(Count_Accuracy, {
-                        ไม่ถูก: newcount,
+                        ไม่ใช่: newcount,
 
                     });
                 });
@@ -5191,32 +5278,32 @@ exports.dialogflowFirebaseFulfillment = functions.https.onRequest((request, resp
                 "actions": [
                     {
                         "type": "message",
-                        "label": "ถูก",
-                        "text": "ได้รับคำตอบถูกต้องในเรื่องการสมัครเรียนภาคการศึกษาพิเศษ"
+                        "label": "ใช่",
+                        "text": "ช่วยตอบคำถามในเรื่องการสมัครเรียนภาคการศึกษาพิเศษ"
                     },
                     {
                         "type": "message",
-                        "label": "ไม่ถูก",
-                        "text": "ได้รับคำตอบไม่ถูกต้องในเรื่องการสมัครเรียนภาคการศึกษาพิเศษ"
+                        "label": "ไม่ใช่",
+                        "text": "ไม่ช่วยตอบคำถามในเรื่องการสมัครเรียนภาคการศึกษาพิเศษ"
                     }
                 ],
-                "text": "คุณได้รับคำตอบถูกต้องไหมคะ?"
+                "text": "น้องบ็อตช่วยตอบคำถามของท่านใช่หรือไม่?"
             }
         };
 
         //ประกาศตัวแปร payload เพื่อแสดงออกหน้าจอ
         let payload่json = new Payload(`LINE`, payload, { sendAsMessage: true });
         let text = request.body.queryResult.queryText;
-        let c = 'ได้รับคำตอบถูกต้องในเรื่องการสมัครเรียนภาคการศึกษาพิเศษ';
-        let b = 'ได้รับคำตอบไม่ถูกต้องในเรื่องการสมัครเรียนภาคการศึกษาพิเศษ';
+        let c = 'ช่วยตอบคำถามในเรื่องการสมัครเรียนภาคการศึกษาพิเศษ';
+        let b = 'ไม่ช่วยตอบคำถามในเรื่องการสมัครเรียนภาคการศึกษาพิเศษ';
 
         //Count_Accuracy
         let Count_Accuracy = admin.firestore().collection("Count_Accuracy").doc(date.toLocaleDateString()).collection("การสมัครเรียน").doc("ภาคการศึกษาพิเศษ");
         Count_Accuracy.get().then(function (docs) {
             if (!docs.exists) {
                 Count_Accuracy.set({
-                    ถูก: 0,
-                    ไม่ถูก: 0
+                    ใช่: 0,
+                    ไม่ใช่: 0
                 });
             }
 
@@ -5224,13 +5311,14 @@ exports.dialogflowFirebaseFulfillment = functions.https.onRequest((request, resp
 
 
         if (text === c) {
-            agent.add("ขอบคุณค่ะ");
+            agent.add("กรุณากดดาวเพื่อประเมินความพึงพอใจหลังการใช้ระบบ")
+            agent.add(pay1);
             db.runTransaction(t => {
                 return t.get(Count_Accuracy).then(doc => {
-                    let newcount = doc.data().ถูก + 1;
+                    let newcount = doc.data().ใช่ + 1;
 
                     t.update(Count_Accuracy, {
-                        ถูก: newcount,
+                        ใช่: newcount,
 
                     });
                 });
@@ -5245,10 +5333,10 @@ exports.dialogflowFirebaseFulfillment = functions.https.onRequest((request, resp
             agent.add("กรุณากดปุ่มติดต่อเจ้าหน้าที่");
             db.runTransaction(t => {
                 return t.get(Count_Accuracy).then(doc => {
-                    let newcount = doc.data().ไม่ถูก + 1;
+                    let newcount = doc.data().ไม่ใช่ + 1;
 
                     t.update(Count_Accuracy, {
-                        ไม่ถูก: newcount,
+                        ไม่ใช่: newcount,
 
                     });
                 });
@@ -5312,32 +5400,32 @@ exports.dialogflowFirebaseFulfillment = functions.https.onRequest((request, resp
                 "actions": [
                     {
                         "type": "message",
-                        "label": "ถูก",
-                        "text": "ได้รับคำตอบถูกต้องในเรื่องการสมัครเรียนภาคการศึกษาฤดูร้อน"
+                        "label": "ใช่",
+                        "text": "ช่วยตอบคำถามในเรื่องการสมัครเรียนภาคการศึกษาฤดูร้อน"
                     },
                     {
                         "type": "message",
-                        "label": "ไม่ถูก",
-                        "text": "ได้รับคำตอบไม่ถูกต้องในเรื่องการสมัครเรียนภาคการศึกษาฤดูร้อน"
+                        "label": "ไม่ใช่",
+                        "text": "ไม่ช่วยตอบคำถามในเรื่องการสมัครเรียนภาคการศึกษาฤดูร้อน"
                     }
                 ],
-                "text": "คุณได้รับคำตอบถูกต้องไหมคะ?"
+                "text": "น้องบ็อตช่วยตอบคำถามของท่านใช่หรือไม่?"
             }
         };
 
         //ประกาศตัวแปร payload เพื่อแสดงออกหน้าจอ
         let payload่json = new Payload(`LINE`, payload, { sendAsMessage: true });
         let text = request.body.queryResult.queryText;
-        let c = 'ได้รับคำตอบถูกต้องในเรื่องการสมัครเรียนภาคการศึกษาฤดูร้อน';
-        let b = 'ได้รับคำตอบไม่ถูกต้องในเรื่องการสมัครเรียนภาคการศึกษาฤดูร้อน';
+        let c = 'ช่วยตอบคำถามในเรื่องการสมัครเรียนภาคการศึกษาฤดูร้อน';
+        let b = 'ไม่ช่วยตอบคำถามในเรื่องการสมัครเรียนภาคการศึกษาฤดูร้อน';
 
         //Count_Accuracy
         let Count_Accuracy = admin.firestore().collection("Count_Accuracy").doc(date.toLocaleDateString()).collection("การสมัครเรียน").doc("ภาคการศึกษาฤดูร้อน");
         Count_Accuracy.get().then(function (docs) {
             if (!docs.exists) {
                 Count_Accuracy.set({
-                    ถูก: 0,
-                    ไม่ถูก: 0
+                    ใช่: 0,
+                    ไม่ใช่: 0
                 });
             }
 
@@ -5345,13 +5433,14 @@ exports.dialogflowFirebaseFulfillment = functions.https.onRequest((request, resp
 
 
         if (text === c) {
-            agent.add("ขอบคุณค่ะ");
+            agent.add("กรุณากดดาวเพื่อประเมินความพึงพอใจหลังการใช้ระบบ")
+            agent.add(pay1);
             db.runTransaction(t => {
                 return t.get(Count_Accuracy).then(doc => {
-                    let newcount = doc.data().ถูก + 1;
+                    let newcount = doc.data().ใช่ + 1;
 
                     t.update(Count_Accuracy, {
-                        ถูก: newcount,
+                        ใช่: newcount,
 
                     });
                 });
@@ -5366,10 +5455,10 @@ exports.dialogflowFirebaseFulfillment = functions.https.onRequest((request, resp
             agent.add("กรุณากดปุ่มติดต่อเจ้าหน้าที่");
             db.runTransaction(t => {
                 return t.get(Count_Accuracy).then(doc => {
-                    let newcount = doc.data().ไม่ถูก + 1;
+                    let newcount = doc.data().ไม่ใช่ + 1;
 
                     t.update(Count_Accuracy, {
-                        ไม่ถูก: newcount,
+                        ไม่ใช่: newcount,
 
                     });
                 });
@@ -5434,32 +5523,32 @@ exports.dialogflowFirebaseFulfillment = functions.https.onRequest((request, resp
                 "actions": [
                     {
                         "type": "message",
-                        "label": "ถูก",
-                        "text": "ได้รับคำตอบถูกต้องในเรื่องค่าธรรมเนียมการศึกษาสาขาคณิตศาสตร์"
+                        "label": "ใช่",
+                        "text": "ช่วยตอบคำถามในเรื่องค่าธรรมเนียมการศึกษาสาขาคณิตศาสตร์"
                     },
                     {
                         "type": "message",
-                        "label": "ไม่ถูก",
-                        "text": "ได้รับคำตอบไม่ถูกต้องในเรื่องค่าธรรมเนียมการศึกษาสาขาคณิตศาสตร์"
+                        "label": "ไม่ใช่",
+                        "text": "ไม่ช่วยตอบคำถามในเรื่องค่าธรรมเนียมการศึกษาสาขาคณิตศาสตร์"
                     }
                 ],
-                "text": "คุณได้รับคำตอบถูกต้องไหมคะ?"
+                "text": "น้องบ็อตช่วยตอบคำถามของท่านใช่หรือไม่?"
             }
         };
 
         //ประกาศตัวแปร payload เพื่อแสดงออกหน้าจอ
         let payload่json = new Payload(`LINE`, payload, { sendAsMessage: true });
         let text = request.body.queryResult.queryText;
-        let c = 'ได้รับคำตอบถูกต้องในเรื่องค่าธรรมเนียมการศึกษาสาขาคณิตศาสตร์';
-        let b = 'ได้รับคำตอบไม่ถูกต้องในเรื่องค่าธรรมเนียมการศึกษาสาขาคณิตศาสตร์';
+        let c = 'ช่วยตอบคำถามในเรื่องค่าธรรมเนียมการศึกษาสาขาคณิตศาสตร์';
+        let b = 'ไม่ช่วยตอบคำถามในเรื่องค่าธรรมเนียมการศึกษาสาขาคณิตศาสตร์';
 
         //Count_Accuracy
         let Count_Accuracy = admin.firestore().collection("Count_Accuracy").doc(date.toLocaleDateString()).collection("ค่าธรรมเนียมการศึกษา").doc("คณะครุศาสตร์").collection("Subject").doc("คณิตศาสตร์");
         Count_Accuracy.get().then(function (docs) {
             if (!docs.exists) {
                 Count_Accuracy.set({
-                    ถูก: 0,
-                    ไม่ถูก: 0
+                    ใช่: 0,
+                    ไม่ใช่: 0
                 });
             }
 
@@ -5467,13 +5556,14 @@ exports.dialogflowFirebaseFulfillment = functions.https.onRequest((request, resp
 
 
         if (text === c) {
-            agent.add("ขอบคุณค่ะ");
+            agent.add("กรุณากดดาวเพื่อประเมินความพึงพอใจหลังการใช้ระบบ")
+            agent.add(pay1);
             db.runTransaction(t => {
                 return t.get(Count_Accuracy).then(doc => {
-                    let newcount = doc.data().ถูก + 1;
+                    let newcount = doc.data().ใช่ + 1;
 
                     t.update(Count_Accuracy, {
-                        ถูก: newcount,
+                        ใช่: newcount,
 
                     });
                 });
@@ -5488,10 +5578,10 @@ exports.dialogflowFirebaseFulfillment = functions.https.onRequest((request, resp
             agent.add("กรุณากดปุ่มติดต่อเจ้าหน้าที่");
             db.runTransaction(t => {
                 return t.get(Count_Accuracy).then(doc => {
-                    let newcount = doc.data().ไม่ถูก + 1;
+                    let newcount = doc.data().ไม่ใช่ + 1;
 
                     t.update(Count_Accuracy, {
-                        ไม่ถูก: newcount,
+                        ไม่ใช่: newcount,
 
                     });
                 });
@@ -5555,32 +5645,32 @@ exports.dialogflowFirebaseFulfillment = functions.https.onRequest((request, resp
                 "actions": [
                     {
                         "type": "message",
-                        "label": "ถูก",
-                        "text": "ได้รับคำตอบถูกต้องในเรื่องค่าธรรมเนียมการศึกษาสาขาการสอนวิทยาศาสตร์ทั่วไป"
+                        "label": "ใช่",
+                        "text": "ช่วยตอบคำถามในเรื่องค่าธรรมเนียมการศึกษาสาขาการสอนวิทยาศาสตร์ทั่วไป"
                     },
                     {
                         "type": "message",
-                        "label": "ไม่ถูก",
-                        "text": "ได้รับคำตอบไม่ถูกต้องในเรื่องค่าธรรมเนียมการศึกษาสาขาการสอนวิทยาศาสตร์ทั่วไป"
+                        "label": "ไม่ใช่",
+                        "text": "ไม่ช่วยตอบคำถามในเรื่องค่าธรรมเนียมการศึกษาสาขาการสอนวิทยาศาสตร์ทั่วไป"
                     }
                 ],
-                "text": "คุณได้รับคำตอบถูกต้องไหมคะ?"
+                "text": "น้องบ็อตช่วยตอบคำถามของท่านใช่หรือไม่?"
             }
         };
 
         //ประกาศตัวแปร payload เพื่อแสดงออกหน้าจอ
         let payload่json = new Payload(`LINE`, payload, { sendAsMessage: true });
         let text = request.body.queryResult.queryText;
-        let c = 'ได้รับคำตอบถูกต้องในเรื่องค่าธรรมเนียมการศึกษาสาขาการสอนวิทยาศาสตร์ทั่วไป';
-        let b = 'ได้รับคำตอบไม่ถูกต้องในเรื่องค่าธรรมเนียมการศึกษาสาขาการสอนวิทยาศาสตร์ทั่วไป';
+        let c = 'ช่วยตอบคำถามในเรื่องค่าธรรมเนียมการศึกษาสาขาการสอนวิทยาศาสตร์ทั่วไป';
+        let b = 'ไม่ช่วยตอบคำถามในเรื่องค่าธรรมเนียมการศึกษาสาขาการสอนวิทยาศาสตร์ทั่วไป';
 
         //Count_Accuracy
         let Count_Accuracy = admin.firestore().collection("Count_Accuracy").doc(date.toLocaleDateString()).collection("ค่าธรรมเนียมการศึกษา").doc("คณะครุศาสตร์").collection("Subject").doc("การสอนวิทยาศาสตร์ทั่วไป");
         Count_Accuracy.get().then(function (docs) {
             if (!docs.exists) {
                 Count_Accuracy.set({
-                    ถูก: 0,
-                    ไม่ถูก: 0
+                    ใช่: 0,
+                    ไม่ใช่: 0
                 });
             }
 
@@ -5588,13 +5678,14 @@ exports.dialogflowFirebaseFulfillment = functions.https.onRequest((request, resp
 
 
         if (text === c) {
-            agent.add("ขอบคุณค่ะ");
+            agent.add("กรุณากดดาวเพื่อประเมินความพึงพอใจหลังการใช้ระบบ")
+            agent.add(pay1);
             db.runTransaction(t => {
                 return t.get(Count_Accuracy).then(doc => {
-                    let newcount = doc.data().ถูก + 1;
+                    let newcount = doc.data().ใช่ + 1;
 
                     t.update(Count_Accuracy, {
-                        ถูก: newcount,
+                        ใช่: newcount,
 
                     });
                 });
@@ -5609,10 +5700,10 @@ exports.dialogflowFirebaseFulfillment = functions.https.onRequest((request, resp
             agent.add("กรุณากดปุ่มติดต่อเจ้าหน้าที่");
             db.runTransaction(t => {
                 return t.get(Count_Accuracy).then(doc => {
-                    let newcount = doc.data().ไม่ถูก + 1;
+                    let newcount = doc.data().ไม่ใช่ + 1;
 
                     t.update(Count_Accuracy, {
-                        ไม่ถูก: newcount,
+                        ไม่ใช่: newcount,
 
                     });
                 });
@@ -5677,32 +5768,32 @@ exports.dialogflowFirebaseFulfillment = functions.https.onRequest((request, resp
                 "actions": [
                     {
                         "type": "message",
-                        "label": "ถูก",
-                        "text": "ได้รับคำตอบถูกต้องในเรื่องค่าธรรมเนียมการศึกษาสาขาคอมพิวเตอร์ศึกษา"
+                        "label": "ใช่",
+                        "text": "ช่วยตอบคำถามในเรื่องค่าธรรมเนียมการศึกษาสาขาคอมพิวเตอร์ศึกษา"
                     },
                     {
                         "type": "message",
-                        "label": "ไม่ถูก",
-                        "text": "ได้รับคำตอบไม่ถูกต้องในเรื่องค่าธรรมเนียมการศึกษาสาขาคอมพิวเตอร์ศึกษา"
+                        "label": "ไม่ใช่",
+                        "text": "ไม่ช่วยตอบคำถามในเรื่องค่าธรรมเนียมการศึกษาสาขาคอมพิวเตอร์ศึกษา"
                     }
                 ],
-                "text": "คุณได้รับคำตอบถูกต้องไหมคะ?"
+                "text": "น้องบ็อตช่วยตอบคำถามของท่านใช่หรือไม่?"
             }
         };
 
         //ประกาศตัวแปร payload เพื่อแสดงออกหน้าจอ
         let payload่json = new Payload(`LINE`, payload, { sendAsMessage: true });
         let text = request.body.queryResult.queryText;
-        let c = 'ได้รับคำตอบถูกต้องในเรื่องค่าธรรมเนียมการศึกษาสาขาคอมพิวเตอร์ศึกษา';
-        let b = 'ได้รับคำตอบไม่ถูกต้องในเรื่องค่าธรรมเนียมการศึกษาสาขาคอมพิวเตอร์ศึกษา';
+        let c = 'ช่วยตอบคำถามในเรื่องค่าธรรมเนียมการศึกษาสาขาคอมพิวเตอร์ศึกษา';
+        let b = 'ไม่ช่วยตอบคำถามในเรื่องค่าธรรมเนียมการศึกษาสาขาคอมพิวเตอร์ศึกษา';
 
         //Count_Accuracy
         let Count_Accuracy = admin.firestore().collection("Count_Accuracy").doc(date.toLocaleDateString()).collection("ค่าธรรมเนียมการศึกษา").doc("คณะครุศาสตร์").collection("Subject").doc("คอมพิวเตอร์ศึกษา");
         Count_Accuracy.get().then(function (docs) {
             if (!docs.exists) {
                 Count_Accuracy.set({
-                    ถูก: 0,
-                    ไม่ถูก: 0
+                    ใช่: 0,
+                    ไม่ใช่: 0
                 });
             }
 
@@ -5710,13 +5801,14 @@ exports.dialogflowFirebaseFulfillment = functions.https.onRequest((request, resp
 
 
         if (text === c) {
-            agent.add("ขอบคุณค่ะ");
+            agent.add("กรุณากดดาวเพื่อประเมินความพึงพอใจหลังการใช้ระบบ")
+            agent.add(pay1);
             db.runTransaction(t => {
                 return t.get(Count_Accuracy).then(doc => {
-                    let newcount = doc.data().ถูก + 1;
+                    let newcount = doc.data().ใช่ + 1;
 
                     t.update(Count_Accuracy, {
-                        ถูก: newcount,
+                        ใช่: newcount,
 
                     });
                 });
@@ -5731,10 +5823,10 @@ exports.dialogflowFirebaseFulfillment = functions.https.onRequest((request, resp
             agent.add("กรุณากดปุ่มติดต่อเจ้าหน้าที่");
             db.runTransaction(t => {
                 return t.get(Count_Accuracy).then(doc => {
-                    let newcount = doc.data().ไม่ถูก + 1;
+                    let newcount = doc.data().ไม่ใช่ + 1;
 
                     t.update(Count_Accuracy, {
-                        ไม่ถูก: newcount,
+                        ไม่ใช่: newcount,
 
                     });
                 });
@@ -5798,32 +5890,32 @@ exports.dialogflowFirebaseFulfillment = functions.https.onRequest((request, resp
                 "actions": [
                     {
                         "type": "message",
-                        "label": "ถูก",
-                        "text": "ได้รับคำตอบถูกต้องในเรื่องค่าธรรมเนียมการศึกษาสาขาการสอนภาษาไทย"
+                        "label": "ใช่",
+                        "text": "ช่วยตอบคำถามในเรื่องค่าธรรมเนียมการศึกษาสาขาการสอนภาษาไทย"
                     },
                     {
                         "type": "message",
-                        "label": "ไม่ถูก",
-                        "text": "ได้รับคำตอบไม่ถูกต้องในเรื่องค่าธรรมเนียมการศึกษาสาขาการสอนภาษาไทย"
+                        "label": "ไม่ใช่",
+                        "text": "ไม่ช่วยตอบคำถามในเรื่องค่าธรรมเนียมการศึกษาสาขาการสอนภาษาไทย"
                     }
                 ],
-                "text": "คุณได้รับคำตอบถูกต้องไหมคะ?"
+                "text": "น้องบ็อตช่วยตอบคำถามของท่านใช่หรือไม่?"
             }
         };
 
         //ประกาศตัวแปร payload เพื่อแสดงออกหน้าจอ
         let payload่json = new Payload(`LINE`, payload, { sendAsMessage: true });
         let text = request.body.queryResult.queryText;
-        let c = 'ได้รับคำตอบถูกต้องในเรื่องค่าธรรมเนียมการศึกษาสาขาการสอนภาษาไทย';
-        let b = 'ได้รับคำตอบไม่ถูกต้องในเรื่องค่าธรรมเนียมการศึกษาสาขาการสอนภาษาไทย';
+        let c = 'ช่วยตอบคำถามในเรื่องค่าธรรมเนียมการศึกษาสาขาการสอนภาษาไทย';
+        let b = 'ไม่ช่วยตอบคำถามในเรื่องค่าธรรมเนียมการศึกษาสาขาการสอนภาษาไทย';
 
         //Count_Accuracy
         let Count_Accuracy = admin.firestore().collection("Count_Accuracy").doc(date.toLocaleDateString()).collection("ค่าธรรมเนียมการศึกษา").doc("คณะครุศาสตร์").collection("Subject").doc("การสอนภาษาไทย");
         Count_Accuracy.get().then(function (docs) {
             if (!docs.exists) {
                 Count_Accuracy.set({
-                    ถูก: 0,
-                    ไม่ถูก: 0
+                    ใช่: 0,
+                    ไม่ใช่: 0
                 });
             }
 
@@ -5831,13 +5923,14 @@ exports.dialogflowFirebaseFulfillment = functions.https.onRequest((request, resp
 
 
         if (text === c) {
-            agent.add("ขอบคุณค่ะ");
+            agent.add("กรุณากดดาวเพื่อประเมินความพึงพอใจหลังการใช้ระบบ")
+            agent.add(pay1);
             db.runTransaction(t => {
                 return t.get(Count_Accuracy).then(doc => {
-                    let newcount = doc.data().ถูก + 1;
+                    let newcount = doc.data().ใช่ + 1;
 
                     t.update(Count_Accuracy, {
-                        ถูก: newcount,
+                        ใช่: newcount,
 
                     });
                 });
@@ -5852,10 +5945,10 @@ exports.dialogflowFirebaseFulfillment = functions.https.onRequest((request, resp
             agent.add("กรุณากดปุ่มติดต่อเจ้าหน้าที่");
             db.runTransaction(t => {
                 return t.get(Count_Accuracy).then(doc => {
-                    let newcount = doc.data().ไม่ถูก + 1;
+                    let newcount = doc.data().ไม่ใช่ + 1;
 
                     t.update(Count_Accuracy, {
-                        ไม่ถูก: newcount,
+                        ไม่ใช่: newcount,
 
                     });
                 });
@@ -5919,32 +6012,32 @@ exports.dialogflowFirebaseFulfillment = functions.https.onRequest((request, resp
                 "actions": [
                     {
                         "type": "message",
-                        "label": "ถูก",
-                        "text": "ได้รับคำตอบถูกต้องในเรื่องค่าธรรมเนียมการศึกษาสาขาการสอนภาษาอังกฤษ"
+                        "label": "ใช่",
+                        "text": "ช่วยตอบคำถามในเรื่องค่าธรรมเนียมการศึกษาสาขาการสอนภาษาอังกฤษ"
                     },
                     {
                         "type": "message",
-                        "label": "ไม่ถูก",
-                        "text": "ได้รับคำตอบไม่ถูกต้องในเรื่องค่าธรรมเนียมการศึกษาสาขาการสอนภาษาอังกฤษ"
+                        "label": "ไม่ใช่",
+                        "text": "ไม่ช่วยตอบคำถามในเรื่องค่าธรรมเนียมการศึกษาสาขาการสอนภาษาอังกฤษ"
                     }
                 ],
-                "text": "คุณได้รับคำตอบถูกต้องไหมคะ?"
+                "text": "น้องบ็อตช่วยตอบคำถามของท่านใช่หรือไม่?"
             }
         };
 
         //ประกาศตัวแปร payload เพื่อแสดงออกหน้าจอ
         let payload่json = new Payload(`LINE`, payload, { sendAsMessage: true });
         let text = request.body.queryResult.queryText;
-        let c = 'ได้รับคำตอบถูกต้องในเรื่องค่าธรรมเนียมการศึกษาสาขาการสอนภาษาอังกฤษ';
-        let b = 'ได้รับคำตอบไม่ถูกต้องในเรื่องค่าธรรมเนียมการศึกษาสาขาการสอนภาษาอังกฤษ';
+        let c = 'ช่วยตอบคำถามในเรื่องค่าธรรมเนียมการศึกษาสาขาการสอนภาษาอังกฤษ';
+        let b = 'ไม่ช่วยตอบคำถามในเรื่องค่าธรรมเนียมการศึกษาสาขาการสอนภาษาอังกฤษ';
 
         //Count_Accuracy
         let Count_Accuracy = admin.firestore().collection("Count_Accuracy").doc(date.toLocaleDateString()).collection("ค่าธรรมเนียมการศึกษา").doc("คณะครุศาสตร์").collection("Subject").doc("การสอนภาษาอังกฤษ");
         Count_Accuracy.get().then(function (docs) {
             if (!docs.exists) {
                 Count_Accuracy.set({
-                    ถูก: 0,
-                    ไม่ถูก: 0
+                    ใช่: 0,
+                    ไม่ใช่: 0
                 });
             }
 
@@ -5952,13 +6045,14 @@ exports.dialogflowFirebaseFulfillment = functions.https.onRequest((request, resp
 
 
         if (text === c) {
-            agent.add("ขอบคุณค่ะ");
+            agent.add("กรุณากดดาวเพื่อประเมินความพึงพอใจหลังการใช้ระบบ")
+            agent.add(pay1);
             db.runTransaction(t => {
                 return t.get(Count_Accuracy).then(doc => {
-                    let newcount = doc.data().ถูก + 1;
+                    let newcount = doc.data().ใช่ + 1;
 
                     t.update(Count_Accuracy, {
-                        ถูก: newcount,
+                        ใช่: newcount,
 
                     });
                 });
@@ -5973,10 +6067,10 @@ exports.dialogflowFirebaseFulfillment = functions.https.onRequest((request, resp
             agent.add("กรุณากดปุ่มติดต่อเจ้าหน้าที่");
             db.runTransaction(t => {
                 return t.get(Count_Accuracy).then(doc => {
-                    let newcount = doc.data().ไม่ถูก + 1;
+                    let newcount = doc.data().ไม่ใช่ + 1;
 
                     t.update(Count_Accuracy, {
-                        ไม่ถูก: newcount,
+                        ไม่ใช่: newcount,
 
                     });
                 });
@@ -6042,32 +6136,32 @@ exports.dialogflowFirebaseFulfillment = functions.https.onRequest((request, resp
                 "actions": [
                     {
                         "type": "message",
-                        "label": "ถูก",
-                        "text": "ได้รับคำตอบถูกต้องในเรื่องค่าธรรมเนียมการศึกษาสาขาการศึกษาปฐมวัย"
+                        "label": "ใช่",
+                        "text": "ช่วยตอบคำถามในเรื่องค่าธรรมเนียมการศึกษาสาขาการศึกษาปฐมวัย"
                     },
                     {
                         "type": "message",
-                        "label": "ไม่ถูก",
-                        "text": "ได้รับคำตอบไม่ถูกต้องในเรื่องค่าธรรมเนียมการศึกษาสาขาการศึกษาปฐมวัย"
+                        "label": "ไม่ใช่",
+                        "text": "ไม่ช่วยตอบคำถามในเรื่องค่าธรรมเนียมการศึกษาสาขาการศึกษาปฐมวัย"
                     }
                 ],
-                "text": "คุณได้รับคำตอบถูกต้องไหมคะ?"
+                "text": "น้องบ็อตช่วยตอบคำถามของท่านใช่หรือไม่?"
             }
         };
 
         //ประกาศตัวแปร payload เพื่อแสดงออกหน้าจอ
         let payload่json = new Payload(`LINE`, payload, { sendAsMessage: true });
         let text = request.body.queryResult.queryText;
-        let c = 'ได้รับคำตอบถูกต้องในเรื่องค่าธรรมเนียมการศึกษาสาขาการศึกษาปฐมวัย';
-        let b = 'ได้รับคำตอบไม่ถูกต้องในเรื่องค่าธรรมเนียมการศึกษาสาขาการศึกษาปฐมวัย';
+        let c = 'ช่วยตอบคำถามในเรื่องค่าธรรมเนียมการศึกษาสาขาการศึกษาปฐมวัย';
+        let b = 'ไม่ช่วยตอบคำถามในเรื่องค่าธรรมเนียมการศึกษาสาขาการศึกษาปฐมวัย';
 
         //Count_Accuracy
         let Count_Accuracy = admin.firestore().collection("Count_Accuracy").doc(date.toLocaleDateString()).collection("ค่าธรรมเนียมการศึกษา").doc("คณะครุศาสตร์").collection("Subject").doc("การศึกษาปฐมวัย");
         Count_Accuracy.get().then(function (docs) {
             if (!docs.exists) {
                 Count_Accuracy.set({
-                    ถูก: 0,
-                    ไม่ถูก: 0
+                    ใช่: 0,
+                    ไม่ใช่: 0
                 });
             }
 
@@ -6075,13 +6169,14 @@ exports.dialogflowFirebaseFulfillment = functions.https.onRequest((request, resp
 
 
         if (text === c) {
-            agent.add("ขอบคุณค่ะ");
+            agent.add("กรุณากดดาวเพื่อประเมินความพึงพอใจหลังการใช้ระบบ")
+            agent.add(pay1);
             db.runTransaction(t => {
                 return t.get(Count_Accuracy).then(doc => {
-                    let newcount = doc.data().ถูก + 1;
+                    let newcount = doc.data().ใช่ + 1;
 
                     t.update(Count_Accuracy, {
-                        ถูก: newcount,
+                        ใช่: newcount,
 
                     });
                 });
@@ -6096,10 +6191,10 @@ exports.dialogflowFirebaseFulfillment = functions.https.onRequest((request, resp
             agent.add("กรุณากดปุ่มติดต่อเจ้าหน้าที่");
             db.runTransaction(t => {
                 return t.get(Count_Accuracy).then(doc => {
-                    let newcount = doc.data().ไม่ถูก + 1;
+                    let newcount = doc.data().ไม่ใช่ + 1;
 
                     t.update(Count_Accuracy, {
-                        ไม่ถูก: newcount,
+                        ไม่ใช่: newcount,
 
                     });
                 });
@@ -6162,32 +6257,32 @@ exports.dialogflowFirebaseFulfillment = functions.https.onRequest((request, resp
                 "actions": [
                     {
                         "type": "message",
-                        "label": "ถูก",
-                        "text": "ได้รับคำตอบถูกต้องในเรื่องค่าธรรมเนียมการศึกษาสาขาการสอนภาษาจีน"
+                        "label": "ใช่",
+                        "text": "ช่วยตอบคำถามในเรื่องค่าธรรมเนียมการศึกษาสาขาการสอนภาษาจีน"
                     },
                     {
                         "type": "message",
-                        "label": "ไม่ถูก",
-                        "text": "ได้รับคำตอบไม่ถูกต้องในเรื่องค่าธรรมเนียมการศึกษาสาขาการสอนภาษาจีน"
+                        "label": "ไม่ใช่",
+                        "text": "ไม่ช่วยตอบคำถามในเรื่องค่าธรรมเนียมการศึกษาสาขาการสอนภาษาจีน"
                     }
                 ],
-                "text": "คุณได้รับคำตอบถูกต้องไหมคะ?"
+                "text": "น้องบ็อตช่วยตอบคำถามของท่านใช่หรือไม่?"
             }
         };
 
         //ประกาศตัวแปร payload เพื่อแสดงออกหน้าจอ
         let payload่json = new Payload(`LINE`, payload, { sendAsMessage: true });
         let text = request.body.queryResult.queryText;
-        let c = 'ได้รับคำตอบถูกต้องในเรื่องค่าธรรมเนียมการศึกษาสาขาการสอนภาษาจีน';
-        let b = 'ได้รับคำตอบไม่ถูกต้องในเรื่องค่าธรรมเนียมการศึกษาสาขาการสอนภาษาจีน';
+        let c = 'ช่วยตอบคำถามในเรื่องค่าธรรมเนียมการศึกษาสาขาการสอนภาษาจีน';
+        let b = 'ไม่ช่วยตอบคำถามในเรื่องค่าธรรมเนียมการศึกษาสาขาการสอนภาษาจีน';
 
         //Count_Accuracy
         let Count_Accuracy = admin.firestore().collection("Count_Accuracy").doc(date.toLocaleDateString()).collection("ค่าธรรมเนียมการศึกษา").doc("คณะครุศาสตร์").collection("Subject").doc("การสอนภาษาจีน");
         Count_Accuracy.get().then(function (docs) {
             if (!docs.exists) {
                 Count_Accuracy.set({
-                    ถูก: 0,
-                    ไม่ถูก: 0
+                    ใช่: 0,
+                    ไม่ใช่: 0
                 });
             }
 
@@ -6195,13 +6290,14 @@ exports.dialogflowFirebaseFulfillment = functions.https.onRequest((request, resp
 
 
         if (text === c) {
-            agent.add("ขอบคุณค่ะ");
+            agent.add("กรุณากดดาวเพื่อประเมินความพึงพอใจหลังการใช้ระบบ")
+            agent.add(pay1);
             db.runTransaction(t => {
                 return t.get(Count_Accuracy).then(doc => {
-                    let newcount = doc.data().ถูก + 1;
+                    let newcount = doc.data().ใช่ + 1;
 
                     t.update(Count_Accuracy, {
-                        ถูก: newcount,
+                        ใช่: newcount,
 
                     });
                 });
@@ -6216,10 +6312,10 @@ exports.dialogflowFirebaseFulfillment = functions.https.onRequest((request, resp
             agent.add("กรุณากดปุ่มติดต่อเจ้าหน้าที่");
             db.runTransaction(t => {
                 return t.get(Count_Accuracy).then(doc => {
-                    let newcount = doc.data().ไม่ถูก + 1;
+                    let newcount = doc.data().ไม่ใช่ + 1;
 
                     t.update(Count_Accuracy, {
-                        ไม่ถูก: newcount,
+                        ไม่ใช่: newcount,
 
                     });
                 });
@@ -6282,32 +6378,32 @@ exports.dialogflowFirebaseFulfillment = functions.https.onRequest((request, resp
                 "actions": [
                     {
                         "type": "message",
-                        "label": "ถูก",
-                        "text": "ได้รับคำตอบถูกต้องในเรื่องค่าธรรมเนียมการศึกษาสาขาจิตวิทยาการปรึกษาและแนะแนว-การสอนภาษาไทย"
+                        "label": "ใช่",
+                        "text": "ช่วยตอบคำถามในเรื่องค่าธรรมเนียมการศึกษาสาขาจิตวิทยาการปรึกษาและแนะแนว-การสอนภาษาไทย"
                     },
                     {
                         "type": "message",
-                        "label": "ไม่ถูก",
-                        "text": "ได้รับคำตอบไม่ถูกต้องในเรื่องค่าธรรมเนียมการศึกษาสาขาจิตวิทยาการปรึกษาและแนะแนว-การสอนภาษาไทย"
+                        "label": "ไม่ใช่",
+                        "text": "ไม่ช่วยตอบคำถามในเรื่องค่าธรรมเนียมการศึกษาสาขาจิตวิทยาการปรึกษาและแนะแนว-การสอนภาษาไทย"
                     }
                 ],
-                "text": "คุณได้รับคำตอบถูกต้องไหมคะ?"
+                "text": "น้องบ็อตช่วยตอบคำถามของท่านใช่หรือไม่?"
             }
         };
 
         //ประกาศตัวแปร payload เพื่อแสดงออกหน้าจอ
         let payload่json = new Payload(`LINE`, payload, { sendAsMessage: true });
         let text = request.body.queryResult.queryText;
-        let c = 'ได้รับคำตอบถูกต้องในเรื่องค่าธรรมเนียมการศึกษาสาขาจิตวิทยาการปรึกษาและแนะแนว-การสอนภาษาไทย';
-        let b = 'ได้รับคำตอบไม่ถูกต้องในเรื่องค่าธรรมเนียมการศึกษาสาขาจิตวิทยาการปรึกษาและแนะแนว-การสอนภาษาไทย';
+        let c = 'ช่วยตอบคำถามในเรื่องค่าธรรมเนียมการศึกษาสาขาจิตวิทยาการปรึกษาและแนะแนว-การสอนภาษาไทย';
+        let b = 'ไม่ช่วยตอบคำถามในเรื่องค่าธรรมเนียมการศึกษาสาขาจิตวิทยาการปรึกษาและแนะแนว-การสอนภาษาไทย';
 
         //Count_Accuracy
         let Count_Accuracy = admin.firestore().collection("Count_Accuracy").doc(date.toLocaleDateString()).collection("ค่าธรรมเนียมการศึกษา").doc("คณะครุศาสตร์").collection("Subject").doc("จิตวิทยาการปรึกษาและแนะแนว-การสอนภาษาไทย");
         Count_Accuracy.get().then(function (docs) {
             if (!docs.exists) {
                 Count_Accuracy.set({
-                    ถูก: 0,
-                    ไม่ถูก: 0
+                    ใช่: 0,
+                    ไม่ใช่: 0
                 });
             }
 
@@ -6315,13 +6411,14 @@ exports.dialogflowFirebaseFulfillment = functions.https.onRequest((request, resp
 
 
         if (text === c) {
-            agent.add("ขอบคุณค่ะ");
+            agent.add("กรุณากดดาวเพื่อประเมินความพึงพอใจหลังการใช้ระบบ")
+            agent.add(pay1);
             db.runTransaction(t => {
                 return t.get(Count_Accuracy).then(doc => {
-                    let newcount = doc.data().ถูก + 1;
+                    let newcount = doc.data().ใช่ + 1;
 
                     t.update(Count_Accuracy, {
-                        ถูก: newcount,
+                        ใช่: newcount,
 
                     });
                 });
@@ -6336,10 +6433,10 @@ exports.dialogflowFirebaseFulfillment = functions.https.onRequest((request, resp
             agent.add("กรุณากดปุ่มติดต่อเจ้าหน้าที่");
             db.runTransaction(t => {
                 return t.get(Count_Accuracy).then(doc => {
-                    let newcount = doc.data().ไม่ถูก + 1;
+                    let newcount = doc.data().ไม่ใช่ + 1;
 
                     t.update(Count_Accuracy, {
-                        ไม่ถูก: newcount,
+                        ไม่ใช่: newcount,
 
                     });
                 });
@@ -6403,32 +6500,32 @@ exports.dialogflowFirebaseFulfillment = functions.https.onRequest((request, resp
                 "actions": [
                     {
                         "type": "message",
-                        "label": "ถูก",
-                        "text": "ได้รับคำตอบถูกต้องในเรื่องค่าธรรมเนียมการศึกษาสาขาเทคโนโลยีสารสนเทศทางการศึกษา-การสอนภาษาไทย"
+                        "label": "ใช่",
+                        "text": "ช่วยตอบคำถามในเรื่องค่าธรรมเนียมการศึกษาสาขาเทคโนโลยีสารสนเทศทางการศึกษา-การสอนภาษาไทย"
                     },
                     {
                         "type": "message",
-                        "label": "ไม่ถูก",
-                        "text": "ได้รับคำตอบไม่ถูกต้องในเรื่องค่าธรรมเนียมการศึกษาสาขาเทคโนโลยีสารสนเทศทางการศึกษา-การสอนภาษาไทย"
+                        "label": "ไม่ใช่",
+                        "text": "ไม่ช่วยตอบคำถามในเรื่องค่าธรรมเนียมการศึกษาสาขาเทคโนโลยีสารสนเทศทางการศึกษา-การสอนภาษาไทย"
                     }
                 ],
-                "text": "คุณได้รับคำตอบถูกต้องไหมคะ?"
+                "text": "น้องบ็อตช่วยตอบคำถามของท่านใช่หรือไม่?"
             }
         };
 
         //ประกาศตัวแปร payload เพื่อแสดงออกหน้าจอ
         let payload่json = new Payload(`LINE`, payload, { sendAsMessage: true });
         let text = request.body.queryResult.queryText;
-        let c = 'ได้รับคำตอบถูกต้องในเรื่องค่าธรรมเนียมการศึกษาสาขาเทคโนโลยีสารสนเทศทางการศึกษา-การสอนภาษาไทย';
-        let b = 'ได้รับคำตอบไม่ถูกต้องในเรื่องค่าธรรมเนียมการศึกษาสาขาเทคโนโลยีสารสนเทศทางการศึกษา-การสอนภาษาไทย';
+        let c = 'ช่วยตอบคำถามในเรื่องค่าธรรมเนียมการศึกษาสาขาเทคโนโลยีสารสนเทศทางการศึกษา-การสอนภาษาไทย';
+        let b = 'ไม่ช่วยตอบคำถามในเรื่องค่าธรรมเนียมการศึกษาสาขาเทคโนโลยีสารสนเทศทางการศึกษา-การสอนภาษาไทย';
 
         //Count_Accuracy
         let Count_Accuracy = admin.firestore().collection("Count_Accuracy").doc(date.toLocaleDateString()).collection("ค่าธรรมเนียมการศึกษา").doc("คณะครุศาสตร์").collection("Subject").doc("เทคโนโลยีสารสนเทศทางการศึกษา-การสอนภาษาไทย");
         Count_Accuracy.get().then(function (docs) {
             if (!docs.exists) {
                 Count_Accuracy.set({
-                    ถูก: 0,
-                    ไม่ถูก: 0
+                    ใช่: 0,
+                    ไม่ใช่: 0
                 });
             }
 
@@ -6436,13 +6533,14 @@ exports.dialogflowFirebaseFulfillment = functions.https.onRequest((request, resp
 
 
         if (text === c) {
-            agent.add("ขอบคุณค่ะ");
+            agent.add("กรุณากดดาวเพื่อประเมินความพึงพอใจหลังการใช้ระบบ")
+            agent.add(pay1);
             db.runTransaction(t => {
                 return t.get(Count_Accuracy).then(doc => {
-                    let newcount = doc.data().ถูก + 1;
+                    let newcount = doc.data().ใช่ + 1;
 
                     t.update(Count_Accuracy, {
-                        ถูก: newcount,
+                        ใช่: newcount,
 
                     });
                 });
@@ -6457,10 +6555,10 @@ exports.dialogflowFirebaseFulfillment = functions.https.onRequest((request, resp
             agent.add("กรุณากดปุ่มติดต่อเจ้าหน้าที่");
             db.runTransaction(t => {
                 return t.get(Count_Accuracy).then(doc => {
-                    let newcount = doc.data().ไม่ถูก + 1;
+                    let newcount = doc.data().ไม่ใช่ + 1;
 
                     t.update(Count_Accuracy, {
-                        ไม่ถูก: newcount,
+                        ไม่ใช่: newcount,
 
                     });
                 });
@@ -6524,32 +6622,32 @@ exports.dialogflowFirebaseFulfillment = functions.https.onRequest((request, resp
                 "actions": [
                     {
                         "type": "message",
-                        "label": "ถูก",
-                        "text": "ได้รับคำตอบถูกต้องในเรื่องค่าธรรมเนียมการศึกษาสาขาการสอนสังคมศึกษา"
+                        "label": "ใช่",
+                        "text": "ช่วยตอบคำถามในเรื่องค่าธรรมเนียมการศึกษาสาขาการสอนสังคมศึกษา"
                     },
                     {
                         "type": "message",
-                        "label": "ไม่ถูก",
-                        "text": "ได้รับคำตอบไม่ถูกต้องในเรื่องค่าธรรมเนียมการศึกษาสาขาการสอนสังคมศึกษา"
+                        "label": "ไม่ใช่",
+                        "text": "ไม่ช่วยตอบคำถามในเรื่องค่าธรรมเนียมการศึกษาสาขาการสอนสังคมศึกษา"
                     }
                 ],
-                "text": "คุณได้รับคำตอบถูกต้องไหมคะ?"
+                "text": "น้องบ็อตช่วยตอบคำถามของท่านใช่หรือไม่?"
             }
         };
 
         //ประกาศตัวแปร payload เพื่อแสดงออกหน้าจอ
         let payload่json = new Payload(`LINE`, payload, { sendAsMessage: true });
         let text = request.body.queryResult.queryText;
-        let c = 'ได้รับคำตอบถูกต้องในเรื่องค่าธรรมเนียมการศึกษาสาขาการสอนสังคมศึกษา';
-        let b = 'ได้รับคำตอบไม่ถูกต้องในเรื่องค่าธรรมเนียมการศึกษาสาขาการสอนสังคมศึกษา';
+        let c = 'ช่วยตอบคำถามในเรื่องค่าธรรมเนียมการศึกษาสาขาการสอนสังคมศึกษา';
+        let b = 'ไม่ช่วยตอบคำถามในเรื่องค่าธรรมเนียมการศึกษาสาขาการสอนสังคมศึกษา';
 
         //Count_Accuracy
         let Count_Accuracy = admin.firestore().collection("Count_Accuracy").doc(date.toLocaleDateString()).collection("ค่าธรรมเนียมการศึกษา").doc("คณะครุศาสตร์").collection("Subject").doc("การสอนสังคมศึกษา");
         Count_Accuracy.get().then(function (docs) {
             if (!docs.exists) {
                 Count_Accuracy.set({
-                    ถูก: 0,
-                    ไม่ถูก: 0
+                    ใช่: 0,
+                    ไม่ใช่: 0
                 });
             }
 
@@ -6557,13 +6655,14 @@ exports.dialogflowFirebaseFulfillment = functions.https.onRequest((request, resp
 
 
         if (text === c) {
-            agent.add("ขอบคุณค่ะ");
+            agent.add("กรุณากดดาวเพื่อประเมินความพึงพอใจหลังการใช้ระบบ")
+            agent.add(pay1);
             db.runTransaction(t => {
                 return t.get(Count_Accuracy).then(doc => {
-                    let newcount = doc.data().ถูก + 1;
+                    let newcount = doc.data().ใช่ + 1;
 
                     t.update(Count_Accuracy, {
-                        ถูก: newcount,
+                        ใช่: newcount,
 
                     });
                 });
@@ -6578,10 +6677,10 @@ exports.dialogflowFirebaseFulfillment = functions.https.onRequest((request, resp
             agent.add("กรุณากดปุ่มติดต่อเจ้าหน้าที่");
             db.runTransaction(t => {
                 return t.get(Count_Accuracy).then(doc => {
-                    let newcount = doc.data().ไม่ถูก + 1;
+                    let newcount = doc.data().ไม่ใช่ + 1;
 
                     t.update(Count_Accuracy, {
-                        ไม่ถูก: newcount,
+                        ไม่ใช่: newcount,
 
                     });
                 });
@@ -6647,32 +6746,32 @@ exports.dialogflowFirebaseFulfillment = functions.https.onRequest((request, resp
                 "actions": [
                     {
                         "type": "message",
-                        "label": "ถูก",
-                        "text": "ได้รับคำตอบถูกต้องในเรื่องค่าธรรมเนียมการศึกษาสาขาเทคโนโลยีอุตสาหกรรม"
+                        "label": "ใช่",
+                        "text": "ช่วยตอบคำถามในเรื่องค่าธรรมเนียมการศึกษาสาขาเทคโนโลยีอุตสาหกรรม"
                     },
                     {
                         "type": "message",
-                        "label": "ไม่ถูก",
-                        "text": "ได้รับคำตอบไม่ถูกต้องในเรื่องค่าธรรมเนียมการศึกษาสาขาเทคโนโลยีอุตสาหกรรม"
+                        "label": "ไม่ใช่",
+                        "text": "ไม่ช่วยตอบคำถามในเรื่องค่าธรรมเนียมการศึกษาสาขาเทคโนโลยีอุตสาหกรรม"
                     }
                 ],
-                "text": "คุณได้รับคำตอบถูกต้องไหมคะ?"
+                "text": "น้องบ็อตช่วยตอบคำถามของท่านใช่หรือไม่?"
             }
         };
 
         //ประกาศตัวแปร payload เพื่อแสดงออกหน้าจอ
         let payload่json = new Payload(`LINE`, payload, { sendAsMessage: true });
         let text = request.body.queryResult.queryText;
-        let c = 'ได้รับคำตอบถูกต้องในเรื่องค่าธรรมเนียมการศึกษาสาขาเทคโนโลยีอุตสาหกรรม';
-        let b = 'ได้รับคำตอบไม่ถูกต้องในเรื่องค่าธรรมเนียมการศึกษาสาขาเทคโนโลยีอุตสาหกรรม';
+        let c = 'ช่วยตอบคำถามในเรื่องค่าธรรมเนียมการศึกษาสาขาเทคโนโลยีอุตสาหกรรม';
+        let b = 'ไม่ช่วยตอบคำถามในเรื่องค่าธรรมเนียมการศึกษาสาขาเทคโนโลยีอุตสาหกรรม';
 
         //Count_Accuracy
         let Count_Accuracy = admin.firestore().collection("Count_Accuracy").doc(date.toLocaleDateString()).collection("ค่าธรรมเนียมการศึกษา").doc("คณะเทคโนโลยีอุตสาหกรรม").collection("Subject").doc("เทคโนโลยีอุตสาหกรรม");
         Count_Accuracy.get().then(function (docs) {
             if (!docs.exists) {
                 Count_Accuracy.set({
-                    ถูก: 0,
-                    ไม่ถูก: 0
+                    ใช่: 0,
+                    ไม่ใช่: 0
                 });
             }
 
@@ -6680,13 +6779,14 @@ exports.dialogflowFirebaseFulfillment = functions.https.onRequest((request, resp
 
 
         if (text === c) {
-            agent.add("ขอบคุณค่ะ");
+            agent.add("กรุณากดดาวเพื่อประเมินความพึงพอใจหลังการใช้ระบบ")
+            agent.add(pay1);
             db.runTransaction(t => {
                 return t.get(Count_Accuracy).then(doc => {
-                    let newcount = doc.data().ถูก + 1;
+                    let newcount = doc.data().ใช่ + 1;
 
                     t.update(Count_Accuracy, {
-                        ถูก: newcount,
+                        ใช่: newcount,
 
                     });
                 });
@@ -6701,10 +6801,10 @@ exports.dialogflowFirebaseFulfillment = functions.https.onRequest((request, resp
             agent.add("กรุณากดปุ่มติดต่อเจ้าหน้าที่");
             db.runTransaction(t => {
                 return t.get(Count_Accuracy).then(doc => {
-                    let newcount = doc.data().ไม่ถูก + 1;
+                    let newcount = doc.data().ไม่ใช่ + 1;
 
                     t.update(Count_Accuracy, {
-                        ไม่ถูก: newcount,
+                        ไม่ใช่: newcount,
 
                     });
                 });
@@ -6768,32 +6868,32 @@ exports.dialogflowFirebaseFulfillment = functions.https.onRequest((request, resp
                 "actions": [
                     {
                         "type": "message",
-                        "label": "ถูก",
-                        "text": "ได้รับคำตอบถูกต้องในเรื่องค่าธรรมเนียมการศึกษาสาขาวิศวกรรมการจัดการอุตสาหกรรม"
+                        "label": "ใช่",
+                        "text": "ช่วยตอบคำถามในเรื่องค่าธรรมเนียมการศึกษาสาขาวิศวกรรมการจัดการอุตสาหกรรม"
                     },
                     {
                         "type": "message",
-                        "label": "ไม่ถูก",
-                        "text": "ได้รับคำตอบไม่ถูกต้องในเรื่องค่าธรรมเนียมการศึกษาสาขาวิศวกรรมการจัดการอุตสาหกรรม"
+                        "label": "ไม่ใช่",
+                        "text": "ไม่ช่วยตอบคำถามในเรื่องค่าธรรมเนียมการศึกษาสาขาวิศวกรรมการจัดการอุตสาหกรรม"
                     }
                 ],
-                "text": "คุณได้รับคำตอบถูกต้องไหมคะ?"
+                "text": "น้องบ็อตช่วยตอบคำถามของท่านใช่หรือไม่?"
             }
         };
 
         //ประกาศตัวแปร payload เพื่อแสดงออกหน้าจอ
         let payload่json = new Payload(`LINE`, payload, { sendAsMessage: true });
         let text = request.body.queryResult.queryText;
-        let c = 'ได้รับคำตอบถูกต้องในเรื่องค่าธรรมเนียมการศึกษาสาขาวิศวกรรมการจัดการอุตสาหกรรม';
-        let b = 'ได้รับคำตอบไม่ถูกต้องในเรื่องค่าธรรมเนียมการศึกษาสาขาวิศวกรรมการจัดการอุตสาหกรรม';
+        let c = 'ช่วยตอบคำถามในเรื่องค่าธรรมเนียมการศึกษาสาขาวิศวกรรมการจัดการอุตสาหกรรม';
+        let b = 'ไม่ช่วยตอบคำถามในเรื่องค่าธรรมเนียมการศึกษาสาขาวิศวกรรมการจัดการอุตสาหกรรม';
 
         //Count_Accuracy
         let Count_Accuracy = admin.firestore().collection("Count_Accuracy").doc(date.toLocaleDateString()).collection("ค่าธรรมเนียมการศึกษา").doc("คณะเทคโนโลยีอุตสาหกรรม").collection("Subject").doc("วิศวกรรมการจัดการอุตสาหกรรม");
         Count_Accuracy.get().then(function (docs) {
             if (!docs.exists) {
                 Count_Accuracy.set({
-                    ถูก: 0,
-                    ไม่ถูก: 0
+                    ใช่: 0,
+                    ไม่ใช่: 0
                 });
             }
 
@@ -6801,13 +6901,14 @@ exports.dialogflowFirebaseFulfillment = functions.https.onRequest((request, resp
 
 
         if (text === c) {
-            agent.add("ขอบคุณค่ะ");
+            agent.add("กรุณากดดาวเพื่อประเมินความพึงพอใจหลังการใช้ระบบ")
+            agent.add(pay1);
             db.runTransaction(t => {
                 return t.get(Count_Accuracy).then(doc => {
-                    let newcount = doc.data().ถูก + 1;
+                    let newcount = doc.data().ใช่ + 1;
 
                     t.update(Count_Accuracy, {
-                        ถูก: newcount,
+                        ใช่: newcount,
 
                     });
                 });
@@ -6822,10 +6923,10 @@ exports.dialogflowFirebaseFulfillment = functions.https.onRequest((request, resp
             agent.add("กรุณากดปุ่มติดต่อเจ้าหน้าที่");
             db.runTransaction(t => {
                 return t.get(Count_Accuracy).then(doc => {
-                    let newcount = doc.data().ไม่ถูก + 1;
+                    let newcount = doc.data().ไม่ใช่ + 1;
 
                     t.update(Count_Accuracy, {
-                        ไม่ถูก: newcount,
+                        ไม่ใช่: newcount,
 
                     });
                 });
@@ -6890,32 +6991,32 @@ exports.dialogflowFirebaseFulfillment = functions.https.onRequest((request, resp
                 "actions": [
                     {
                         "type": "message",
-                        "label": "ถูก",
-                        "text": "ได้รับคำตอบถูกต้องในเรื่องค่าธรรมเนียมการศึกษาสาขาวิศวกรรมเครื่องกลยานยนต์"
+                        "label": "ใช่",
+                        "text": "ช่วยตอบคำถามในเรื่องค่าธรรมเนียมการศึกษาสาขาวิศวกรรมเครื่องกลยานยนต์"
                     },
                     {
                         "type": "message",
-                        "label": "ไม่ถูก",
-                        "text": "ได้รับคำตอบไม่ถูกต้องในเรื่องค่าธรรมเนียมการศึกษาสาขาวิศวกรรมเครื่องกลยานยนต์"
+                        "label": "ไม่ใช่",
+                        "text": "ไม่ช่วยตอบคำถามในเรื่องค่าธรรมเนียมการศึกษาสาขาวิศวกรรมเครื่องกลยานยนต์"
                     }
                 ],
-                "text": "คุณได้รับคำตอบถูกต้องไหมคะ?"
+                "text": "น้องบ็อตช่วยตอบคำถามของท่านใช่หรือไม่?"
             }
         };
 
         //ประกาศตัวแปร payload เพื่อแสดงออกหน้าจอ
         let payload่json = new Payload(`LINE`, payload, { sendAsMessage: true });
         let text = request.body.queryResult.queryText;
-        let c = 'ได้รับคำตอบถูกต้องในเรื่องค่าธรรมเนียมการศึกษาสาขาวิศวกรรมเครื่องกลยานยนต์';
-        let b = 'ได้รับคำตอบไม่ถูกต้องในเรื่องค่าธรรมเนียมการศึกษาสาขาวิศวกรรมเครื่องกลยานยนต์';
+        let c = 'ช่วยตอบคำถามในเรื่องค่าธรรมเนียมการศึกษาสาขาวิศวกรรมเครื่องกลยานยนต์';
+        let b = 'ไม่ช่วยตอบคำถามในเรื่องค่าธรรมเนียมการศึกษาสาขาวิศวกรรมเครื่องกลยานยนต์';
 
         //Count_Accuracy
         let Count_Accuracy = admin.firestore().collection("Count_Accuracy").doc(date.toLocaleDateString()).collection("ค่าธรรมเนียมการศึกษา").doc("คณะเทคโนโลยีอุตสาหกรรม").collection("Subject").doc("วิศวกรรมเครื่องกลยานยนต์");
         Count_Accuracy.get().then(function (docs) {
             if (!docs.exists) {
                 Count_Accuracy.set({
-                    ถูก: 0,
-                    ไม่ถูก: 0
+                    ใช่: 0,
+                    ไม่ใช่: 0
                 });
             }
 
@@ -6923,13 +7024,14 @@ exports.dialogflowFirebaseFulfillment = functions.https.onRequest((request, resp
 
 
         if (text === c) {
-            agent.add("ขอบคุณค่ะ");
+            agent.add("กรุณากดดาวเพื่อประเมินความพึงพอใจหลังการใช้ระบบ")
+            agent.add(pay1);
             db.runTransaction(t => {
                 return t.get(Count_Accuracy).then(doc => {
-                    let newcount = doc.data().ถูก + 1;
+                    let newcount = doc.data().ใช่ + 1;
 
                     t.update(Count_Accuracy, {
-                        ถูก: newcount,
+                        ใช่: newcount,
 
                     });
                 });
@@ -6944,10 +7046,10 @@ exports.dialogflowFirebaseFulfillment = functions.https.onRequest((request, resp
             agent.add("กรุณากดปุ่มติดต่อเจ้าหน้าที่");
             db.runTransaction(t => {
                 return t.get(Count_Accuracy).then(doc => {
-                    let newcount = doc.data().ไม่ถูก + 1;
+                    let newcount = doc.data().ไม่ใช่ + 1;
 
                     t.update(Count_Accuracy, {
-                        ไม่ถูก: newcount,
+                        ไม่ใช่: newcount,
 
                     });
                 });
@@ -7012,32 +7114,32 @@ exports.dialogflowFirebaseFulfillment = functions.https.onRequest((request, resp
                 "actions": [
                     {
                         "type": "message",
-                        "label": "ถูก",
-                        "text": "ได้รับคำตอบถูกต้องในเรื่องค่าธรรมเนียมการศึกษาสาขาวิศวกรรมไฟฟ้า"
+                        "label": "ใช่",
+                        "text": "ช่วยตอบคำถามในเรื่องค่าธรรมเนียมการศึกษาสาขาวิศวกรรมไฟฟ้า"
                     },
                     {
                         "type": "message",
-                        "label": "ไม่ถูก",
-                        "text": "ได้รับคำตอบไม่ถูกต้องในเรื่องค่าธรรมเนียมการศึกษาสาขาวิศวกรรมไฟฟ้า"
+                        "label": "ไม่ใช่",
+                        "text": "ไม่ช่วยตอบคำถามในเรื่องค่าธรรมเนียมการศึกษาสาขาวิศวกรรมไฟฟ้า"
                     }
                 ],
-                "text": "คุณได้รับคำตอบถูกต้องไหมคะ?"
+                "text": "น้องบ็อตช่วยตอบคำถามของท่านใช่หรือไม่?"
             }
         };
 
         //ประกาศตัวแปร payload เพื่อแสดงออกหน้าจอ
         let payload่json = new Payload(`LINE`, payload, { sendAsMessage: true });
         let text = request.body.queryResult.queryText;
-        let c = 'ได้รับคำตอบถูกต้องในเรื่องค่าธรรมเนียมการศึกษาสาขาวิศวกรรมไฟฟ้า';
-        let b = 'ได้รับคำตอบไม่ถูกต้องในเรื่องค่าธรรมเนียมการศึกษาสาขาวิศวกรรมไฟฟ้า';
+        let c = 'ช่วยตอบคำถามในเรื่องค่าธรรมเนียมการศึกษาสาขาวิศวกรรมไฟฟ้า';
+        let b = 'ไม่ช่วยตอบคำถามในเรื่องค่าธรรมเนียมการศึกษาสาขาวิศวกรรมไฟฟ้า';
 
         //Count_Accuracy
         let Count_Accuracy = admin.firestore().collection("Count_Accuracy").doc(date.toLocaleDateString()).collection("ค่าธรรมเนียมการศึกษา").doc("คณะเทคโนโลยีอุตสาหกรรม").collection("Subject").doc("วิศวกรรมไฟฟ้า");
         Count_Accuracy.get().then(function (docs) {
             if (!docs.exists) {
                 Count_Accuracy.set({
-                    ถูก: 0,
-                    ไม่ถูก: 0
+                    ใช่: 0,
+                    ไม่ใช่: 0
                 });
             }
 
@@ -7045,13 +7147,14 @@ exports.dialogflowFirebaseFulfillment = functions.https.onRequest((request, resp
 
 
         if (text === c) {
-            agent.add("ขอบคุณค่ะ");
+            agent.add("กรุณากดดาวเพื่อประเมินความพึงพอใจหลังการใช้ระบบ")
+            agent.add(pay1);
             db.runTransaction(t => {
                 return t.get(Count_Accuracy).then(doc => {
-                    let newcount = doc.data().ถูก + 1;
+                    let newcount = doc.data().ใช่ + 1;
 
                     t.update(Count_Accuracy, {
-                        ถูก: newcount,
+                        ใช่: newcount,
 
                     });
                 });
@@ -7066,10 +7169,10 @@ exports.dialogflowFirebaseFulfillment = functions.https.onRequest((request, resp
             agent.add("กรุณากดปุ่มติดต่อเจ้าหน้าที่");
             db.runTransaction(t => {
                 return t.get(Count_Accuracy).then(doc => {
-                    let newcount = doc.data().ไม่ถูก + 1;
+                    let newcount = doc.data().ไม่ใช่ + 1;
 
                     t.update(Count_Accuracy, {
-                        ไม่ถูก: newcount,
+                        ไม่ใช่: newcount,
 
                     });
                 });
@@ -7135,32 +7238,32 @@ exports.dialogflowFirebaseFulfillment = functions.https.onRequest((request, resp
                 "actions": [
                     {
                         "type": "message",
-                        "label": "ถูก",
-                        "text": "ได้รับคำตอบถูกต้องในเรื่องค่าธรรมเนียมการศึกษาสาขาออกแบบผลิตภัณฑ์"
+                        "label": "ใช่",
+                        "text": "ช่วยตอบคำถามในเรื่องค่าธรรมเนียมการศึกษาสาขาออกแบบผลิตภัณฑ์"
                     },
                     {
                         "type": "message",
-                        "label": "ไม่ถูก",
-                        "text": "ได้รับคำตอบไม่ถูกต้องในเรื่องค่าธรรมเนียมการศึกษาสาขาออกแบบผลิตภัณฑ์"
+                        "label": "ไม่ใช่",
+                        "text": "ไม่ช่วยตอบคำถามในเรื่องค่าธรรมเนียมการศึกษาสาขาออกแบบผลิตภัณฑ์"
                     }
                 ],
-                "text": "คุณได้รับคำตอบถูกต้องไหมคะ?"
+                "text": "น้องบ็อตช่วยตอบคำถามของท่านใช่หรือไม่?"
             }
         };
 
         //ประกาศตัวแปร payload เพื่อแสดงออกหน้าจอ
         let payload่json = new Payload(`LINE`, payload, { sendAsMessage: true });
         let text = request.body.queryResult.queryText;
-        let c = 'ได้รับคำตอบถูกต้องในเรื่องค่าธรรมเนียมการศึกษาสาขาออกแบบผลิตภัณฑ์';
-        let b = 'ได้รับคำตอบไม่ถูกต้องในเรื่องค่าธรรมเนียมการศึกษาสาขาออกแบบผลิตภัณฑ์';
+        let c = 'ช่วยตอบคำถามในเรื่องค่าธรรมเนียมการศึกษาสาขาออกแบบผลิตภัณฑ์';
+        let b = 'ไม่ช่วยตอบคำถามในเรื่องค่าธรรมเนียมการศึกษาสาขาออกแบบผลิตภัณฑ์';
 
         //Count_Accuracy
         let Count_Accuracy = admin.firestore().collection("Count_Accuracy").doc(date.toLocaleDateString()).collection("ค่าธรรมเนียมการศึกษา").doc("คณะเทคโนโลยีอุตสาหกรรม").collection("Subject").doc("ออกแบบผลิตภัณฑ์");
         Count_Accuracy.get().then(function (docs) {
             if (!docs.exists) {
                 Count_Accuracy.set({
-                    ถูก: 0,
-                    ไม่ถูก: 0
+                    ใช่: 0,
+                    ไม่ใช่: 0
                 });
             }
 
@@ -7168,13 +7271,14 @@ exports.dialogflowFirebaseFulfillment = functions.https.onRequest((request, resp
 
 
         if (text === c) {
-            agent.add("ขอบคุณค่ะ");
+            agent.add("กรุณากดดาวเพื่อประเมินความพึงพอใจหลังการใช้ระบบ")
+            agent.add(pay1);
             db.runTransaction(t => {
                 return t.get(Count_Accuracy).then(doc => {
-                    let newcount = doc.data().ถูก + 1;
+                    let newcount = doc.data().ใช่ + 1;
 
                     t.update(Count_Accuracy, {
-                        ถูก: newcount,
+                        ใช่: newcount,
 
                     });
                 });
@@ -7189,10 +7293,10 @@ exports.dialogflowFirebaseFulfillment = functions.https.onRequest((request, resp
             agent.add("กรุณากดปุ่มติดต่อเจ้าหน้าที่");
             db.runTransaction(t => {
                 return t.get(Count_Accuracy).then(doc => {
-                    let newcount = doc.data().ไม่ถูก + 1;
+                    let newcount = doc.data().ไม่ใช่ + 1;
 
                     t.update(Count_Accuracy, {
-                        ไม่ถูก: newcount,
+                        ไม่ใช่: newcount,
 
                     });
                 });
@@ -7259,32 +7363,32 @@ exports.dialogflowFirebaseFulfillment = functions.https.onRequest((request, resp
                 "actions": [
                     {
                         "type": "message",
-                        "label": "ถูก",
-                        "text": "ได้รับคำตอบถูกต้องในเรื่องค่าธรรมเนียมการศึกษาสาขาการพัฒนาสังคม"
+                        "label": "ใช่",
+                        "text": "ช่วยตอบคำถามในเรื่องค่าธรรมเนียมการศึกษาสาขาการพัฒนาสังคม"
                     },
                     {
                         "type": "message",
-                        "label": "ไม่ถูก",
-                        "text": "ได้รับคำตอบไม่ถูกต้องในเรื่องค่าธรรมเนียมการศึกษาสาขาการพัฒนาสังคม"
+                        "label": "ไม่ใช่",
+                        "text": "ไม่ช่วยตอบคำถามในเรื่องค่าธรรมเนียมการศึกษาสาขาการพัฒนาสังคม"
                     }
                 ],
-                "text": "คุณได้รับคำตอบถูกต้องไหมคะ?"
+                "text": "น้องบ็อตช่วยตอบคำถามของท่านใช่หรือไม่?"
             }
         };
 
         //ประกาศตัวแปร payload เพื่อแสดงออกหน้าจอ
         let payload่json = new Payload(`LINE`, payload, { sendAsMessage: true });
         let text = request.body.queryResult.queryText;
-        let c = 'ได้รับคำตอบถูกต้องในเรื่องค่าธรรมเนียมการศึกษาสาขาการพัฒนาสังคม';
-        let b = 'ได้รับคำตอบไม่ถูกต้องในเรื่องค่าธรรมเนียมการศึกษาสาขาการพัฒนาสังคม';
+        let c = 'ช่วยตอบคำถามในเรื่องค่าธรรมเนียมการศึกษาสาขาการพัฒนาสังคม';
+        let b = 'ไม่ช่วยตอบคำถามในเรื่องค่าธรรมเนียมการศึกษาสาขาการพัฒนาสังคม';
 
         //Count_Accuracy
         let Count_Accuracy = admin.firestore().collection("Count_Accuracy").doc(date.toLocaleDateString()).collection("ค่าธรรมเนียมการศึกษา").doc("คณะมนุษยศาสตร์และสังคมศาสตร์").collection("Subject").doc("การพัฒนาสังคม");
         Count_Accuracy.get().then(function (docs) {
             if (!docs.exists) {
                 Count_Accuracy.set({
-                    ถูก: 0,
-                    ไม่ถูก: 0
+                    ใช่: 0,
+                    ไม่ใช่: 0
                 });
             }
 
@@ -7292,13 +7396,14 @@ exports.dialogflowFirebaseFulfillment = functions.https.onRequest((request, resp
 
 
         if (text === c) {
-            agent.add("ขอบคุณค่ะ");
+            agent.add("กรุณากดดาวเพื่อประเมินความพึงพอใจหลังการใช้ระบบ")
+            agent.add(pay1);
             db.runTransaction(t => {
                 return t.get(Count_Accuracy).then(doc => {
-                    let newcount = doc.data().ถูก + 1;
+                    let newcount = doc.data().ใช่ + 1;
 
                     t.update(Count_Accuracy, {
-                        ถูก: newcount,
+                        ใช่: newcount,
 
                     });
                 });
@@ -7313,10 +7418,10 @@ exports.dialogflowFirebaseFulfillment = functions.https.onRequest((request, resp
             agent.add("กรุณากดปุ่มติดต่อเจ้าหน้าที่");
             db.runTransaction(t => {
                 return t.get(Count_Accuracy).then(doc => {
-                    let newcount = doc.data().ไม่ถูก + 1;
+                    let newcount = doc.data().ไม่ใช่ + 1;
 
                     t.update(Count_Accuracy, {
-                        ไม่ถูก: newcount,
+                        ไม่ใช่: newcount,
 
                     });
                 });
@@ -7380,32 +7485,32 @@ exports.dialogflowFirebaseFulfillment = functions.https.onRequest((request, resp
                 "actions": [
                     {
                         "type": "message",
-                        "label": "ถูก",
-                        "text": "ได้รับคำตอบถูกต้องในเรื่องค่าธรรมเนียมการศึกษาสาขาภาษาอังกฤษ"
+                        "label": "ใช่",
+                        "text": "ช่วยตอบคำถามในเรื่องค่าธรรมเนียมการศึกษาสาขาภาษาอังกฤษ"
                     },
                     {
                         "type": "message",
-                        "label": "ไม่ถูก",
-                        "text": "ได้รับคำตอบไม่ถูกต้องในเรื่องค่าธรรมเนียมการศึกษาสาขาภาษาอังกฤษ"
+                        "label": "ไม่ใช่",
+                        "text": "ไม่ช่วยตอบคำถามในเรื่องค่าธรรมเนียมการศึกษาสาขาภาษาอังกฤษ"
                     }
                 ],
-                "text": "คุณได้รับคำตอบถูกต้องไหมคะ?"
+                "text": "น้องบ็อตช่วยตอบคำถามของท่านใช่หรือไม่?"
             }
         };
 
         //ประกาศตัวแปร payload เพื่อแสดงออกหน้าจอ
         let payload่json = new Payload(`LINE`, payload, { sendAsMessage: true });
         let text = request.body.queryResult.queryText;
-        let c = 'ได้รับคำตอบถูกต้องในเรื่องค่าธรรมเนียมการศึกษาสาขาภาษาอังกฤษ';
-        let b = 'ได้รับคำตอบไม่ถูกต้องในเรื่องค่าธรรมเนียมการศึกษาสาขาภาษาอังกฤษ';
+        let c = 'ช่วยตอบคำถามในเรื่องค่าธรรมเนียมการศึกษาสาขาภาษาอังกฤษ';
+        let b = 'ไม่ช่วยตอบคำถามในเรื่องค่าธรรมเนียมการศึกษาสาขาภาษาอังกฤษ';
 
         //Count_Accuracy
         let Count_Accuracy = admin.firestore().collection("Count_Accuracy").doc(date.toLocaleDateString()).collection("ค่าธรรมเนียมการศึกษา").doc("คณะมนุษยศาสตร์และสังคมศาสตร์").collection("Subject").doc("ภาษาอังกฤษ");
         Count_Accuracy.get().then(function (docs) {
             if (!docs.exists) {
                 Count_Accuracy.set({
-                    ถูก: 0,
-                    ไม่ถูก: 0
+                    ใช่: 0,
+                    ไม่ใช่: 0
                 });
             }
 
@@ -7413,13 +7518,14 @@ exports.dialogflowFirebaseFulfillment = functions.https.onRequest((request, resp
 
 
         if (text === c) {
-            agent.add("ขอบคุณค่ะ");
+            agent.add("กรุณากดดาวเพื่อประเมินความพึงพอใจหลังการใช้ระบบ")
+            agent.add(pay1);
             db.runTransaction(t => {
                 return t.get(Count_Accuracy).then(doc => {
-                    let newcount = doc.data().ถูก + 1;
+                    let newcount = doc.data().ใช่ + 1;
 
                     t.update(Count_Accuracy, {
-                        ถูก: newcount,
+                        ใช่: newcount,
 
                     });
                 });
@@ -7434,10 +7540,10 @@ exports.dialogflowFirebaseFulfillment = functions.https.onRequest((request, resp
             agent.add("กรุณากดปุ่มติดต่อเจ้าหน้าที่");
             db.runTransaction(t => {
                 return t.get(Count_Accuracy).then(doc => {
-                    let newcount = doc.data().ไม่ถูก + 1;
+                    let newcount = doc.data().ไม่ใช่ + 1;
 
                     t.update(Count_Accuracy, {
-                        ไม่ถูก: newcount,
+                        ไม่ใช่: newcount,
 
                     });
                 });
@@ -7500,32 +7606,32 @@ exports.dialogflowFirebaseFulfillment = functions.https.onRequest((request, resp
                 "actions": [
                     {
                         "type": "message",
-                        "label": "ถูก",
-                        "text": "ได้รับคำตอบถูกต้องในเรื่องค่าธรรมเนียมการศึกษาสาขาดนตรีสากล"
+                        "label": "ใช่",
+                        "text": "ช่วยตอบคำถามในเรื่องค่าธรรมเนียมการศึกษาสาขาดนตรีสากล"
                     },
                     {
                         "type": "message",
-                        "label": "ไม่ถูก",
-                        "text": "ได้รับคำตอบไม่ถูกต้องในเรื่องค่าธรรมเนียมการศึกษาสาขาดนตรีสากล"
+                        "label": "ไม่ใช่",
+                        "text": "ไม่ช่วยตอบคำถามในเรื่องค่าธรรมเนียมการศึกษาสาขาดนตรีสากล"
                     }
                 ],
-                "text": "คุณได้รับคำตอบถูกต้องไหมคะ?"
+                "text": "น้องบ็อตช่วยตอบคำถามของท่านใช่หรือไม่?"
             }
         };
 
         //ประกาศตัวแปร payload เพื่อแสดงออกหน้าจอ
         let payload่json = new Payload(`LINE`, payload, { sendAsMessage: true });
         let text = request.body.queryResult.queryText;
-        let c = 'ได้รับคำตอบถูกต้องในเรื่องค่าธรรมเนียมการศึกษาสาขาดนตรีสากล';
-        let b = 'ได้รับคำตอบไม่ถูกต้องในเรื่องค่าธรรมเนียมการศึกษาสาขาดนตรีสากล';
+        let c = 'ช่วยตอบคำถามในเรื่องค่าธรรมเนียมการศึกษาสาขาดนตรีสากล';
+        let b = 'ไม่ช่วยตอบคำถามในเรื่องค่าธรรมเนียมการศึกษาสาขาดนตรีสากล';
 
         //Count_Accuracy
         let Count_Accuracy = admin.firestore().collection("Count_Accuracy").doc(date.toLocaleDateString()).collection("ค่าธรรมเนียมการศึกษา").doc("คณะมนุษยศาสตร์และสังคมศาสตร์").collection("Subject").doc("ดนตรีสากล");
         Count_Accuracy.get().then(function (docs) {
             if (!docs.exists) {
                 Count_Accuracy.set({
-                    ถูก: 0,
-                    ไม่ถูก: 0
+                    ใช่: 0,
+                    ไม่ใช่: 0
                 });
             }
 
@@ -7533,13 +7639,14 @@ exports.dialogflowFirebaseFulfillment = functions.https.onRequest((request, resp
 
 
         if (text === c) {
-            agent.add("ขอบคุณค่ะ");
+            agent.add("กรุณากดดาวเพื่อประเมินความพึงพอใจหลังการใช้ระบบ")
+            agent.add(pay1);
             db.runTransaction(t => {
                 return t.get(Count_Accuracy).then(doc => {
-                    let newcount = doc.data().ถูก + 1;
+                    let newcount = doc.data().ใช่ + 1;
 
                     t.update(Count_Accuracy, {
-                        ถูก: newcount,
+                        ใช่: newcount,
 
                     });
                 });
@@ -7554,10 +7661,10 @@ exports.dialogflowFirebaseFulfillment = functions.https.onRequest((request, resp
             agent.add("กรุณากดปุ่มติดต่อเจ้าหน้าที่");
             db.runTransaction(t => {
                 return t.get(Count_Accuracy).then(doc => {
-                    let newcount = doc.data().ไม่ถูก + 1;
+                    let newcount = doc.data().ไม่ใช่ + 1;
 
                     t.update(Count_Accuracy, {
-                        ไม่ถูก: newcount,
+                        ไม่ใช่: newcount,
 
                     });
                 });
@@ -7620,32 +7727,32 @@ exports.dialogflowFirebaseFulfillment = functions.https.onRequest((request, resp
                 "actions": [
                     {
                         "type": "message",
-                        "label": "ถูก",
-                        "text": "ได้รับคำตอบถูกต้องในเรื่องค่าธรรมเนียมการศึกษาสาขาทัศนศิลป์"
+                        "label": "ใช่",
+                        "text": "ช่วยตอบคำถามในเรื่องค่าธรรมเนียมการศึกษาสาขาทัศนศิลป์"
                     },
                     {
                         "type": "message",
-                        "label": "ไม่ถูก",
-                        "text": "ได้รับคำตอบไม่ถูกต้องในเรื่องค่าธรรมเนียมการศึกษาสาขาทัศนศิลป์"
+                        "label": "ไม่ใช่",
+                        "text": "ไม่ช่วยตอบคำถามในเรื่องค่าธรรมเนียมการศึกษาสาขาทัศนศิลป์"
                     }
                 ],
-                "text": "คุณได้รับคำตอบถูกต้องไหมคะ?"
+                "text": "น้องบ็อตช่วยตอบคำถามของท่านใช่หรือไม่?"
             }
         };
 
         //ประกาศตัวแปร payload เพื่อแสดงออกหน้าจอ
         let payload่json = new Payload(`LINE`, payload, { sendAsMessage: true });
         let text = request.body.queryResult.queryText;
-        let c = 'ได้รับคำตอบถูกต้องในเรื่องค่าธรรมเนียมการศึกษาสาขาทัศนศิลป์';
-        let b = 'ได้รับคำตอบไม่ถูกต้องในเรื่องค่าธรรมเนียมการศึกษาสาขาทัศนศิลป์';
+        let c = 'ช่วยตอบคำถามในเรื่องค่าธรรมเนียมการศึกษาสาขาทัศนศิลป์';
+        let b = 'ไม่ช่วยตอบคำถามในเรื่องค่าธรรมเนียมการศึกษาสาขาทัศนศิลป์';
 
         //Count_Accuracy
         let Count_Accuracy = admin.firestore().collection("Count_Accuracy").doc(date.toLocaleDateString()).collection("ค่าธรรมเนียมการศึกษา").doc("คณะมนุษยศาสตร์และสังคมศาสตร์").collection("Subject").doc("ทัศนศิลป์");
         Count_Accuracy.get().then(function (docs) {
             if (!docs.exists) {
                 Count_Accuracy.set({
-                    ถูก: 0,
-                    ไม่ถูก: 0
+                    ใช่: 0,
+                    ไม่ใช่: 0
                 });
             }
 
@@ -7653,13 +7760,14 @@ exports.dialogflowFirebaseFulfillment = functions.https.onRequest((request, resp
 
 
         if (text === c) {
-            agent.add("ขอบคุณค่ะ");
+            agent.add("กรุณากดดาวเพื่อประเมินความพึงพอใจหลังการใช้ระบบ")
+            agent.add(pay1);
             db.runTransaction(t => {
                 return t.get(Count_Accuracy).then(doc => {
-                    let newcount = doc.data().ถูก + 1;
+                    let newcount = doc.data().ใช่ + 1;
 
                     t.update(Count_Accuracy, {
-                        ถูก: newcount,
+                        ใช่: newcount,
 
                     });
                 });
@@ -7674,10 +7782,10 @@ exports.dialogflowFirebaseFulfillment = functions.https.onRequest((request, resp
             agent.add("กรุณากดปุ่มติดต่อเจ้าหน้าที่");
             db.runTransaction(t => {
                 return t.get(Count_Accuracy).then(doc => {
-                    let newcount = doc.data().ไม่ถูก + 1;
+                    let newcount = doc.data().ไม่ใช่ + 1;
 
                     t.update(Count_Accuracy, {
-                        ไม่ถูก: newcount,
+                        ไม่ใช่: newcount,
 
                     });
                 });
@@ -7741,32 +7849,32 @@ exports.dialogflowFirebaseFulfillment = functions.https.onRequest((request, resp
                 "actions": [
                     {
                         "type": "message",
-                        "label": "ถูก",
-                        "text": "ได้รับคำตอบถูกต้องในเรื่องค่าธรรมเนียมการศึกษาสาขารัฐศาสตร์"
+                        "label": "ใช่",
+                        "text": "ช่วยตอบคำถามในเรื่องค่าธรรมเนียมการศึกษาสาขารัฐศาสตร์"
                     },
                     {
                         "type": "message",
-                        "label": "ไม่ถูก",
-                        "text": "ได้รับคำตอบไม่ถูกต้องในเรื่องค่าธรรมเนียมการศึกษาสาขารัฐศาสตร์"
+                        "label": "ไม่ใช่",
+                        "text": "ไม่ช่วยตอบคำถามในเรื่องค่าธรรมเนียมการศึกษาสาขารัฐศาสตร์"
                     }
                 ],
-                "text": "คุณได้รับคำตอบถูกต้องไหมคะ?"
+                "text": "น้องบ็อตช่วยตอบคำถามของท่านใช่หรือไม่?"
             }
         };
 
         //ประกาศตัวแปร payload เพื่อแสดงออกหน้าจอ
         let payload่json = new Payload(`LINE`, payload, { sendAsMessage: true });
         let text = request.body.queryResult.queryText;
-        let c = 'ได้รับคำตอบถูกต้องในเรื่องค่าธรรมเนียมการศึกษาสาขารัฐศาสตร์';
-        let b = 'ได้รับคำตอบไม่ถูกต้องในเรื่องค่าธรรมเนียมการศึกษาสาขารัฐศาสตร์';
+        let c = 'ช่วยตอบคำถามในเรื่องค่าธรรมเนียมการศึกษาสาขารัฐศาสตร์';
+        let b = 'ไม่ช่วยตอบคำถามในเรื่องค่าธรรมเนียมการศึกษาสาขารัฐศาสตร์';
 
         //Count_Accuracy
         let Count_Accuracy = admin.firestore().collection("Count_Accuracy").doc(date.toLocaleDateString()).collection("ค่าธรรมเนียมการศึกษา").doc("คณะมนุษยศาสตร์และสังคมศาสตร์").collection("Subject").doc("รัฐศาสตร์");
         Count_Accuracy.get().then(function (docs) {
             if (!docs.exists) {
                 Count_Accuracy.set({
-                    ถูก: 0,
-                    ไม่ถูก: 0
+                    ใช่: 0,
+                    ไม่ใช่: 0
                 });
             }
 
@@ -7774,13 +7882,14 @@ exports.dialogflowFirebaseFulfillment = functions.https.onRequest((request, resp
 
 
         if (text === c) {
-            agent.add("ขอบคุณค่ะ");
+            agent.add("กรุณากดดาวเพื่อประเมินความพึงพอใจหลังการใช้ระบบ")
+            agent.add(pay1);
             db.runTransaction(t => {
                 return t.get(Count_Accuracy).then(doc => {
-                    let newcount = doc.data().ถูก + 1;
+                    let newcount = doc.data().ใช่ + 1;
 
                     t.update(Count_Accuracy, {
-                        ถูก: newcount,
+                        ใช่: newcount,
 
                     });
                 });
@@ -7795,10 +7904,10 @@ exports.dialogflowFirebaseFulfillment = functions.https.onRequest((request, resp
             agent.add("กรุณากดปุ่มติดต่อเจ้าหน้าที่");
             db.runTransaction(t => {
                 return t.get(Count_Accuracy).then(doc => {
-                    let newcount = doc.data().ไม่ถูก + 1;
+                    let newcount = doc.data().ไม่ใช่ + 1;
 
                     t.update(Count_Accuracy, {
-                        ไม่ถูก: newcount,
+                        ไม่ใช่: newcount,
 
                     });
                 });
@@ -7861,32 +7970,32 @@ exports.dialogflowFirebaseFulfillment = functions.https.onRequest((request, resp
                 "actions": [
                     {
                         "type": "message",
-                        "label": "ถูก",
-                        "text": "ได้รับคำตอบถูกต้องในเรื่องค่าธรรมเนียมการศึกษาสาขารัฐประศาสนศาสตร์"
+                        "label": "ใช่",
+                        "text": "ช่วยตอบคำถามในเรื่องค่าธรรมเนียมการศึกษาสาขารัฐประศาสนศาสตร์"
                     },
                     {
                         "type": "message",
-                        "label": "ไม่ถูก",
-                        "text": "ได้รับคำตอบไม่ถูกต้องในเรื่องค่าธรรมเนียมการศึกษาสาขารัฐประศาสนศาสตร์"
+                        "label": "ไม่ใช่",
+                        "text": "ไม่ช่วยตอบคำถามในเรื่องค่าธรรมเนียมการศึกษาสาขารัฐประศาสนศาสตร์"
                     }
                 ],
-                "text": "คุณได้รับคำตอบถูกต้องไหมคะ?"
+                "text": "น้องบ็อตช่วยตอบคำถามของท่านใช่หรือไม่?"
             }
         };
 
         //ประกาศตัวแปร payload เพื่อแสดงออกหน้าจอ
         let payload่json = new Payload(`LINE`, payload, { sendAsMessage: true });
         let text = request.body.queryResult.queryText;
-        let c = 'ได้รับคำตอบถูกต้องในเรื่องค่าธรรมเนียมการศึกษาสาขารัฐประศาสนศาสตร์';
-        let b = 'ได้รับคำตอบไม่ถูกต้องในเรื่องค่าธรรมเนียมการศึกษาสาขารัฐประศาสนศาสตร์';
+        let c = 'ช่วยตอบคำถามในเรื่องค่าธรรมเนียมการศึกษาสาขารัฐประศาสนศาสตร์';
+        let b = 'ไม่ช่วยตอบคำถามในเรื่องค่าธรรมเนียมการศึกษาสาขารัฐประศาสนศาสตร์';
 
         //Count_Accuracy
         let Count_Accuracy = admin.firestore().collection("Count_Accuracy").doc(date.toLocaleDateString()).collection("ค่าธรรมเนียมการศึกษา").doc("คณะมนุษยศาสตร์และสังคมศาสตร์").collection("Subject").doc("รัฐประศาสนศาสตร์");
         Count_Accuracy.get().then(function (docs) {
             if (!docs.exists) {
                 Count_Accuracy.set({
-                    ถูก: 0,
-                    ไม่ถูก: 0
+                    ใช่: 0,
+                    ไม่ใช่: 0
                 });
             }
 
@@ -7894,13 +8003,14 @@ exports.dialogflowFirebaseFulfillment = functions.https.onRequest((request, resp
 
 
         if (text === c) {
-            agent.add("ขอบคุณค่ะ");
+            agent.add("กรุณากดดาวเพื่อประเมินความพึงพอใจหลังการใช้ระบบ")
+            agent.add(pay1);
             db.runTransaction(t => {
                 return t.get(Count_Accuracy).then(doc => {
-                    let newcount = doc.data().ถูก + 1;
+                    let newcount = doc.data().ใช่ + 1;
 
                     t.update(Count_Accuracy, {
-                        ถูก: newcount,
+                        ใช่: newcount,
 
                     });
                 });
@@ -7915,10 +8025,10 @@ exports.dialogflowFirebaseFulfillment = functions.https.onRequest((request, resp
             agent.add("กรุณากดปุ่มติดต่อเจ้าหน้าที่");
             db.runTransaction(t => {
                 return t.get(Count_Accuracy).then(doc => {
-                    let newcount = doc.data().ไม่ถูก + 1;
+                    let newcount = doc.data().ไม่ใช่ + 1;
 
                     t.update(Count_Accuracy, {
-                        ไม่ถูก: newcount,
+                        ไม่ใช่: newcount,
 
                     });
                 });
@@ -7982,32 +8092,32 @@ exports.dialogflowFirebaseFulfillment = functions.https.onRequest((request, resp
                 "actions": [
                     {
                         "type": "message",
-                        "label": "ถูก",
-                        "text": "ได้รับคำตอบถูกต้องในเรื่องค่าธรรมเนียมการศึกษาสาขานิติศาสตร์บัณฑิต"
+                        "label": "ใช่",
+                        "text": "ช่วยตอบคำถามในเรื่องค่าธรรมเนียมการศึกษาสาขานิติศาสตร์บัณฑิต"
                     },
                     {
                         "type": "message",
-                        "label": "ไม่ถูก",
-                        "text": "ได้รับคำตอบไม่ถูกต้องในเรื่องค่าธรรมเนียมการศึกษาสาขานิติศาสตร์บัณฑิต"
+                        "label": "ไม่ใช่",
+                        "text": "ไม่ช่วยตอบคำถามในเรื่องค่าธรรมเนียมการศึกษาสาขานิติศาสตร์บัณฑิต"
                     }
                 ],
-                "text": "คุณได้รับคำตอบถูกต้องไหมคะ?"
+                "text": "น้องบ็อตช่วยตอบคำถามของท่านใช่หรือไม่?"
             }
         };
 
         //ประกาศตัวแปร payload เพื่อแสดงออกหน้าจอ
         let payload่json = new Payload(`LINE`, payload, { sendAsMessage: true });
         let text = request.body.queryResult.queryText;
-        let c = 'ได้รับคำตอบถูกต้องในเรื่องค่าธรรมเนียมการศึกษาสาขานิติศาสตร์บัณฑิต';
-        let b = 'ได้รับคำตอบไม่ถูกต้องในเรื่องค่าธรรมเนียมการศึกษาสาขานิติศาสตร์บัณฑิต';
+        let c = 'ช่วยตอบคำถามในเรื่องค่าธรรมเนียมการศึกษาสาขานิติศาสตร์บัณฑิต';
+        let b = 'ไม่ช่วยตอบคำถามในเรื่องค่าธรรมเนียมการศึกษาสาขานิติศาสตร์บัณฑิต';
 
         //Count_Accuracy
         let Count_Accuracy = admin.firestore().collection("Count_Accuracy").doc(date.toLocaleDateString()).collection("ค่าธรรมเนียมการศึกษา").doc("คณะมนุษยศาสตร์และสังคมศาสตร์").collection("Subject").doc("นิติศาสตร์บัณฑิต");
         Count_Accuracy.get().then(function (docs) {
             if (!docs.exists) {
                 Count_Accuracy.set({
-                    ถูก: 0,
-                    ไม่ถูก: 0
+                    ใช่: 0,
+                    ไม่ใช่: 0
                 });
             }
 
@@ -8015,13 +8125,14 @@ exports.dialogflowFirebaseFulfillment = functions.https.onRequest((request, resp
 
 
         if (text === c) {
-            agent.add("ขอบคุณค่ะ");
+            agent.add("กรุณากดดาวเพื่อประเมินความพึงพอใจหลังการใช้ระบบ")
+            agent.add(pay1);
             db.runTransaction(t => {
                 return t.get(Count_Accuracy).then(doc => {
-                    let newcount = doc.data().ถูก + 1;
+                    let newcount = doc.data().ใช่ + 1;
 
                     t.update(Count_Accuracy, {
-                        ถูก: newcount,
+                        ใช่: newcount,
 
                     });
                 });
@@ -8036,10 +8147,10 @@ exports.dialogflowFirebaseFulfillment = functions.https.onRequest((request, resp
             agent.add("กรุณากดปุ่มติดต่อเจ้าหน้าที่");
             db.runTransaction(t => {
                 return t.get(Count_Accuracy).then(doc => {
-                    let newcount = doc.data().ไม่ถูก + 1;
+                    let newcount = doc.data().ไม่ใช่ + 1;
 
                     t.update(Count_Accuracy, {
-                        ไม่ถูก: newcount,
+                        ไม่ใช่: newcount,
 
                     });
                 });
@@ -8104,32 +8215,32 @@ exports.dialogflowFirebaseFulfillment = functions.https.onRequest((request, resp
                 "actions": [
                     {
                         "type": "message",
-                        "label": "ถูก",
-                        "text": "ได้รับคำตอบถูกต้องในเรื่องค่าธรรมเนียมการศึกษาสาขาภาษาญี่ปุ่น"
+                        "label": "ใช่",
+                        "text": "ช่วยตอบคำถามในเรื่องค่าธรรมเนียมการศึกษาสาขาภาษาญี่ปุ่น"
                     },
                     {
                         "type": "message",
-                        "label": "ไม่ถูก",
-                        "text": "ได้รับคำตอบไม่ถูกต้องในเรื่องค่าธรรมเนียมการศึกษาสาขาภาษาญี่ปุ่น"
+                        "label": "ไม่ใช่",
+                        "text": "ไม่ช่วยตอบคำถามในเรื่องค่าธรรมเนียมการศึกษาสาขาภาษาญี่ปุ่น"
                     }
                 ],
-                "text": "คุณได้รับคำตอบถูกต้องไหมคะ?"
+                "text": "น้องบ็อตช่วยตอบคำถามของท่านใช่หรือไม่?"
             }
         };
 
         //ประกาศตัวแปร payload เพื่อแสดงออกหน้าจอ
         let payload่json = new Payload(`LINE`, payload, { sendAsMessage: true });
         let text = request.body.queryResult.queryText;
-        let c = 'ได้รับคำตอบถูกต้องในเรื่องค่าธรรมเนียมการศึกษาสาขาภาษาญี่ปุ่น';
-        let b = 'ได้รับคำตอบไม่ถูกต้องในเรื่องค่าธรรมเนียมการศึกษาสาขาภาษาญี่ปุ่น';
+        let c = 'ช่วยตอบคำถามในเรื่องค่าธรรมเนียมการศึกษาสาขาภาษาญี่ปุ่น';
+        let b = 'ไม่ช่วยตอบคำถามในเรื่องค่าธรรมเนียมการศึกษาสาขาภาษาญี่ปุ่น';
 
         //Count_Accuracy
         let Count_Accuracy = admin.firestore().collection("Count_Accuracy").doc(date.toLocaleDateString()).collection("ค่าธรรมเนียมการศึกษา").doc("คณะมนุษยศาสตร์และสังคมศาสตร์").collection("Subject").doc("ภาษาญี่ปุ่น");
         Count_Accuracy.get().then(function (docs) {
             if (!docs.exists) {
                 Count_Accuracy.set({
-                    ถูก: 0,
-                    ไม่ถูก: 0
+                    ใช่: 0,
+                    ไม่ใช่: 0
                 });
             }
 
@@ -8137,13 +8248,14 @@ exports.dialogflowFirebaseFulfillment = functions.https.onRequest((request, resp
 
 
         if (text === c) {
-            agent.add("ขอบคุณค่ะ");
+            agent.add("กรุณากดดาวเพื่อประเมินความพึงพอใจหลังการใช้ระบบ")
+            agent.add(pay1);
             db.runTransaction(t => {
                 return t.get(Count_Accuracy).then(doc => {
-                    let newcount = doc.data().ถูก + 1;
+                    let newcount = doc.data().ใช่ + 1;
 
                     t.update(Count_Accuracy, {
-                        ถูก: newcount,
+                        ใช่: newcount,
 
                     });
                 });
@@ -8158,10 +8270,10 @@ exports.dialogflowFirebaseFulfillment = functions.https.onRequest((request, resp
             agent.add("กรุณากดปุ่มติดต่อเจ้าหน้าที่");
             db.runTransaction(t => {
                 return t.get(Count_Accuracy).then(doc => {
-                    let newcount = doc.data().ไม่ถูก + 1;
+                    let newcount = doc.data().ไม่ใช่ + 1;
 
                     t.update(Count_Accuracy, {
-                        ไม่ถูก: newcount,
+                        ไม่ใช่: newcount,
 
                     });
                 });
@@ -8226,32 +8338,32 @@ exports.dialogflowFirebaseFulfillment = functions.https.onRequest((request, resp
                 "actions": [
                     {
                         "type": "message",
-                        "label": "ถูก",
-                        "text": "ได้รับคำตอบถูกต้องในเรื่องค่าธรรมเนียมการศึกษาสาขาศิลปกรรม"
+                        "label": "ใช่",
+                        "text": "ช่วยตอบคำถามในเรื่องค่าธรรมเนียมการศึกษาสาขาศิลปกรรม"
                     },
                     {
                         "type": "message",
-                        "label": "ไม่ถูก",
-                        "text": "ได้รับคำตอบไม่ถูกต้องในเรื่องค่าธรรมเนียมการศึกษาสาขาศิลปกรรม"
+                        "label": "ไม่ใช่",
+                        "text": "ไม่ช่วยตอบคำถามในเรื่องค่าธรรมเนียมการศึกษาสาขาศิลปกรรม"
                     }
                 ],
-                "text": "คุณได้รับคำตอบถูกต้องไหมคะ?"
+                "text": "น้องบ็อตช่วยตอบคำถามของท่านใช่หรือไม่?"
             }
         };
 
         //ประกาศตัวแปร payload เพื่อแสดงออกหน้าจอ
         let payload่json = new Payload(`LINE`, payload, { sendAsMessage: true });
         let text = request.body.queryResult.queryText;
-        let c = 'ได้รับคำตอบถูกต้องในเรื่องค่าธรรมเนียมการศึกษาสาขาศิลปกรรม';
-        let b = 'ได้รับคำตอบไม่ถูกต้องในเรื่องค่าธรรมเนียมการศึกษาสาขาศิลปกรรม';
+        let c = 'ช่วยตอบคำถามในเรื่องค่าธรรมเนียมการศึกษาสาขาศิลปกรรม';
+        let b = 'ไม่ช่วยตอบคำถามในเรื่องค่าธรรมเนียมการศึกษาสาขาศิลปกรรม';
 
         //Count_Accuracy
         let Count_Accuracy = admin.firestore().collection("Count_Accuracy").doc(date.toLocaleDateString()).collection("ค่าธรรมเนียมการศึกษา").doc("คณะมนุษยศาสตร์และสังคมศาสตร์").collection("Subject").doc("ศิลปกรรม");
         Count_Accuracy.get().then(function (docs) {
             if (!docs.exists) {
                 Count_Accuracy.set({
-                    ถูก: 0,
-                    ไม่ถูก: 0
+                    ใช่: 0,
+                    ไม่ใช่: 0
                 });
             }
 
@@ -8259,13 +8371,14 @@ exports.dialogflowFirebaseFulfillment = functions.https.onRequest((request, resp
 
 
         if (text === c) {
-            agent.add("ขอบคุณค่ะ");
+            agent.add("กรุณากดดาวเพื่อประเมินความพึงพอใจหลังการใช้ระบบ")
+            agent.add(pay1);
             db.runTransaction(t => {
                 return t.get(Count_Accuracy).then(doc => {
-                    let newcount = doc.data().ถูก + 1;
+                    let newcount = doc.data().ใช่ + 1;
 
                     t.update(Count_Accuracy, {
-                        ถูก: newcount,
+                        ใช่: newcount,
 
                     });
                 });
@@ -8280,10 +8393,10 @@ exports.dialogflowFirebaseFulfillment = functions.https.onRequest((request, resp
             agent.add("กรุณากดปุ่มติดต่อเจ้าหน้าที่");
             db.runTransaction(t => {
                 return t.get(Count_Accuracy).then(doc => {
-                    let newcount = doc.data().ไม่ถูก + 1;
+                    let newcount = doc.data().ไม่ใช่ + 1;
 
                     t.update(Count_Accuracy, {
-                        ไม่ถูก: newcount,
+                        ไม่ใช่: newcount,
 
                     });
                 });
@@ -8347,32 +8460,32 @@ exports.dialogflowFirebaseFulfillment = functions.https.onRequest((request, resp
                 "actions": [
                     {
                         "type": "message",
-                        "label": "ถูก",
-                        "text": "ได้รับคำตอบถูกต้องในเรื่องค่าธรรมเนียมการศึกษาสาขาสารสนเทศศาสตร์และบรรณารักษศาสตร์"
+                        "label": "ใช่",
+                        "text": "ช่วยตอบคำถามในเรื่องค่าธรรมเนียมการศึกษาสาขาสารสนเทศศาสตร์และบรรณารักษศาสตร์"
                     },
                     {
                         "type": "message",
-                        "label": "ไม่ถูก",
-                        "text": "ได้รับคำตอบไม่ถูกต้องในเรื่องค่าธรรมเนียมการศึกษาสาขาสารสนเทศศาสตร์และบรรณารักษศาสตร์"
+                        "label": "ไม่ใช่",
+                        "text": "ไม่ช่วยตอบคำถามในเรื่องค่าธรรมเนียมการศึกษาสาขาสารสนเทศศาสตร์และบรรณารักษศาสตร์"
                     }
                 ],
-                "text": "คุณได้รับคำตอบถูกต้องไหมคะ?"
+                "text": "น้องบ็อตช่วยตอบคำถามของท่านใช่หรือไม่?"
             }
         };
 
         //ประกาศตัวแปร payload เพื่อแสดงออกหน้าจอ
         let payload่json = new Payload(`LINE`, payload, { sendAsMessage: true });
         let text = request.body.queryResult.queryText;
-        let c = 'ได้รับคำตอบถูกต้องในเรื่องค่าธรรมเนียมการศึกษาสาขาสารสนเทศศาสตร์และบรรณารักษศาสตร์';
-        let b = 'ได้รับคำตอบไม่ถูกต้องในเรื่องค่าธรรมเนียมการศึกษาสาขาสารสนเทศศาสตร์และบรรณารักษศาสตร์';
+        let c = 'ช่วยตอบคำถามในเรื่องค่าธรรมเนียมการศึกษาสาขาสารสนเทศศาสตร์และบรรณารักษศาสตร์';
+        let b = 'ไม่ช่วยตอบคำถามในเรื่องค่าธรรมเนียมการศึกษาสาขาสารสนเทศศาสตร์และบรรณารักษศาสตร์';
 
         //Count_Accuracy
         let Count_Accuracy = admin.firestore().collection("Count_Accuracy").doc(date.toLocaleDateString()).collection("ค่าธรรมเนียมการศึกษา").doc("คณะมนุษยศาสตร์และสังคมศาสตร์").collection("Subject").doc("สารสนเทศศาสตร์และบรรณารักษศาสตร์");
         Count_Accuracy.get().then(function (docs) {
             if (!docs.exists) {
                 Count_Accuracy.set({
-                    ถูก: 0,
-                    ไม่ถูก: 0
+                    ใช่: 0,
+                    ไม่ใช่: 0
                 });
             }
 
@@ -8380,13 +8493,14 @@ exports.dialogflowFirebaseFulfillment = functions.https.onRequest((request, resp
 
 
         if (text === c) {
-            agent.add("ขอบคุณค่ะ");
+            agent.add("กรุณากดดาวเพื่อประเมินความพึงพอใจหลังการใช้ระบบ")
+            agent.add(pay1);
             db.runTransaction(t => {
                 return t.get(Count_Accuracy).then(doc => {
-                    let newcount = doc.data().ถูก + 1;
+                    let newcount = doc.data().ใช่ + 1;
 
                     t.update(Count_Accuracy, {
-                        ถูก: newcount,
+                        ใช่: newcount,
 
                     });
                 });
@@ -8401,10 +8515,10 @@ exports.dialogflowFirebaseFulfillment = functions.https.onRequest((request, resp
             agent.add("กรุณากดปุ่มติดต่อเจ้าหน้าที่");
             db.runTransaction(t => {
                 return t.get(Count_Accuracy).then(doc => {
-                    let newcount = doc.data().ไม่ถูก + 1;
+                    let newcount = doc.data().ไม่ใช่ + 1;
 
                     t.update(Count_Accuracy, {
-                        ไม่ถูก: newcount,
+                        ไม่ใช่: newcount,
 
                     });
                 });
@@ -8468,32 +8582,32 @@ exports.dialogflowFirebaseFulfillment = functions.https.onRequest((request, resp
                 "actions": [
                     {
                         "type": "message",
-                        "label": "ถูก",
-                        "text": "ได้รับคำตอบถูกต้องในเรื่องค่าธรรมเนียมการศึกษาสาขานาฎดุริยางคศิลป์ไทย"
+                        "label": "ใช่",
+                        "text": "ช่วยตอบคำถามในเรื่องค่าธรรมเนียมการศึกษาสาขานาฎดุริยางคศิลป์ไทย"
                     },
                     {
                         "type": "message",
-                        "label": "ไม่ถูก",
-                        "text": "ได้รับคำตอบไม่ถูกต้องในเรื่องค่าธรรมเนียมการศึกษาสาขานาฎดุริยางคศิลป์ไทย"
+                        "label": "ไม่ใช่",
+                        "text": "ไม่ช่วยตอบคำถามในเรื่องค่าธรรมเนียมการศึกษาสาขานาฎดุริยางคศิลป์ไทย"
                     }
                 ],
-                "text": "คุณได้รับคำตอบถูกต้องไหมคะ?"
+                "text": "น้องบ็อตช่วยตอบคำถามของท่านใช่หรือไม่?"
             }
         };
 
         //ประกาศตัวแปร payload เพื่อแสดงออกหน้าจอ
         let payload่json = new Payload(`LINE`, payload, { sendAsMessage: true });
         let text = request.body.queryResult.queryText;
-        let c = 'ได้รับคำตอบถูกต้องในเรื่องค่าธรรมเนียมการศึกษาสาขานาฎดุริยางคศิลป์ไทย';
-        let b = 'ได้รับคำตอบไม่ถูกต้องในเรื่องค่าธรรมเนียมการศึกษาสาขานาฎดุริยางคศิลป์ไทย';
+        let c = 'ช่วยตอบคำถามในเรื่องค่าธรรมเนียมการศึกษาสาขานาฎดุริยางคศิลป์ไทย';
+        let b = 'ไม่ช่วยตอบคำถามในเรื่องค่าธรรมเนียมการศึกษาสาขานาฎดุริยางคศิลป์ไทย';
 
         //Count_Accuracy
         let Count_Accuracy = admin.firestore().collection("Count_Accuracy").doc(date.toLocaleDateString()).collection("ค่าธรรมเนียมการศึกษา").doc("คณะมนุษยศาสตร์และสังคมศาสตร์").collection("Subject").doc("นาฎดุริยางคศิลป์ไทย");
         Count_Accuracy.get().then(function (docs) {
             if (!docs.exists) {
                 Count_Accuracy.set({
-                    ถูก: 0,
-                    ไม่ถูก: 0
+                    ใช่: 0,
+                    ไม่ใช่: 0
                 });
             }
 
@@ -8501,13 +8615,14 @@ exports.dialogflowFirebaseFulfillment = functions.https.onRequest((request, resp
 
 
         if (text === c) {
-            agent.add("ขอบคุณค่ะ");
+            agent.add("กรุณากดดาวเพื่อประเมินความพึงพอใจหลังการใช้ระบบ")
+            agent.add(pay1);
             db.runTransaction(t => {
                 return t.get(Count_Accuracy).then(doc => {
-                    let newcount = doc.data().ถูก + 1;
+                    let newcount = doc.data().ใช่ + 1;
 
                     t.update(Count_Accuracy, {
-                        ถูก: newcount,
+                        ใช่: newcount,
 
                     });
                 });
@@ -8522,10 +8637,10 @@ exports.dialogflowFirebaseFulfillment = functions.https.onRequest((request, resp
             agent.add("กรุณากดปุ่มติดต่อเจ้าหน้าที่");
             db.runTransaction(t => {
                 return t.get(Count_Accuracy).then(doc => {
-                    let newcount = doc.data().ไม่ถูก + 1;
+                    let newcount = doc.data().ไม่ใช่ + 1;
 
                     t.update(Count_Accuracy, {
-                        ไม่ถูก: newcount,
+                        ไม่ใช่: newcount,
 
                     });
                 });
@@ -8591,32 +8706,32 @@ exports.dialogflowFirebaseFulfillment = functions.https.onRequest((request, resp
                 "actions": [
                     {
                         "type": "message",
-                        "label": "ถูก",
-                        "text": "ได้รับคำตอบถูกต้องในเรื่องค่าธรรมเนียมการศึกษาสาขาการบัญชี"
+                        "label": "ใช่",
+                        "text": "ช่วยตอบคำถามในเรื่องค่าธรรมเนียมการศึกษาสาขาการบัญชี"
                     },
                     {
                         "type": "message",
-                        "label": "ไม่ถูก",
-                        "text": "ได้รับคำตอบไม่ถูกต้องในเรื่องค่าธรรมเนียมการศึกษาสาขาการบัญชี"
+                        "label": "ไม่ใช่",
+                        "text": "ไม่ช่วยตอบคำถามในเรื่องค่าธรรมเนียมการศึกษาสาขาการบัญชี"
                     }
                 ],
-                "text": "คุณได้รับคำตอบถูกต้องไหมคะ?"
+                "text": "น้องบ็อตช่วยตอบคำถามของท่านใช่หรือไม่?"
             }
         };
 
         //ประกาศตัวแปร payload เพื่อแสดงออกหน้าจอ
         let payload่json = new Payload(`LINE`, payload, { sendAsMessage: true });
         let text = request.body.queryResult.queryText;
-        let c = 'ได้รับคำตอบถูกต้องในเรื่องค่าธรรมเนียมการศึกษาสาขาการบัญชี';
-        let b = 'ได้รับคำตอบไม่ถูกต้องในเรื่องค่าธรรมเนียมการศึกษาสาขาการบัญชี';
+        let c = 'ช่วยตอบคำถามในเรื่องค่าธรรมเนียมการศึกษาสาขาการบัญชี';
+        let b = 'ไม่ช่วยตอบคำถามในเรื่องค่าธรรมเนียมการศึกษาสาขาการบัญชี';
 
         //Count_Accuracy
         let Count_Accuracy = admin.firestore().collection("Count_Accuracy").doc(date.toLocaleDateString()).collection("ค่าธรรมเนียมการศึกษา").doc("คณะวิทยาการจัดการ").collection("Subject").doc("การบัญชี");
         Count_Accuracy.get().then(function (docs) {
             if (!docs.exists) {
                 Count_Accuracy.set({
-                    ถูก: 0,
-                    ไม่ถูก: 0
+                    ใช่: 0,
+                    ไม่ใช่: 0
                 });
             }
 
@@ -8624,13 +8739,14 @@ exports.dialogflowFirebaseFulfillment = functions.https.onRequest((request, resp
 
 
         if (text === c) {
-            agent.add("ขอบคุณค่ะ");
+            agent.add("กรุณากดดาวเพื่อประเมินความพึงพอใจหลังการใช้ระบบ")
+            agent.add(pay1);
             db.runTransaction(t => {
                 return t.get(Count_Accuracy).then(doc => {
-                    let newcount = doc.data().ถูก + 1;
+                    let newcount = doc.data().ใช่ + 1;
 
                     t.update(Count_Accuracy, {
-                        ถูก: newcount,
+                        ใช่: newcount,
 
                     });
                 });
@@ -8645,10 +8761,10 @@ exports.dialogflowFirebaseFulfillment = functions.https.onRequest((request, resp
             agent.add("กรุณากดปุ่มติดต่อเจ้าหน้าที่");
             db.runTransaction(t => {
                 return t.get(Count_Accuracy).then(doc => {
-                    let newcount = doc.data().ไม่ถูก + 1;
+                    let newcount = doc.data().ไม่ใช่ + 1;
 
                     t.update(Count_Accuracy, {
-                        ไม่ถูก: newcount,
+                        ไม่ใช่: newcount,
 
                     });
                 });
@@ -8712,32 +8828,32 @@ exports.dialogflowFirebaseFulfillment = functions.https.onRequest((request, resp
                 "actions": [
                     {
                         "type": "message",
-                        "label": "ถูก",
-                        "text": "ได้รับคำตอบถูกต้องในเรื่องค่าธรรมเนียมการศึกษาสาขาการจัดการทรัพยากรมนุษย์"
+                        "label": "ใช่",
+                        "text": "ช่วยตอบคำถามในเรื่องค่าธรรมเนียมการศึกษาสาขาการจัดการทรัพยากรมนุษย์"
                     },
                     {
                         "type": "message",
-                        "label": "ไม่ถูก",
-                        "text": "ได้รับคำตอบไม่ถูกต้องในเรื่องค่าธรรมเนียมการศึกษาสาขาการจัดการทรัพยากรมนุษย์"
+                        "label": "ไม่ใช่",
+                        "text": "ไม่ช่วยตอบคำถามในเรื่องค่าธรรมเนียมการศึกษาสาขาการจัดการทรัพยากรมนุษย์"
                     }
                 ],
-                "text": "คุณได้รับคำตอบถูกต้องไหมคะ?"
+                "text": "น้องบ็อตช่วยตอบคำถามของท่านใช่หรือไม่?"
             }
         };
 
         //ประกาศตัวแปร payload เพื่อแสดงออกหน้าจอ
         let payload่json = new Payload(`LINE`, payload, { sendAsMessage: true });
         let text = request.body.queryResult.queryText;
-        let c = 'ได้รับคำตอบถูกต้องในเรื่องค่าธรรมเนียมการศึกษาสาขาการจัดการทรัพยากรมนุษย์';
-        let b = 'ได้รับคำตอบไม่ถูกต้องในเรื่องค่าธรรมเนียมการศึกษาสาขาการจัดการทรัพยากรมนุษย์';
+        let c = 'ช่วยตอบคำถามในเรื่องค่าธรรมเนียมการศึกษาสาขาการจัดการทรัพยากรมนุษย์';
+        let b = 'ไม่ช่วยตอบคำถามในเรื่องค่าธรรมเนียมการศึกษาสาขาการจัดการทรัพยากรมนุษย์';
 
         //Count_Accuracy
         let Count_Accuracy = admin.firestore().collection("Count_Accuracy").doc(date.toLocaleDateString()).collection("ค่าธรรมเนียมการศึกษา").doc("คณะวิทยาการจัดการ").collection("Subject").doc("การจัดการทรัพยากรมนุษย์");
         Count_Accuracy.get().then(function (docs) {
             if (!docs.exists) {
                 Count_Accuracy.set({
-                    ถูก: 0,
-                    ไม่ถูก: 0
+                    ใช่: 0,
+                    ไม่ใช่: 0
                 });
             }
 
@@ -8745,13 +8861,14 @@ exports.dialogflowFirebaseFulfillment = functions.https.onRequest((request, resp
 
 
         if (text === c) {
-            agent.add("ขอบคุณค่ะ");
+            agent.add("กรุณากดดาวเพื่อประเมินความพึงพอใจหลังการใช้ระบบ")
+            agent.add(pay1);
             db.runTransaction(t => {
                 return t.get(Count_Accuracy).then(doc => {
-                    let newcount = doc.data().ถูก + 1;
+                    let newcount = doc.data().ใช่ + 1;
 
                     t.update(Count_Accuracy, {
-                        ถูก: newcount,
+                        ใช่: newcount,
 
                     });
                 });
@@ -8766,10 +8883,10 @@ exports.dialogflowFirebaseFulfillment = functions.https.onRequest((request, resp
             agent.add("กรุณากดปุ่มติดต่อเจ้าหน้าที่");
             db.runTransaction(t => {
                 return t.get(Count_Accuracy).then(doc => {
-                    let newcount = doc.data().ไม่ถูก + 1;
+                    let newcount = doc.data().ไม่ใช่ + 1;
 
                     t.update(Count_Accuracy, {
-                        ไม่ถูก: newcount,
+                        ไม่ใช่: newcount,
 
                     });
                 });
@@ -8832,32 +8949,32 @@ exports.dialogflowFirebaseFulfillment = functions.https.onRequest((request, resp
                 "actions": [
                     {
                         "type": "message",
-                        "label": "ถูก",
-                        "text": "ได้รับคำตอบถูกต้องในเรื่องค่าธรรมเนียมการศึกษาสาขาการตลาด"
+                        "label": "ใช่",
+                        "text": "ช่วยตอบคำถามในเรื่องค่าธรรมเนียมการศึกษาสาขาการตลาด"
                     },
                     {
                         "type": "message",
-                        "label": "ไม่ถูก",
-                        "text": "ได้รับคำตอบไม่ถูกต้องในเรื่องค่าธรรมเนียมการศึกษาสาขาการตลาด"
+                        "label": "ไม่ใช่",
+                        "text": "ไม่ช่วยตอบคำถามในเรื่องค่าธรรมเนียมการศึกษาสาขาการตลาด"
                     }
                 ],
-                "text": "คุณได้รับคำตอบถูกต้องไหมคะ?"
+                "text": "น้องบ็อตช่วยตอบคำถามของท่านใช่หรือไม่?"
             }
         };
 
         //ประกาศตัวแปร payload เพื่อแสดงออกหน้าจอ
         let payload่json = new Payload(`LINE`, payload, { sendAsMessage: true });
         let text = request.body.queryResult.queryText;
-        let c = 'ได้รับคำตอบถูกต้องในเรื่องค่าธรรมเนียมการศึกษาสาขาการตลาด';
-        let b = 'ได้รับคำตอบไม่ถูกต้องในเรื่องค่าธรรมเนียมการศึกษาสาขาการตลาด';
+        let c = 'ช่วยตอบคำถามในเรื่องค่าธรรมเนียมการศึกษาสาขาการตลาด';
+        let b = 'ไม่ช่วยตอบคำถามในเรื่องค่าธรรมเนียมการศึกษาสาขาการตลาด';
 
         //Count_Accuracy
         let Count_Accuracy = admin.firestore().collection("Count_Accuracy").doc(date.toLocaleDateString()).collection("ค่าธรรมเนียมการศึกษา").doc("คณะวิทยาการจัดการ").collection("Subject").doc("การตลาด");
         Count_Accuracy.get().then(function (docs) {
             if (!docs.exists) {
                 Count_Accuracy.set({
-                    ถูก: 0,
-                    ไม่ถูก: 0
+                    ใช่: 0,
+                    ไม่ใช่: 0
                 });
             }
 
@@ -8865,13 +8982,14 @@ exports.dialogflowFirebaseFulfillment = functions.https.onRequest((request, resp
 
 
         if (text === c) {
-            agent.add("ขอบคุณค่ะ");
+            agent.add("กรุณากดดาวเพื่อประเมินความพึงพอใจหลังการใช้ระบบ")
+            agent.add(pay1);
             db.runTransaction(t => {
                 return t.get(Count_Accuracy).then(doc => {
-                    let newcount = doc.data().ถูก + 1;
+                    let newcount = doc.data().ใช่ + 1;
 
                     t.update(Count_Accuracy, {
-                        ถูก: newcount,
+                        ใช่: newcount,
 
                     });
                 });
@@ -8886,10 +9004,10 @@ exports.dialogflowFirebaseFulfillment = functions.https.onRequest((request, resp
             agent.add("กรุณากดปุ่มติดต่อเจ้าหน้าที่");
             db.runTransaction(t => {
                 return t.get(Count_Accuracy).then(doc => {
-                    let newcount = doc.data().ไม่ถูก + 1;
+                    let newcount = doc.data().ไม่ใช่ + 1;
 
                     t.update(Count_Accuracy, {
-                        ไม่ถูก: newcount,
+                        ไม่ใช่: newcount,
 
                     });
                 });
@@ -8952,32 +9070,32 @@ exports.dialogflowFirebaseFulfillment = functions.https.onRequest((request, resp
                 "actions": [
                     {
                         "type": "message",
-                        "label": "ถูก",
-                        "text": "ได้รับคำตอบถูกต้องในเรื่องค่าธรรมเนียมการศึกษาสาขาคอมพิวเตอร์ธุรกิจ"
+                        "label": "ใช่",
+                        "text": "ช่วยตอบคำถามในเรื่องค่าธรรมเนียมการศึกษาสาขาคอมพิวเตอร์ธุรกิจ"
                     },
                     {
                         "type": "message",
-                        "label": "ไม่ถูก",
-                        "text": "ได้รับคำตอบไม่ถูกต้องในเรื่องค่าธรรมเนียมการศึกษาสาขาคอมพิวเตอร์ธุรกิจ"
+                        "label": "ไม่ใช่",
+                        "text": "ไม่ช่วยตอบคำถามในเรื่องค่าธรรมเนียมการศึกษาสาขาคอมพิวเตอร์ธุรกิจ"
                     }
                 ],
-                "text": "คุณได้รับคำตอบถูกต้องไหมคะ?"
+                "text": "น้องบ็อตช่วยตอบคำถามของท่านใช่หรือไม่?"
             }
         };
 
         //ประกาศตัวแปร payload เพื่อแสดงออกหน้าจอ
         let payload่json = new Payload(`LINE`, payload, { sendAsMessage: true });
         let text = request.body.queryResult.queryText;
-        let c = 'ได้รับคำตอบถูกต้องในเรื่องค่าธรรมเนียมการศึกษาสาขาคอมพิวเตอร์ธุรกิจ';
-        let b = 'ได้รับคำตอบไม่ถูกต้องในเรื่องค่าธรรมเนียมการศึกษาสาขาคอมพิวเตอร์ธุรกิจ';
+        let c = 'ช่วยตอบคำถามในเรื่องค่าธรรมเนียมการศึกษาสาขาคอมพิวเตอร์ธุรกิจ';
+        let b = 'ไม่ช่วยตอบคำถามในเรื่องค่าธรรมเนียมการศึกษาสาขาคอมพิวเตอร์ธุรกิจ';
 
         //Count_Accuracy
         let Count_Accuracy = admin.firestore().collection("Count_Accuracy").doc(date.toLocaleDateString()).collection("ค่าธรรมเนียมการศึกษา").doc("คณะวิทยาการจัดการ").collection("Subject").doc("คอมพิวเตอร์ธุรกิจ");
         Count_Accuracy.get().then(function (docs) {
             if (!docs.exists) {
                 Count_Accuracy.set({
-                    ถูก: 0,
-                    ไม่ถูก: 0
+                    ใช่: 0,
+                    ไม่ใช่: 0
                 });
             }
 
@@ -8985,13 +9103,14 @@ exports.dialogflowFirebaseFulfillment = functions.https.onRequest((request, resp
 
 
         if (text === c) {
-            agent.add("ขอบคุณค่ะ");
+            agent.add("กรุณากดดาวเพื่อประเมินความพึงพอใจหลังการใช้ระบบ")
+            agent.add(pay1);
             db.runTransaction(t => {
                 return t.get(Count_Accuracy).then(doc => {
-                    let newcount = doc.data().ถูก + 1;
+                    let newcount = doc.data().ใช่ + 1;
 
                     t.update(Count_Accuracy, {
-                        ถูก: newcount,
+                        ใช่: newcount,
 
                     });
                 });
@@ -9006,10 +9125,10 @@ exports.dialogflowFirebaseFulfillment = functions.https.onRequest((request, resp
             agent.add("กรุณากดปุ่มติดต่อเจ้าหน้าที่");
             db.runTransaction(t => {
                 return t.get(Count_Accuracy).then(doc => {
-                    let newcount = doc.data().ไม่ถูก + 1;
+                    let newcount = doc.data().ไม่ใช่ + 1;
 
                     t.update(Count_Accuracy, {
-                        ไม่ถูก: newcount,
+                        ไม่ใช่: newcount,
 
                     });
                 });
@@ -9073,32 +9192,32 @@ exports.dialogflowFirebaseFulfillment = functions.https.onRequest((request, resp
                 "actions": [
                     {
                         "type": "message",
-                        "label": "ถูก",
-                        "text": "ได้รับคำตอบถูกต้องในเรื่องค่าธรรมเนียมการศึกษาสาขาการจัดการ"
+                        "label": "ใช่",
+                        "text": "ช่วยตอบคำถามในเรื่องค่าธรรมเนียมการศึกษาสาขาการจัดการ"
                     },
                     {
                         "type": "message",
-                        "label": "ไม่ถูก",
-                        "text": "ได้รับคำตอบไม่ถูกต้องในเรื่องค่าธรรมเนียมการศึกษาสาขาการจัดการ"
+                        "label": "ไม่ใช่",
+                        "text": "ไม่ช่วยตอบคำถามในเรื่องค่าธรรมเนียมการศึกษาสาขาการจัดการ"
                     }
                 ],
-                "text": "คุณได้รับคำตอบถูกต้องไหมคะ?"
+                "text": "น้องบ็อตช่วยตอบคำถามของท่านใช่หรือไม่?"
             }
         };
 
         //ประกาศตัวแปร payload เพื่อแสดงออกหน้าจอ
         let payload่json = new Payload(`LINE`, payload, { sendAsMessage: true });
         let text = request.body.queryResult.queryText;
-        let c = 'ได้รับคำตอบถูกต้องในเรื่องค่าธรรมเนียมการศึกษาสาขาการจัดการ';
-        let b = 'ได้รับคำตอบไม่ถูกต้องในเรื่องค่าธรรมเนียมการศึกษาสาขาการจัดการ';
+        let c = 'ช่วยตอบคำถามในเรื่องค่าธรรมเนียมการศึกษาสาขาการจัดการ';
+        let b = 'ไม่ช่วยตอบคำถามในเรื่องค่าธรรมเนียมการศึกษาสาขาการจัดการ';
 
         //Count_Accuracy
         let Count_Accuracy = admin.firestore().collection("Count_Accuracy").doc(date.toLocaleDateString()).collection("ค่าธรรมเนียมการศึกษา").doc("คณะวิทยาการจัดการ").collection("Subject").doc("การจัดการ");
         Count_Accuracy.get().then(function (docs) {
             if (!docs.exists) {
                 Count_Accuracy.set({
-                    ถูก: 0,
-                    ไม่ถูก: 0
+                    ใช่: 0,
+                    ไม่ใช่: 0
                 });
             }
 
@@ -9106,13 +9225,14 @@ exports.dialogflowFirebaseFulfillment = functions.https.onRequest((request, resp
 
 
         if (text === c) {
-            agent.add("ขอบคุณค่ะ");
+            agent.add("กรุณากดดาวเพื่อประเมินความพึงพอใจหลังการใช้ระบบ")
+            agent.add(pay1);
             db.runTransaction(t => {
                 return t.get(Count_Accuracy).then(doc => {
-                    let newcount = doc.data().ถูก + 1;
+                    let newcount = doc.data().ใช่ + 1;
 
                     t.update(Count_Accuracy, {
-                        ถูก: newcount,
+                        ใช่: newcount,
 
                     });
                 });
@@ -9127,10 +9247,10 @@ exports.dialogflowFirebaseFulfillment = functions.https.onRequest((request, resp
             agent.add("กรุณากดปุ่มติดต่อเจ้าหน้าที่");
             db.runTransaction(t => {
                 return t.get(Count_Accuracy).then(doc => {
-                    let newcount = doc.data().ไม่ถูก + 1;
+                    let newcount = doc.data().ไม่ใช่ + 1;
 
                     t.update(Count_Accuracy, {
-                        ไม่ถูก: newcount,
+                        ไม่ใช่: newcount,
 
                     });
                 });
@@ -9194,32 +9314,32 @@ exports.dialogflowFirebaseFulfillment = functions.https.onRequest((request, resp
                 "actions": [
                     {
                         "type": "message",
-                        "label": "ถูก",
-                        "text": "ได้รับคำตอบถูกต้องในเรื่องค่าธรรมเนียมการศึกษาสาขานิเทศศาสตร์"
+                        "label": "ใช่",
+                        "text": "ช่วยตอบคำถามในเรื่องค่าธรรมเนียมการศึกษาสาขานิเทศศาสตร์"
                     },
                     {
                         "type": "message",
-                        "label": "ไม่ถูก",
-                        "text": "ได้รับคำตอบไม่ถูกต้องในเรื่องค่าธรรมเนียมการศึกษาสาขานิเทศศาสตร์"
+                        "label": "ไม่ใช่",
+                        "text": "ไม่ช่วยตอบคำถามในเรื่องค่าธรรมเนียมการศึกษาสาขานิเทศศาสตร์"
                     }
                 ],
-                "text": "คุณได้รับคำตอบถูกต้องไหมคะ?"
+                "text": "น้องบ็อตช่วยตอบคำถามของท่านใช่หรือไม่?"
             }
         };
 
         //ประกาศตัวแปร payload เพื่อแสดงออกหน้าจอ
         let payload่json = new Payload(`LINE`, payload, { sendAsMessage: true });
         let text = request.body.queryResult.queryText;
-        let c = 'ได้รับคำตอบถูกต้องในเรื่องค่าธรรมเนียมการศึกษาสาขานิเทศศาสตร์';
-        let b = 'ได้รับคำตอบไม่ถูกต้องในเรื่องค่าธรรมเนียมการศึกษาสาขานิเทศศาสตร์';
+        let c = 'ช่วยตอบคำถามในเรื่องค่าธรรมเนียมการศึกษาสาขานิเทศศาสตร์';
+        let b = 'ไม่ช่วยตอบคำถามในเรื่องค่าธรรมเนียมการศึกษาสาขานิเทศศาสตร์';
 
         //Count_Accuracy
         let Count_Accuracy = admin.firestore().collection("Count_Accuracy").doc(date.toLocaleDateString()).collection("ค่าธรรมเนียมการศึกษา").doc("คณะวิทยาการจัดการ").collection("Subject").doc("นิเทศศาสตร์");
         Count_Accuracy.get().then(function (docs) {
             if (!docs.exists) {
                 Count_Accuracy.set({
-                    ถูก: 0,
-                    ไม่ถูก: 0
+                    ใช่: 0,
+                    ไม่ใช่: 0
                 });
             }
 
@@ -9227,13 +9347,14 @@ exports.dialogflowFirebaseFulfillment = functions.https.onRequest((request, resp
 
 
         if (text === c) {
-            agent.add("ขอบคุณค่ะ");
+            agent.add("กรุณากดดาวเพื่อประเมินความพึงพอใจหลังการใช้ระบบ")
+            agent.add(pay1);
             db.runTransaction(t => {
                 return t.get(Count_Accuracy).then(doc => {
-                    let newcount = doc.data().ถูก + 1;
+                    let newcount = doc.data().ใช่ + 1;
 
                     t.update(Count_Accuracy, {
-                        ถูก: newcount,
+                        ใช่: newcount,
 
                     });
                 });
@@ -9248,10 +9369,10 @@ exports.dialogflowFirebaseFulfillment = functions.https.onRequest((request, resp
             agent.add("กรุณากดปุ่มติดต่อเจ้าหน้าที่");
             db.runTransaction(t => {
                 return t.get(Count_Accuracy).then(doc => {
-                    let newcount = doc.data().ไม่ถูก + 1;
+                    let newcount = doc.data().ไม่ใช่ + 1;
 
                     t.update(Count_Accuracy, {
-                        ไม่ถูก: newcount,
+                        ไม่ใช่: newcount,
 
                     });
                 });
@@ -9315,32 +9436,32 @@ exports.dialogflowFirebaseFulfillment = functions.https.onRequest((request, resp
                 "actions": [
                     {
                         "type": "message",
-                        "label": "ถูก",
-                        "text": "ได้รับคำตอบถูกต้องในเรื่องค่าธรรมเนียมการศึกษาสาขาการท่องเที่ยว"
+                        "label": "ใช่",
+                        "text": "ช่วยตอบคำถามในเรื่องค่าธรรมเนียมการศึกษาสาขาการท่องเที่ยว"
                     },
                     {
                         "type": "message",
-                        "label": "ไม่ถูก",
-                        "text": "ได้รับคำตอบไม่ถูกต้องในเรื่องค่าธรรมเนียมการศึกษาสาขาการท่องเที่ยว"
+                        "label": "ไม่ใช่",
+                        "text": "ไม่ช่วยตอบคำถามในเรื่องค่าธรรมเนียมการศึกษาสาขาการท่องเที่ยว"
                     }
                 ],
-                "text": "คุณได้รับคำตอบถูกต้องไหมคะ?"
+                "text": "น้องบ็อตช่วยตอบคำถามของท่านใช่หรือไม่?"
             }
         };
 
         //ประกาศตัวแปร payload เพื่อแสดงออกหน้าจอ
         let payload่json = new Payload(`LINE`, payload, { sendAsMessage: true });
         let text = request.body.queryResult.queryText;
-        let c = 'ได้รับคำตอบถูกต้องในเรื่องค่าธรรมเนียมการศึกษาสาขาการท่องเที่ยว';
-        let b = 'ได้รับคำตอบไม่ถูกต้องในเรื่องค่าธรรมเนียมการศึกษาสาขาการท่องเที่ยว';
+        let c = 'ช่วยตอบคำถามในเรื่องค่าธรรมเนียมการศึกษาสาขาการท่องเที่ยว';
+        let b = 'ไม่ช่วยตอบคำถามในเรื่องค่าธรรมเนียมการศึกษาสาขาการท่องเที่ยว';
 
         //Count_Accuracy
         let Count_Accuracy = admin.firestore().collection("Count_Accuracy").doc(date.toLocaleDateString()).collection("ค่าธรรมเนียมการศึกษา").doc("คณะวิทยาการจัดการ").collection("Subject").doc("การท่องเที่ยว");
         Count_Accuracy.get().then(function (docs) {
             if (!docs.exists) {
                 Count_Accuracy.set({
-                    ถูก: 0,
-                    ไม่ถูก: 0
+                    ใช่: 0,
+                    ไม่ใช่: 0
                 });
             }
 
@@ -9348,13 +9469,14 @@ exports.dialogflowFirebaseFulfillment = functions.https.onRequest((request, resp
 
 
         if (text === c) {
-            agent.add("ขอบคุณค่ะ");
+            agent.add("กรุณากดดาวเพื่อประเมินความพึงพอใจหลังการใช้ระบบ")
+            agent.add(pay1);
             db.runTransaction(t => {
                 return t.get(Count_Accuracy).then(doc => {
-                    let newcount = doc.data().ถูก + 1;
+                    let newcount = doc.data().ใช่ + 1;
 
                     t.update(Count_Accuracy, {
-                        ถูก: newcount,
+                        ใช่: newcount,
 
                     });
                 });
@@ -9369,10 +9491,10 @@ exports.dialogflowFirebaseFulfillment = functions.https.onRequest((request, resp
             agent.add("กรุณากดปุ่มติดต่อเจ้าหน้าที่");
             db.runTransaction(t => {
                 return t.get(Count_Accuracy).then(doc => {
-                    let newcount = doc.data().ไม่ถูก + 1;
+                    let newcount = doc.data().ไม่ใช่ + 1;
 
                     t.update(Count_Accuracy, {
-                        ไม่ถูก: newcount,
+                        ไม่ใช่: newcount,
 
                     });
                 });
@@ -9438,32 +9560,32 @@ exports.dialogflowFirebaseFulfillment = functions.https.onRequest((request, resp
                 "actions": [
                     {
                         "type": "message",
-                        "label": "ถูก",
-                        "text": "ได้รับคำตอบถูกต้องในเรื่องค่าธรรมเนียมการศึกษาสาขาอาชีวอนามัยและความปลอดภัย"
+                        "label": "ใช่",
+                        "text": "ช่วยตอบคำถามในเรื่องค่าธรรมเนียมการศึกษาสาขาอาชีวอนามัยและความปลอดภัย"
                     },
                     {
                         "type": "message",
-                        "label": "ไม่ถูก",
-                        "text": "ได้รับคำตอบไม่ถูกต้องในเรื่องค่าธรรมเนียมการศึกษาสาขาอาชีวอนามัยและความปลอดภัย"
+                        "label": "ไม่ใช่",
+                        "text": "ไม่ช่วยตอบคำถามในเรื่องค่าธรรมเนียมการศึกษาสาขาอาชีวอนามัยและความปลอดภัย"
                     }
                 ],
-                "text": "คุณได้รับคำตอบถูกต้องไหมคะ?"
+                "text": "น้องบ็อตช่วยตอบคำถามของท่านใช่หรือไม่?"
             }
         };
 
         //ประกาศตัวแปร payload เพื่อแสดงออกหน้าจอ
         let payload่json = new Payload(`LINE`, payload, { sendAsMessage: true });
         let text = request.body.queryResult.queryText;
-        let c = 'ได้รับคำตอบถูกต้องในเรื่องค่าธรรมเนียมการศึกษาสาขาอาชีวอนามัยและความปลอดภัย';
-        let b = 'ได้รับคำตอบไม่ถูกต้องในเรื่องค่าธรรมเนียมการศึกษาสาขาอาชีวอนามัยและความปลอดภัย';
+        let c = 'ช่วยตอบคำถามในเรื่องค่าธรรมเนียมการศึกษาสาขาอาชีวอนามัยและความปลอดภัย';
+        let b = 'ไม่ช่วยตอบคำถามในเรื่องค่าธรรมเนียมการศึกษาสาขาอาชีวอนามัยและความปลอดภัย';
 
         //Count_Accuracy
         let Count_Accuracy = admin.firestore().collection("Count_Accuracy").doc(date.toLocaleDateString()).collection("ค่าธรรมเนียมการศึกษา").doc("คณะวิทยาศาสตร์และเทคโนโลยี").collection("Subject").doc("อาชีวอนามัยและความปลอดภัย");
         Count_Accuracy.get().then(function (docs) {
             if (!docs.exists) {
                 Count_Accuracy.set({
-                    ถูก: 0,
-                    ไม่ถูก: 0
+                    ใช่: 0,
+                    ไม่ใช่: 0
                 });
             }
 
@@ -9471,13 +9593,14 @@ exports.dialogflowFirebaseFulfillment = functions.https.onRequest((request, resp
 
 
         if (text === c) {
-            agent.add("ขอบคุณค่ะ");
+            agent.add("กรุณากดดาวเพื่อประเมินความพึงพอใจหลังการใช้ระบบ")
+            agent.add(pay1);
             db.runTransaction(t => {
                 return t.get(Count_Accuracy).then(doc => {
-                    let newcount = doc.data().ถูก + 1;
+                    let newcount = doc.data().ใช่ + 1;
 
                     t.update(Count_Accuracy, {
-                        ถูก: newcount,
+                        ใช่: newcount,
 
                     });
                 });
@@ -9492,10 +9615,10 @@ exports.dialogflowFirebaseFulfillment = functions.https.onRequest((request, resp
             agent.add("กรุณากดปุ่มติดต่อเจ้าหน้าที่");
             db.runTransaction(t => {
                 return t.get(Count_Accuracy).then(doc => {
-                    let newcount = doc.data().ไม่ถูก + 1;
+                    let newcount = doc.data().ไม่ใช่ + 1;
 
                     t.update(Count_Accuracy, {
-                        ไม่ถูก: newcount,
+                        ไม่ใช่: newcount,
 
                     });
                 });
@@ -9559,32 +9682,32 @@ exports.dialogflowFirebaseFulfillment = functions.https.onRequest((request, resp
                 "actions": [
                     {
                         "type": "message",
-                        "label": "ถูก",
-                        "text": "ได้รับคำตอบถูกต้องในเรื่องค่าธรรมเนียมการศึกษาสาขาวิทยาศาสตร์สิ่งแวดล้อม"
+                        "label": "ใช่",
+                        "text": "ช่วยตอบคำถามในเรื่องค่าธรรมเนียมการศึกษาสาขาวิทยาศาสตร์สิ่งแวดล้อม"
                     },
                     {
                         "type": "message",
-                        "label": "ไม่ถูก",
-                        "text": "ได้รับคำตอบไม่ถูกต้องในเรื่องค่าธรรมเนียมการศึกษาสาขาวิทยาศาสตร์สิ่งแวดล้อม"
+                        "label": "ไม่ใช่",
+                        "text": "ไม่ช่วยตอบคำถามในเรื่องค่าธรรมเนียมการศึกษาสาขาวิทยาศาสตร์สิ่งแวดล้อม"
                     }
                 ],
-                "text": "คุณได้รับคำตอบถูกต้องไหมคะ?"
+                "text": "น้องบ็อตช่วยตอบคำถามของท่านใช่หรือไม่?"
             }
         };
 
         //ประกาศตัวแปร payload เพื่อแสดงออกหน้าจอ
         let payload่json = new Payload(`LINE`, payload, { sendAsMessage: true });
         let text = request.body.queryResult.queryText;
-        let c = 'ได้รับคำตอบถูกต้องในเรื่องค่าธรรมเนียมการศึกษาสาขาวิทยาศาสตร์สิ่งแวดล้อม';
-        let b = 'ได้รับคำตอบไม่ถูกต้องในเรื่องค่าธรรมเนียมการศึกษาสาขาวิทยาศาสตร์สิ่งแวดล้อม';
+        let c = 'ช่วยตอบคำถามในเรื่องค่าธรรมเนียมการศึกษาสาขาวิทยาศาสตร์สิ่งแวดล้อม';
+        let b = 'ไม่ช่วยตอบคำถามในเรื่องค่าธรรมเนียมการศึกษาสาขาวิทยาศาสตร์สิ่งแวดล้อม';
 
         //Count_Accuracy
         let Count_Accuracy = admin.firestore().collection("Count_Accuracy").doc(date.toLocaleDateString()).collection("ค่าธรรมเนียมการศึกษา").doc("คณะวิทยาศาสตร์และเทคโนโลยี").collection("Subject").doc("วิทยาศาสตร์สิ่งแวดล้อม");
         Count_Accuracy.get().then(function (docs) {
             if (!docs.exists) {
                 Count_Accuracy.set({
-                    ถูก: 0,
-                    ไม่ถูก: 0
+                    ใช่: 0,
+                    ไม่ใช่: 0
                 });
             }
 
@@ -9592,13 +9715,14 @@ exports.dialogflowFirebaseFulfillment = functions.https.onRequest((request, resp
 
 
         if (text === c) {
-            agent.add("ขอบคุณค่ะ");
+            agent.add("กรุณากดดาวเพื่อประเมินความพึงพอใจหลังการใช้ระบบ")
+            agent.add(pay1);
             db.runTransaction(t => {
                 return t.get(Count_Accuracy).then(doc => {
-                    let newcount = doc.data().ถูก + 1;
+                    let newcount = doc.data().ใช่ + 1;
 
                     t.update(Count_Accuracy, {
-                        ถูก: newcount,
+                        ใช่: newcount,
 
                     });
                 });
@@ -9613,10 +9737,10 @@ exports.dialogflowFirebaseFulfillment = functions.https.onRequest((request, resp
             agent.add("กรุณากดปุ่มติดต่อเจ้าหน้าที่");
             db.runTransaction(t => {
                 return t.get(Count_Accuracy).then(doc => {
-                    let newcount = doc.data().ไม่ถูก + 1;
+                    let newcount = doc.data().ไม่ใช่ + 1;
 
                     t.update(Count_Accuracy, {
-                        ไม่ถูก: newcount,
+                        ไม่ใช่: newcount,
 
                     });
                 });
@@ -9680,32 +9804,32 @@ exports.dialogflowFirebaseFulfillment = functions.https.onRequest((request, resp
                 "actions": [
                     {
                         "type": "message",
-                        "label": "ถูก",
-                        "text": "ได้รับคำตอบถูกต้องในเรื่องค่าธรรมเนียมการศึกษาสาขาเทคโนโลยีสารสนเทศ"
+                        "label": "ใช่",
+                        "text": "ช่วยตอบคำถามในเรื่องค่าธรรมเนียมการศึกษาสาขาเทคโนโลยีสารสนเทศ"
                     },
                     {
                         "type": "message",
-                        "label": "ไม่ถูก",
-                        "text": "ได้รับคำตอบไม่ถูกต้องในเรื่องค่าธรรมเนียมการศึกษาสาขาเทคโนโลยีสารสนเทศ"
+                        "label": "ไม่ใช่",
+                        "text": "ไม่ช่วยตอบคำถามในเรื่องค่าธรรมเนียมการศึกษาสาขาเทคโนโลยีสารสนเทศ"
                     }
                 ],
-                "text": "คุณได้รับคำตอบถูกต้องไหมคะ?"
+                "text": "น้องบ็อตช่วยตอบคำถามของท่านใช่หรือไม่?"
             }
         };
 
         //ประกาศตัวแปร payload เพื่อแสดงออกหน้าจอ
         let payload่json = new Payload(`LINE`, payload, { sendAsMessage: true });
         let text = request.body.queryResult.queryText;
-        let c = 'ได้รับคำตอบถูกต้องในเรื่องค่าธรรมเนียมการศึกษาสาขาเทคโนโลยีสารสนเทศ';
-        let b = 'ได้รับคำตอบไม่ถูกต้องในเรื่องค่าธรรมเนียมการศึกษาสาขาเทคโนโลยีสารสนเทศ';
+        let c = 'ช่วยตอบคำถามในเรื่องค่าธรรมเนียมการศึกษาสาขาเทคโนโลยีสารสนเทศ';
+        let b = 'ไม่ช่วยตอบคำถามในเรื่องค่าธรรมเนียมการศึกษาสาขาเทคโนโลยีสารสนเทศ';
 
         //Count_Accuracy
         let Count_Accuracy = admin.firestore().collection("Count_Accuracy").doc(date.toLocaleDateString()).collection("ค่าธรรมเนียมการศึกษา").doc("คณะวิทยาศาสตร์และเทคโนโลยี").collection("Subject").doc("เทคโนโลยีสารสนเทศ");
         Count_Accuracy.get().then(function (docs) {
             if (!docs.exists) {
                 Count_Accuracy.set({
-                    ถูก: 0,
-                    ไม่ถูก: 0
+                    ใช่: 0,
+                    ไม่ใช่: 0
                 });
             }
 
@@ -9713,13 +9837,14 @@ exports.dialogflowFirebaseFulfillment = functions.https.onRequest((request, resp
 
 
         if (text === c) {
-            agent.add("ขอบคุณค่ะ");
+            agent.add("กรุณากดดาวเพื่อประเมินความพึงพอใจหลังการใช้ระบบ")
+            agent.add(pay1);
             db.runTransaction(t => {
                 return t.get(Count_Accuracy).then(doc => {
-                    let newcount = doc.data().ถูก + 1;
+                    let newcount = doc.data().ใช่ + 1;
 
                     t.update(Count_Accuracy, {
-                        ถูก: newcount,
+                        ใช่: newcount,
 
                     });
                 });
@@ -9734,10 +9859,10 @@ exports.dialogflowFirebaseFulfillment = functions.https.onRequest((request, resp
             agent.add("กรุณากดปุ่มติดต่อเจ้าหน้าที่");
             db.runTransaction(t => {
                 return t.get(Count_Accuracy).then(doc => {
-                    let newcount = doc.data().ไม่ถูก + 1;
+                    let newcount = doc.data().ไม่ใช่ + 1;
 
                     t.update(Count_Accuracy, {
-                        ไม่ถูก: newcount,
+                        ไม่ใช่: newcount,
 
                     });
                 });
@@ -9801,32 +9926,32 @@ exports.dialogflowFirebaseFulfillment = functions.https.onRequest((request, resp
                 "actions": [
                     {
                         "type": "message",
-                        "label": "ถูก",
-                        "text": "ได้รับคำตอบถูกต้องในเรื่องค่าธรรมเนียมการศึกษาสาขาการอาหารและธุรกิจบริการ"
+                        "label": "ใช่",
+                        "text": "ช่วยตอบคำถามในเรื่องค่าธรรมเนียมการศึกษาสาขาการอาหารและธุรกิจบริการ"
                     },
                     {
                         "type": "message",
-                        "label": "ไม่ถูก",
-                        "text": "ได้รับคำตอบไม่ถูกต้องในเรื่องค่าธรรมเนียมการศึกษาสาขาการอาหารและธุรกิจบริการ"
+                        "label": "ไม่ใช่",
+                        "text": "ไม่ช่วยตอบคำถามในเรื่องค่าธรรมเนียมการศึกษาสาขาการอาหารและธุรกิจบริการ"
                     }
                 ],
-                "text": "คุณได้รับคำตอบถูกต้องไหมคะ?"
+                "text": "น้องบ็อตช่วยตอบคำถามของท่านใช่หรือไม่?"
             }
         };
 
         //ประกาศตัวแปร payload เพื่อแสดงออกหน้าจอ
         let payload่json = new Payload(`LINE`, payload, { sendAsMessage: true });
         let text = request.body.queryResult.queryText;
-        let c = 'ได้รับคำตอบถูกต้องในเรื่องค่าธรรมเนียมการศึกษาสาขาการอาหารและธุรกิจบริการ';
-        let b = 'ได้รับคำตอบไม่ถูกต้องในเรื่องค่าธรรมเนียมการศึกษาสาขาการอาหารและธุรกิจบริการ';
+        let c = 'ช่วยตอบคำถามในเรื่องค่าธรรมเนียมการศึกษาสาขาการอาหารและธุรกิจบริการ';
+        let b = 'ไม่ช่วยตอบคำถามในเรื่องค่าธรรมเนียมการศึกษาสาขาการอาหารและธุรกิจบริการ';
 
         //Count_Accuracy
         let Count_Accuracy = admin.firestore().collection("Count_Accuracy").doc(date.toLocaleDateString()).collection("ค่าธรรมเนียมการศึกษา").doc("คณะวิทยาศาสตร์และเทคโนโลยี").collection("Subject").doc("การอาหารและธุรกิจบริการ");
         Count_Accuracy.get().then(function (docs) {
             if (!docs.exists) {
                 Count_Accuracy.set({
-                    ถูก: 0,
-                    ไม่ถูก: 0
+                    ใช่: 0,
+                    ไม่ใช่: 0
                 });
             }
 
@@ -9834,13 +9959,14 @@ exports.dialogflowFirebaseFulfillment = functions.https.onRequest((request, resp
 
 
         if (text === c) {
-            agent.add("ขอบคุณค่ะ");
+            agent.add("กรุณากดดาวเพื่อประเมินความพึงพอใจหลังการใช้ระบบ")
+            agent.add(pay1);
             db.runTransaction(t => {
                 return t.get(Count_Accuracy).then(doc => {
-                    let newcount = doc.data().ถูก + 1;
+                    let newcount = doc.data().ใช่ + 1;
 
                     t.update(Count_Accuracy, {
-                        ถูก: newcount,
+                        ใช่: newcount,
 
                     });
                 });
@@ -9855,10 +9981,10 @@ exports.dialogflowFirebaseFulfillment = functions.https.onRequest((request, resp
             agent.add("กรุณากดปุ่มติดต่อเจ้าหน้าที่");
             db.runTransaction(t => {
                 return t.get(Count_Accuracy).then(doc => {
-                    let newcount = doc.data().ไม่ถูก + 1;
+                    let newcount = doc.data().ไม่ใช่ + 1;
 
                     t.update(Count_Accuracy, {
-                        ไม่ถูก: newcount,
+                        ไม่ใช่: newcount,
 
                     });
                 });
@@ -9921,32 +10047,32 @@ exports.dialogflowFirebaseFulfillment = functions.https.onRequest((request, resp
                 "actions": [
                     {
                         "type": "message",
-                        "label": "ถูก",
-                        "text": "ได้รับคำตอบถูกต้องในเรื่องค่าธรรมเนียมการศึกษาสาขาเทคโนโลยีการเกษตร"
+                        "label": "ใช่",
+                        "text": "ช่วยตอบคำถามในเรื่องค่าธรรมเนียมการศึกษาสาขาเทคโนโลยีการเกษตร"
                     },
                     {
                         "type": "message",
-                        "label": "ไม่ถูก",
-                        "text": "ได้รับคำตอบไม่ถูกต้องในเรื่องค่าธรรมเนียมการศึกษาสาขาเทคโนโลยีการเกษตร"
+                        "label": "ไม่ใช่",
+                        "text": "ไม่ช่วยตอบคำถามในเรื่องค่าธรรมเนียมการศึกษาสาขาเทคโนโลยีการเกษตร"
                     }
                 ],
-                "text": "คุณได้รับคำตอบถูกต้องไหมคะ?"
+                "text": "น้องบ็อตช่วยตอบคำถามของท่านใช่หรือไม่?"
             }
         };
 
         //ประกาศตัวแปร payload เพื่อแสดงออกหน้าจอ
         let payload่json = new Payload(`LINE`, payload, { sendAsMessage: true });
         let text = request.body.queryResult.queryText;
-        let c = 'ได้รับคำตอบถูกต้องในเรื่องค่าธรรมเนียมการศึกษาสาขาเทคโนโลยีการเกษตร';
-        let b = 'ได้รับคำตอบไม่ถูกต้องในเรื่องค่าธรรมเนียมการศึกษาสาขาเทคโนโลยีการเกษตร';
+        let c = 'ช่วยตอบคำถามในเรื่องค่าธรรมเนียมการศึกษาสาขาเทคโนโลยีการเกษตร';
+        let b = 'ไม่ช่วยตอบคำถามในเรื่องค่าธรรมเนียมการศึกษาสาขาเทคโนโลยีการเกษตร';
 
         //Count_Accuracy
         let Count_Accuracy = admin.firestore().collection("Count_Accuracy").doc(date.toLocaleDateString()).collection("ค่าธรรมเนียมการศึกษา").doc("คณะวิทยาศาสตร์และเทคโนโลยี").collection("Subject").doc("เทคโนโลยีการเกษตร");
         Count_Accuracy.get().then(function (docs) {
             if (!docs.exists) {
                 Count_Accuracy.set({
-                    ถูก: 0,
-                    ไม่ถูก: 0
+                    ใช่: 0,
+                    ไม่ใช่: 0
                 });
             }
 
@@ -9954,13 +10080,14 @@ exports.dialogflowFirebaseFulfillment = functions.https.onRequest((request, resp
 
 
         if (text === c) {
-            agent.add("ขอบคุณค่ะ");
+            agent.add("กรุณากดดาวเพื่อประเมินความพึงพอใจหลังการใช้ระบบ")
+            agent.add(pay1);
             db.runTransaction(t => {
                 return t.get(Count_Accuracy).then(doc => {
-                    let newcount = doc.data().ถูก + 1;
+                    let newcount = doc.data().ใช่ + 1;
 
                     t.update(Count_Accuracy, {
-                        ถูก: newcount,
+                        ใช่: newcount,
 
                     });
                 });
@@ -9975,10 +10102,10 @@ exports.dialogflowFirebaseFulfillment = functions.https.onRequest((request, resp
             agent.add("กรุณากดปุ่มติดต่อเจ้าหน้าที่");
             db.runTransaction(t => {
                 return t.get(Count_Accuracy).then(doc => {
-                    let newcount = doc.data().ไม่ถูก + 1;
+                    let newcount = doc.data().ไม่ใช่ + 1;
 
                     t.update(Count_Accuracy, {
-                        ไม่ถูก: newcount,
+                        ไม่ใช่: newcount,
 
                     });
                 });
@@ -10043,32 +10170,32 @@ exports.dialogflowFirebaseFulfillment = functions.https.onRequest((request, resp
                 "actions": [
                     {
                         "type": "message",
-                        "label": "ถูก",
-                        "text": "ได้รับคำตอบถูกต้องในเรื่องค่าธรรมเนียมการศึกษาสาขาวิชาเคมี"
+                        "label": "ใช่",
+                        "text": "ช่วยตอบคำถามในเรื่องค่าธรรมเนียมการศึกษาสาขาวิชาเคมี"
                     },
                     {
                         "type": "message",
-                        "label": "ไม่ถูก",
-                        "text": "ได้รับคำตอบไม่ถูกต้องในเรื่องค่าธรรมเนียมการศึกษาสาขาวิชาเคมี"
+                        "label": "ไม่ใช่",
+                        "text": "ไม่ช่วยตอบคำถามในเรื่องค่าธรรมเนียมการศึกษาสาขาวิชาเคมี"
                     }
                 ],
-                "text": "คุณได้รับคำตอบถูกต้องไหมคะ?"
+                "text": "น้องบ็อตช่วยตอบคำถามของท่านใช่หรือไม่?"
             }
         };
 
         //ประกาศตัวแปร payload เพื่อแสดงออกหน้าจอ
         let payload่json = new Payload(`LINE`, payload, { sendAsMessage: true });
         let text = request.body.queryResult.queryText;
-        let c = 'ได้รับคำตอบถูกต้องในเรื่องค่าธรรมเนียมการศึกษาสาขาวิชาเคมี';
-        let b = 'ได้รับคำตอบไม่ถูกต้องในเรื่องค่าธรรมเนียมการศึกษาสาขาวิชาเคมี';
+        let c = 'ช่วยตอบคำถามในเรื่องค่าธรรมเนียมการศึกษาสาขาวิชาเคมี';
+        let b = 'ไม่ช่วยตอบคำถามในเรื่องค่าธรรมเนียมการศึกษาสาขาวิชาเคมี';
 
         //Count_Accuracy
         let Count_Accuracy = admin.firestore().collection("Count_Accuracy").doc(date.toLocaleDateString()).collection("ค่าธรรมเนียมการศึกษา").doc("คณะวิทยาศาสตร์และเทคโนโลยี").collection("Subject").doc("วิชาเคมี");
         Count_Accuracy.get().then(function (docs) {
             if (!docs.exists) {
                 Count_Accuracy.set({
-                    ถูก: 0,
-                    ไม่ถูก: 0
+                    ใช่: 0,
+                    ไม่ใช่: 0
                 });
             }
 
@@ -10076,13 +10203,14 @@ exports.dialogflowFirebaseFulfillment = functions.https.onRequest((request, resp
 
 
         if (text === c) {
-            agent.add("ขอบคุณค่ะ");
+            agent.add("กรุณากดดาวเพื่อประเมินความพึงพอใจหลังการใช้ระบบ")
+            agent.add(pay1);
             db.runTransaction(t => {
                 return t.get(Count_Accuracy).then(doc => {
-                    let newcount = doc.data().ถูก + 1;
+                    let newcount = doc.data().ใช่ + 1;
 
                     t.update(Count_Accuracy, {
-                        ถูก: newcount,
+                        ใช่: newcount,
 
                     });
                 });
@@ -10097,10 +10225,10 @@ exports.dialogflowFirebaseFulfillment = functions.https.onRequest((request, resp
             agent.add("กรุณากดปุ่มติดต่อเจ้าหน้าที่");
             db.runTransaction(t => {
                 return t.get(Count_Accuracy).then(doc => {
-                    let newcount = doc.data().ไม่ถูก + 1;
+                    let newcount = doc.data().ไม่ใช่ + 1;
 
                     t.update(Count_Accuracy, {
-                        ไม่ถูก: newcount,
+                        ไม่ใช่: newcount,
 
                     });
                 });
@@ -10165,32 +10293,32 @@ exports.dialogflowFirebaseFulfillment = functions.https.onRequest((request, resp
                 "actions": [
                     {
                         "type": "message",
-                        "label": "ถูก",
-                        "text": "ได้รับคำตอบถูกต้องในเรื่องค่าธรรมเนียมการศึกษาสาขาชีววิทยาประยุกต์"
+                        "label": "ใช่",
+                        "text": "ช่วยตอบคำถามในเรื่องค่าธรรมเนียมการศึกษาสาขาชีววิทยาประยุกต์"
                     },
                     {
                         "type": "message",
-                        "label": "ไม่ถูก",
-                        "text": "ได้รับคำตอบไม่ถูกต้องในเรื่องค่าธรรมเนียมการศึกษาสาขาชีววิทยาประยุกต์"
+                        "label": "ไม่ใช่",
+                        "text": "ไม่ช่วยตอบคำถามในเรื่องค่าธรรมเนียมการศึกษาสาขาชีววิทยาประยุกต์"
                     }
                 ],
-                "text": "คุณได้รับคำตอบถูกต้องไหมคะ?"
+                "text": "น้องบ็อตช่วยตอบคำถามของท่านใช่หรือไม่?"
             }
         };
 
         //ประกาศตัวแปร payload เพื่อแสดงออกหน้าจอ
         let payload่json = new Payload(`LINE`, payload, { sendAsMessage: true });
         let text = request.body.queryResult.queryText;
-        let c = 'ได้รับคำตอบถูกต้องในเรื่องค่าธรรมเนียมการศึกษาสาขาชีววิทยาประยุกต์';
-        let b = 'ได้รับคำตอบไม่ถูกต้องในเรื่องค่าธรรมเนียมการศึกษาสาขาชีววิทยาประยุกต์';
+        let c = 'ช่วยตอบคำถามในเรื่องค่าธรรมเนียมการศึกษาสาขาชีววิทยาประยุกต์';
+        let b = 'ไม่ช่วยตอบคำถามในเรื่องค่าธรรมเนียมการศึกษาสาขาชีววิทยาประยุกต์';
 
         //Count_Accuracy
         let Count_Accuracy = admin.firestore().collection("Count_Accuracy").doc(date.toLocaleDateString()).collection("ค่าธรรมเนียมการศึกษา").doc("คณะวิทยาศาสตร์และเทคโนโลยี").collection("Subject").doc("ชีววิทยาประยุกต์");
         Count_Accuracy.get().then(function (docs) {
             if (!docs.exists) {
                 Count_Accuracy.set({
-                    ถูก: 0,
-                    ไม่ถูก: 0
+                    ใช่: 0,
+                    ไม่ใช่: 0
                 });
             }
 
@@ -10198,13 +10326,14 @@ exports.dialogflowFirebaseFulfillment = functions.https.onRequest((request, resp
 
 
         if (text === c) {
-            agent.add("ขอบคุณค่ะ");
+            agent.add("กรุณากดดาวเพื่อประเมินความพึงพอใจหลังการใช้ระบบ")
+            agent.add(pay1);
             db.runTransaction(t => {
                 return t.get(Count_Accuracy).then(doc => {
-                    let newcount = doc.data().ถูก + 1;
+                    let newcount = doc.data().ใช่ + 1;
 
                     t.update(Count_Accuracy, {
-                        ถูก: newcount,
+                        ใช่: newcount,
 
                     });
                 });
@@ -10219,10 +10348,10 @@ exports.dialogflowFirebaseFulfillment = functions.https.onRequest((request, resp
             agent.add("กรุณากดปุ่มติดต่อเจ้าหน้าที่");
             db.runTransaction(t => {
                 return t.get(Count_Accuracy).then(doc => {
-                    let newcount = doc.data().ไม่ถูก + 1;
+                    let newcount = doc.data().ไม่ใช่ + 1;
 
                     t.update(Count_Accuracy, {
-                        ไม่ถูก: newcount,
+                        ไม่ใช่: newcount,
 
                     });
                 });
@@ -10286,32 +10415,32 @@ exports.dialogflowFirebaseFulfillment = functions.https.onRequest((request, resp
                 "actions": [
                     {
                         "type": "message",
-                        "label": "ถูก",
-                        "text": "ได้รับคำตอบถูกต้องในเรื่องค่าธรรมเนียมการศึกษาสาขาฟิสิกส์ประยุกต์"
+                        "label": "ใช่",
+                        "text": "ช่วยตอบคำถามในเรื่องค่าธรรมเนียมการศึกษาสาขาฟิสิกส์ประยุกต์"
                     },
                     {
                         "type": "message",
-                        "label": "ไม่ถูก",
-                        "text": "ได้รับคำตอบไม่ถูกต้องในเรื่องค่าธรรมเนียมการศึกษาสาขาฟิสิกส์ประยุกต์"
+                        "label": "ไม่ใช่",
+                        "text": "ไม่ช่วยตอบคำถามในเรื่องค่าธรรมเนียมการศึกษาสาขาฟิสิกส์ประยุกต์"
                     }
                 ],
-                "text": "คุณได้รับคำตอบถูกต้องไหมคะ?"
+                "text": "น้องบ็อตช่วยตอบคำถามของท่านใช่หรือไม่?"
             }
         };
 
         //ประกาศตัวแปร payload เพื่อแสดงออกหน้าจอ
         let payload่json = new Payload(`LINE`, payload, { sendAsMessage: true });
         let text = request.body.queryResult.queryText;
-        let c = 'ได้รับคำตอบถูกต้องในเรื่องค่าธรรมเนียมการศึกษาสาขาฟิสิกส์ประยุกต์';
-        let b = 'ได้รับคำตอบไม่ถูกต้องในเรื่องค่าธรรมเนียมการศึกษาสาขาฟิสิกส์ประยุกต์';
+        let c = 'ช่วยตอบคำถามในเรื่องค่าธรรมเนียมการศึกษาสาขาฟิสิกส์ประยุกต์';
+        let b = 'ไม่ช่วยตอบคำถามในเรื่องค่าธรรมเนียมการศึกษาสาขาฟิสิกส์ประยุกต์';
 
         //Count_Accuracy
         let Count_Accuracy = admin.firestore().collection("Count_Accuracy").doc(date.toLocaleDateString()).collection("ค่าธรรมเนียมการศึกษา").doc("คณะวิทยาศาสตร์และเทคโนโลยี").collection("Subject").doc("ฟิสิกส์ประยุกต์");
         Count_Accuracy.get().then(function (docs) {
             if (!docs.exists) {
                 Count_Accuracy.set({
-                    ถูก: 0,
-                    ไม่ถูก: 0
+                    ใช่: 0,
+                    ไม่ใช่: 0
                 });
             }
 
@@ -10319,13 +10448,14 @@ exports.dialogflowFirebaseFulfillment = functions.https.onRequest((request, resp
 
 
         if (text === c) {
-            agent.add("ขอบคุณค่ะ");
+            agent.add("กรุณากดดาวเพื่อประเมินความพึงพอใจหลังการใช้ระบบ")
+            agent.add(pay1);
             db.runTransaction(t => {
                 return t.get(Count_Accuracy).then(doc => {
-                    let newcount = doc.data().ถูก + 1;
+                    let newcount = doc.data().ใช่ + 1;
 
                     t.update(Count_Accuracy, {
-                        ถูก: newcount,
+                        ใช่: newcount,
 
                     });
                 });
@@ -10340,10 +10470,10 @@ exports.dialogflowFirebaseFulfillment = functions.https.onRequest((request, resp
             agent.add("กรุณากดปุ่มติดต่อเจ้าหน้าที่");
             db.runTransaction(t => {
                 return t.get(Count_Accuracy).then(doc => {
-                    let newcount = doc.data().ไม่ถูก + 1;
+                    let newcount = doc.data().ไม่ใช่ + 1;
 
                     t.update(Count_Accuracy, {
-                        ไม่ถูก: newcount,
+                        ไม่ใช่: newcount,
 
                     });
                 });
@@ -10407,32 +10537,32 @@ exports.dialogflowFirebaseFulfillment = functions.https.onRequest((request, resp
                 "actions": [
                     {
                         "type": "message",
-                        "label": "ถูก",
-                        "text": "ได้รับคำตอบถูกต้องในเรื่องค่าธรรมเนียมการศึกษาสาขาวิทยาการคอมพิวเตอร์"
+                        "label": "ใช่",
+                        "text": "ช่วยตอบคำถามในเรื่องค่าธรรมเนียมการศึกษาสาขาวิทยาการคอมพิวเตอร์"
                     },
                     {
                         "type": "message",
-                        "label": "ไม่ถูก",
-                        "text": "ได้รับคำตอบไม่ถูกต้องในเรื่องค่าธรรมเนียมการศึกษาสาขาวิทยาการคอมพิวเตอร์"
+                        "label": "ไม่ใช่",
+                        "text": "ไม่ช่วยตอบคำถามในเรื่องค่าธรรมเนียมการศึกษาสาขาวิทยาการคอมพิวเตอร์"
                     }
                 ],
-                "text": "คุณได้รับคำตอบถูกต้องไหมคะ?"
+                "text": "น้องบ็อตช่วยตอบคำถามของท่านใช่หรือไม่?"
             }
         };
 
         //ประกาศตัวแปร payload เพื่อแสดงออกหน้าจอ
         let payload่json = new Payload(`LINE`, payload, { sendAsMessage: true });
         let text = request.body.queryResult.queryText;
-        let c = 'ได้รับคำตอบถูกต้องในเรื่องค่าธรรมเนียมการศึกษาสาขาวิทยาการคอมพิวเตอร์';
-        let b = 'ได้รับคำตอบไม่ถูกต้องในเรื่องค่าธรรมเนียมการศึกษาสาขาวิทยาการคอมพิวเตอร์';
+        let c = 'ช่วยตอบคำถามในเรื่องค่าธรรมเนียมการศึกษาสาขาวิทยาการคอมพิวเตอร์';
+        let b = 'ไม่ช่วยตอบคำถามในเรื่องค่าธรรมเนียมการศึกษาสาขาวิทยาการคอมพิวเตอร์';
 
         //Count_Accuracy
         let Count_Accuracy = admin.firestore().collection("Count_Accuracy").doc(date.toLocaleDateString()).collection("ค่าธรรมเนียมการศึกษา").doc("คณะวิทยาศาสตร์และเทคโนโลยี").collection("Subject").doc("วิทยาการคอมพิวเตอร์");
         Count_Accuracy.get().then(function (docs) {
             if (!docs.exists) {
                 Count_Accuracy.set({
-                    ถูก: 0,
-                    ไม่ถูก: 0
+                    ใช่: 0,
+                    ไม่ใช่: 0
                 });
             }
 
@@ -10440,13 +10570,14 @@ exports.dialogflowFirebaseFulfillment = functions.https.onRequest((request, resp
 
 
         if (text === c) {
-            agent.add("ขอบคุณค่ะ");
+            agent.add("กรุณากดดาวเพื่อประเมินความพึงพอใจหลังการใช้ระบบ")
+            agent.add(pay1);
             db.runTransaction(t => {
                 return t.get(Count_Accuracy).then(doc => {
-                    let newcount = doc.data().ถูก + 1;
+                    let newcount = doc.data().ใช่ + 1;
 
                     t.update(Count_Accuracy, {
-                        ถูก: newcount,
+                        ใช่: newcount,
 
                     });
                 });
@@ -10461,10 +10592,10 @@ exports.dialogflowFirebaseFulfillment = functions.https.onRequest((request, resp
             agent.add("กรุณากดปุ่มติดต่อเจ้าหน้าที่");
             db.runTransaction(t => {
                 return t.get(Count_Accuracy).then(doc => {
-                    let newcount = doc.data().ไม่ถูก + 1;
+                    let newcount = doc.data().ไม่ใช่ + 1;
 
                     t.update(Count_Accuracy, {
-                        ไม่ถูก: newcount,
+                        ไม่ใช่: newcount,
 
                     });
                 });
@@ -10527,32 +10658,32 @@ exports.dialogflowFirebaseFulfillment = functions.https.onRequest((request, resp
                 "actions": [
                     {
                         "type": "message",
-                        "label": "ถูก",
-                        "text": "ได้รับคำตอบถูกต้องในเรื่องค่าธรรมเนียมการศึกษาสาขาสาธารณสุขศาสตร์"
+                        "label": "ใช่",
+                        "text": "ช่วยตอบคำถามในเรื่องค่าธรรมเนียมการศึกษาสาขาสาธารณสุขศาสตร์"
                     },
                     {
                         "type": "message",
-                        "label": "ไม่ถูก",
-                        "text": "ได้รับคำตอบไม่ถูกต้องในเรื่องค่าธรรมเนียมการศึกษาสาขาสาธารณสุขศาสตร์"
+                        "label": "ไม่ใช่",
+                        "text": "ไม่ช่วยตอบคำถามในเรื่องค่าธรรมเนียมการศึกษาสาขาสาธารณสุขศาสตร์"
                     }
                 ],
-                "text": "คุณได้รับคำตอบถูกต้องไหมคะ?"
+                "text": "น้องบ็อตช่วยตอบคำถามของท่านใช่หรือไม่?"
             }
         };
 
         //ประกาศตัวแปร payload เพื่อแสดงออกหน้าจอ
         let payload่json = new Payload(`LINE`, payload, { sendAsMessage: true });
         let text = request.body.queryResult.queryText;
-        let c = 'ได้รับคำตอบถูกต้องในเรื่องค่าธรรมเนียมการศึกษาสาขาสาธารณสุขศาสตร์';
-        let b = 'ได้รับคำตอบไม่ถูกต้องในเรื่องค่าธรรมเนียมการศึกษาสาขาสาธารณสุขศาสตร์';
+        let c = 'ช่วยตอบคำถามในเรื่องค่าธรรมเนียมการศึกษาสาขาสาธารณสุขศาสตร์';
+        let b = 'ไม่ช่วยตอบคำถามในเรื่องค่าธรรมเนียมการศึกษาสาขาสาธารณสุขศาสตร์';
 
         //Count_Accuracy
         let Count_Accuracy = admin.firestore().collection("Count_Accuracy").doc(date.toLocaleDateString()).collection("ค่าธรรมเนียมการศึกษา").doc("คณะวิทยาศาสตร์และเทคโนโลยี").collection("Subject").doc("สาธารณสุขศาสตร์");
         Count_Accuracy.get().then(function (docs) {
             if (!docs.exists) {
                 Count_Accuracy.set({
-                    ถูก: 0,
-                    ไม่ถูก: 0
+                    ใช่: 0,
+                    ไม่ใช่: 0
                 });
             }
 
@@ -10560,13 +10691,14 @@ exports.dialogflowFirebaseFulfillment = functions.https.onRequest((request, resp
 
 
         if (text === c) {
-            agent.add("ขอบคุณค่ะ");
+            agent.add("กรุณากดดาวเพื่อประเมินความพึงพอใจหลังการใช้ระบบ")
+            agent.add(pay1);
             db.runTransaction(t => {
                 return t.get(Count_Accuracy).then(doc => {
-                    let newcount = doc.data().ถูก + 1;
+                    let newcount = doc.data().ใช่ + 1;
 
                     t.update(Count_Accuracy, {
-                        ถูก: newcount,
+                        ใช่: newcount,
 
                     });
                 });
@@ -10581,10 +10713,10 @@ exports.dialogflowFirebaseFulfillment = functions.https.onRequest((request, resp
             agent.add("กรุณากดปุ่มติดต่อเจ้าหน้าที่");
             db.runTransaction(t => {
                 return t.get(Count_Accuracy).then(doc => {
-                    let newcount = doc.data().ไม่ถูก + 1;
+                    let newcount = doc.data().ไม่ใช่ + 1;
 
                     t.update(Count_Accuracy, {
-                        ไม่ถูก: newcount,
+                        ไม่ใช่: newcount,
 
                     });
                 });
@@ -10648,32 +10780,32 @@ exports.dialogflowFirebaseFulfillment = functions.https.onRequest((request, resp
                 "actions": [
                     {
                         "type": "message",
-                        "label": "ถูก",
-                        "text": "ได้รับคำตอบถูกต้องในเรื่องค่าธรรมเนียมการศึกษาสาขาคณิตศาสตร์และสถิติประยุกต์"
+                        "label": "ใช่",
+                        "text": "ช่วยตอบคำถามในเรื่องค่าธรรมเนียมการศึกษาสาขาคณิตศาสตร์และสถิติประยุกต์"
                     },
                     {
                         "type": "message",
-                        "label": "ไม่ถูก",
-                        "text": "ได้รับคำตอบไม่ถูกต้องในเรื่องค่าธรรมเนียมการศึกษาสาขาคณิตศาสตร์และสถิติประยุกต์"
+                        "label": "ไม่ใช่",
+                        "text": "ไม่ช่วยตอบคำถามในเรื่องค่าธรรมเนียมการศึกษาสาขาคณิตศาสตร์และสถิติประยุกต์"
                     }
                 ],
-                "text": "คุณได้รับคำตอบถูกต้องไหมคะ?"
+                "text": "น้องบ็อตช่วยตอบคำถามของท่านใช่หรือไม่?"
             }
         };
 
         //ประกาศตัวแปร payload เพื่อแสดงออกหน้าจอ
         let payload่json = new Payload(`LINE`, payload, { sendAsMessage: true });
         let text = request.body.queryResult.queryText;
-        let c = 'ได้รับคำตอบถูกต้องในเรื่องค่าธรรมเนียมการศึกษาสาขาคณิตศาสตร์และสถิติประยุกต์';
-        let b = 'ได้รับคำตอบไม่ถูกต้องในเรื่องค่าธรรมเนียมการศึกษาสาขาคณิตศาสตร์และสถิติประยุกต์';
+        let c = 'ช่วยตอบคำถามในเรื่องค่าธรรมเนียมการศึกษาสาขาคณิตศาสตร์และสถิติประยุกต์';
+        let b = 'ไม่ช่วยตอบคำถามในเรื่องค่าธรรมเนียมการศึกษาสาขาคณิตศาสตร์และสถิติประยุกต์';
 
         //Count_Accuracy
         let Count_Accuracy = admin.firestore().collection("Count_Accuracy").doc(date.toLocaleDateString()).collection("ค่าธรรมเนียมการศึกษา").doc("คณะวิทยาศาสตร์และเทคโนโลยี").collection("Subject").doc("คณิตศาสตร์และสถิติประยุกต์");
         Count_Accuracy.get().then(function (docs) {
             if (!docs.exists) {
                 Count_Accuracy.set({
-                    ถูก: 0,
-                    ไม่ถูก: 0
+                    ใช่: 0,
+                    ไม่ใช่: 0
                 });
             }
 
@@ -10681,13 +10813,14 @@ exports.dialogflowFirebaseFulfillment = functions.https.onRequest((request, resp
 
 
         if (text === c) {
-            agent.add("ขอบคุณค่ะ");
+            agent.add("กรุณากดดาวเพื่อประเมินความพึงพอใจหลังการใช้ระบบ")
+            agent.add(pay1);
             db.runTransaction(t => {
                 return t.get(Count_Accuracy).then(doc => {
-                    let newcount = doc.data().ถูก + 1;
+                    let newcount = doc.data().ใช่ + 1;
 
                     t.update(Count_Accuracy, {
-                        ถูก: newcount,
+                        ใช่: newcount,
 
                     });
                 });
@@ -10702,10 +10835,10 @@ exports.dialogflowFirebaseFulfillment = functions.https.onRequest((request, resp
             agent.add("กรุณากดปุ่มติดต่อเจ้าหน้าที่");
             db.runTransaction(t => {
                 return t.get(Count_Accuracy).then(doc => {
-                    let newcount = doc.data().ไม่ถูก + 1;
+                    let newcount = doc.data().ไม่ใช่ + 1;
 
                     t.update(Count_Accuracy, {
-                        ไม่ถูก: newcount,
+                        ไม่ใช่: newcount,
 
                     });
                 });
@@ -10758,175 +10891,2847 @@ exports.dialogflowFirebaseFulfillment = functions.https.onRequest((request, resp
 
     }
 
-	function Contact_staff(agent) {
-      let text = request.body.queryResult.queryText;
-      agent.add(text);
-    }
-  
-  
-    function Default_Fallback_Intent(agent) {
-     
-		
+    function Contact_staff(agent) {
         let text = request.body.queryResult.queryText;
-      	let user_id = request.body.originalDetectIntentRequest.payload.data.source.userId;
-      
-      
-  		 
+        let user_id = request.body.originalDetectIntentRequest.payload.data.source.userId;
 
-     
+        db.collection("Notify").doc(user_id).set({
+            count: 1
+        });
+        agent.add("กำลังติดต่อเจ้าหน้าที่ให้นะคะกรุณาทิ้งคำถามที่ต้องการสอบถามไว้เลยค่ะ");
+
+    }
+
+
+
+    function Default_Fallback_Intent(agent) {
+
+        let text = request.body.queryResult.queryText;
+        let user_id = request.body.originalDetectIntentRequest.payload.data.source.userId;
         let c = 'หอพัก';
         //agent.add("Correct");
-        if (text.search(c) !== -1) {
-            agent.add("Correct");
-        } else {
-            agent.add();
-        }
+        //if (text.search(c) !== -1) {
+        //  agent.add("Correct");
+        //} else {
+        //  agent.add(user_id);
+        //}
+
+        admin.firestore().collection('Default_Fallback').doc('user_id').collection(user_id).add({
+            response: text
+        });
+
+
+        //return ข้อมูลคำตอบ 
+        return admin.firestore().collection('Notify').doc(user_id).get().then(function (doc) {
+            if (doc.exists) {
+                agent.add("รอเจ้าหน้าที่สักครู่นะคะ    ถ้าคุณต้องการที่จะใช้งานน้องบ๊อตกรุณา กด เมนูหลัก");
+            } else {
+                agent.add("ขอโทษค่ะ น้องบ็อตไม่สามารถตอบคำถามนี้ได้ กรุณากดปุ่มติดต่อเจ้าหน้าที่ด้านล่างด้วยนะคะ");
+            }
+
+
+        });
+
+    }
+
+    //การลงทะเบียน เมนู
+    function Registration(agent) {
+        let payload = {
+            "type": "flex",
+            "contents": {
+                "body": {
+                    "type": "box",
+                    "layout": "vertical",
+                    "spacing": "md",
+                    "contents": [
+                        {
+                            "type": "text",
+                            "text": "การลงทะเบียน",
+                            "weight": "bold",
+                            "size": "xl"
+                        },
+                        {
+                            "color": "#AAAAAA",
+                            "margin": "none",
+                            "type": "text",
+                            "text": "กรุณากดเลือกหัวข้อในการสอบถาม",
+                            "size": "xxs"
+                        }
+                    ],
+                    "action": {
+                        "type": "uri",
+                        "uri": "https://linecorp.com",
+                        "label": "Action"
+                    }
+                },
+                "type": "bubble",
+                "footer": {
+                    "type": "box",
+                    "layout": "vertical",
+                    "contents": [
+                        {
+                            "size": "sm",
+                            "type": "spacer"
+                        },
+                        {
+                            "color": "#0E9407",
+                            "height": "sm",
+                            "margin": "none",
+                            "action": {
+                                "type": "message",
+                                "text": "การลงทะเบียนเรียน",
+                                "label": "การลงทะเบียนเรียน"
+                            },
+                            "type": "button",
+                            "style": "primary"
+                        },
+                        {
+                            "style": "primary",
+                            "color": "#0E9407",
+                            "height": "sm",
+                            "margin": "sm",
+                            "action": {
+                                "label": "การเพิ่มรายวิชา",
+                                "type": "message",
+                                "text": "การเพิ่มรายวิชา"
+                            },
+                            "type": "button"
+                        },
+                        {
+                            "action": {
+                                "type": "message",
+                                "text": "การถอนรายวิชา",
+                                "label": "การถอนรายวิชา"
+                            },
+                            "type": "button",
+                            "style": "primary",
+                            "color": "#0E9407",
+                            "height": "sm",
+                            "margin": "sm"
+                        },
+                        {
+                            "color": "#0E9407",
+                            "height": "sm",
+                            "margin": "sm",
+                            "action": {
+                                "label": "การยกเลิกรายวิชา",
+                                "type": "message",
+                                "text": "การยกเลิกรายวิชา"
+                            },
+                            "type": "button",
+                            "style": "primary"
+                        },
+                        {
+                            "action": {
+                                "label": "การลืมรหัสผ่าน",
+                                "type": "message",
+                                "text": "การลืมรหัสผ่าน"
+                            },
+                            "type": "button",
+                            "style": "primary",
+                            "color": "#0E9407",
+                            "height": "sm",
+                            "margin": "sm"
+                        },
+                        {
+                            "type": "button",
+                            "style": "primary",
+                            "color": "#0E9407",
+                            "height": "sm",
+                            "margin": "sm",
+                            "action": {
+                                "type": "message",
+                                "text": "การลงทะเบียนไม่ได้",
+                                "label": "การลงทะเบียนไม่ได้"
+                            }
+                        },
+                        {
+                            "color": "#0E9407",
+                            "height": "sm",
+                            "margin": "sm",
+                            "action": {
+                                "type": "message",
+                                "text": "หน่วยกิตที่ต้องสะสม",
+                                "label": "หน่วยกิตที่ต้องสะสม"
+                            },
+                            "type": "button",
+                            "style": "primary"
+                        },
+                        {
+                            "action": {
+                                "type": "message",
+                                "text": "การขอเปิดรายวิชาเพิ่ม",
+                                "label": "การขอเปิดรายวิชาเพิ่ม"
+                            },
+                            "type": "button",
+                            "style": "primary",
+                            "color": "#0E9407",
+                            "height": "sm",
+                            "margin": "sm"
+                        },
+                        {
+                            "type": "button",
+                            "style": "primary",
+                            "color": "#0E9407",
+                            "height": "sm",
+                            "margin": "sm",
+                            "action": {
+                                "type": "message",
+                                "text": "การลงทะเบียนซ้ำ",
+                                "label": "การลงทะเบียนซ้ำ"
+                            }
+                        },
+                        {
+                            "type": "button",
+                            "style": "primary",
+                            "color": "#0E9407",
+                            "height": "sm",
+                            "margin": "sm",
+                            "action": {
+                                "type": "message",
+                                "text": "ระยะเวลาการศึกษาระดับปริญญาตรี",
+                                "label": "ระยะเวลาการศึกษาระดับปริญญาตรี"
+                            }
+                        }
+                    ]
+                },
+                "hero": {
+                    "type": "image",
+                    "aspectRatio": "20:13",
+                    "size": "full",
+                    "aspectMode": "cover",
+                    "url": "https://sv1.picz.in.th/images/2019/11/18/gXuQ2b.jpg",
+                    "action": {
+                        "type": "uri",
+                        "uri": "https://linecorp.com",
+                        "label": "Action"
+                    }
+                }
+            },
+            "altText": "การลงทะเบียน"
+
+        };
+
+
+        //ประกาศตัวแปร payload เพื่อแสดงออกหน้าจอ
+        let payload่json = new Payload(`LINE`, payload, { sendAsMessage: true });
+
+
+        agent.add(payload่json); //แสดง paylaod
+
+
     }
 
 
+    //Menu
+    function Menu(agent) {
+        let payload = {
+
+            "type": "flex",
+            "contents": {
+                "type": "bubble",
+                "footer": {
+                    "type": "box",
+                    "layout": "vertical",
+                    "contents": [
+                        {
+                            "size": "sm",
+                            "type": "spacer"
+                        },
+                        {
+                            "type": "button",
+                            "style": "primary",
+                            "color": "#0E9407",
+                            "height": "sm",
+                            "margin": "none",
+                            "action": {
+                                "label": "การลงทะเบียน",
+                                "type": "message",
+                                "text": "การลงทะเบียน"
+                            }
+                        },
+                        {
+                            "action": {
+                                "type": "message",
+                                "text": "ค่าธรรมเนียมการศึกษา",
+                                "label": "ค่าธรรมเนียมการศึกษา"
+                            },
+                            "type": "button",
+                            "style": "primary",
+                            "color": "#0E9407",
+                            "height": "sm",
+                            "margin": "sm"
+                        },
+                        {
+                            "color": "#0E9407",
+                            "height": "sm",
+                            "margin": "sm",
+                            "action": {
+                                "label": "ปฏิทินการศึกษา",
+                                "type": "message",
+                                "text": "ปฏิทินการศึกษา"
+                            },
+                            "type": "button",
+                            "style": "primary"
+                        },
+                        {
+                            "action": {
+                                "type": "message",
+                                "text": "การลา",
+                                "label": "การลา"
+                            },
+                            "type": "button",
+                            "style": "primary",
+                            "color": "#0E9407",
+                            "height": "sm",
+                            "margin": "sm"
+                        },
+                        {
+                            "action": {
+                                "type": "message",
+                                "text": "การลาพักการศึกษา",
+                                "label": "การลาพักการศึกษา"
+                            },
+                            "type": "button",
+                            "style": "primary",
+                            "color": "#0E9407",
+                            "height": "sm",
+                            "margin": "sm"
+                        },
+                        {
+                            "action": {
+                                "label": "การลาออก",
+                                "type": "message",
+                                "text": "การลาออก"
+                            },
+                            "type": "button",
+                            "style": "primary",
+                            "color": "#0E9407",
+                            "height": "sm",
+                            "margin": "sm"
+                        },
+                        {
+                            "color": "#0E9407",
+                            "height": "sm",
+                            "margin": "sm",
+                            "action": {
+                                "type": "message",
+                                "text": "การขอรับเอกสารการศึกษา",
+                                "label": "การขอรับเอกสารการศึกษา"
+                            },
+                            "type": "button",
+                            "style": "primary"
+                        },
+                        {
+                            "action": {
+                                "type": "message",
+                                "text": "การสำเร็จการศึกษา",
+                                "label": "การสำเร็จการศึกษา"
+                            },
+                            "type": "button",
+                            "style": "primary",
+                            "color": "#0E9407",
+                            "height": "sm",
+                            "margin": "sm"
+                        },
+                        {
+                            "color": "#0E9407",
+                            "height": "sm",
+                            "margin": "sm",
+                            "action": {
+                                "type": "message",
+                                "text": "บัตรนักศึกษา",
+                                "label": "บัตรนักศึกษา"
+                            },
+                            "type": "button",
+                            "style": "primary"
+                        },
+                        {
+                            "color": "#0E9407",
+                            "height": "sm",
+                            "margin": "sm",
+                            "action": {
+                                "type": "message",
+                                "text": "การพ้นสภาพการเป็นนักศึกษา",
+                                "label": "การพ้นสภาพการเป็นนักศึกษา"
+                            },
+                            "type": "button",
+                            "style": "primary"
+                        },
+                        {
+                            "style": "primary",
+                            "color": "#0E9407",
+                            "height": "sm",
+                            "margin": "sm",
+                            "action": {
+                                "label": "การสมัครเรียน",
+                                "type": "message",
+                                "text": "การสมัครเรียน"
+                            },
+                            "type": "button"
+                        },
+                        {
+                            "action": {
+                                "label": "การวัดและการประเมินผล",
+                                "type": "message",
+                                "text": "การวัดและการประเมินผล"
+                            },
+                            "type": "button",
+                            "style": "primary",
+                            "color": "#0E9407",
+                            "height": "sm",
+                            "margin": "sm"
+                        }
+                    ]
+                },
+                "hero": {
+                    "action": {
+                        "type": "uri",
+                        "uri": "https://linecorp.com",
+                        "label": "Action"
+                    },
+                    "type": "image",
+                    "aspectRatio": "20:13",
+                    "size": "full",
+                    "aspectMode": "cover",
+                    "url": "https://sv1.picz.in.th/images/2019/11/21/gLt9ln.jpg"
+                },
+                "body": {
+                    "action": {
+                        "type": "uri",
+                        "uri": "https://linecorp.com",
+                        "label": "Action"
+                    },
+                    "type": "box",
+                    "layout": "vertical",
+                    "spacing": "md",
+                    "contents": [
+                        {
+                            "type": "text",
+                            "text": "เมนูหลัก",
+                            "weight": "bold",
+                            "size": "xl"
+                        },
+                        {
+                            "color": "#AAAAAA",
+                            "margin": "none",
+                            "type": "text",
+                            "text": "กรุณากดเลือกหัวข้อในการสอบถาม",
+                            "size": "xxs"
+                        }
+                    ]
+                }
+            },
+            "altText": "เมนูหลัก"
+
+
+        };
+        db.collection("Notify").doc(user_id).delete().then(function () {
+
+        });
+
+
+        //ประกาศตัวแปร payload เพื่อแสดงออกหน้าจอ
+        let payload่json = new Payload(`LINE`, payload, { sendAsMessage: true });
+
+
+        agent.add(payload่json); //แสดง paylaod
+
+
+    }
+
+    //Undergraduate_Study_Period ระยะเวลา
+    function Undergraduate_Study_Period(agent) {
+        let payload = {
+
+            "type": "flex",
+            "contents": {
+                "footer": {
+                    "type": "box",
+                    "layout": "vertical",
+                    "contents": [
+                        {
+                            "size": "sm",
+                            "type": "spacer"
+                        },
+                        {
+                            "style": "primary",
+                            "color": "#0E9407",
+                            "height": "sm",
+                            "margin": "none",
+                            "action": {
+                                "type": "message",
+                                "text": "หลักสูตรปริญญาตรี 4 ปี",
+                                "label": "หลักสูตรปริญญาตรี 4 ปี"
+                            },
+                            "type": "button"
+                        },
+                        {
+                            "style": "primary",
+                            "color": "#0E9407",
+                            "height": "sm",
+                            "margin": "sm",
+                            "action": {
+                                "label": "หลักสูตรปริญญาตรี 5 ปี",
+                                "type": "message",
+                                "text": "หลักสูตรปริญญาตรี 5 ปี"
+                            },
+                            "type": "button"
+                        },
+                        {
+                            "color": "#0E9407",
+                            "height": "sm",
+                            "margin": "sm",
+                            "action": {
+                                "type": "message",
+                                "text": "หลักสูตรปริญญาต่อเนื่อง",
+                                "label": "หลักสูตรปริญญาต่อเนื่อง"
+                            },
+                            "type": "button",
+                            "style": "primary"
+                        }
+                    ]
+                },
+                "hero": {
+                    "type": "image",
+                    "aspectRatio": "20:13",
+                    "size": "full",
+                    "aspectMode": "cover",
+                    "url": "https://sv1.picz.in.th/images/2019/11/18/gXuQ2b.jpg",
+                    "action": {
+                        "label": "Action",
+                        "type": "uri",
+                        "uri": "https://linecorp.com"
+                    }
+                },
+                "body": {
+                    "contents": [
+                        {
+                            "weight": "bold",
+                            "size": "xl",
+                            "type": "text",
+                            "text": "ระยะเวลาการศึกษาระดับปริญญาตรี"
+                        },
+                        {
+                            "color": "#AAAAAA",
+                            "margin": "none",
+                            "type": "text",
+                            "text": "กรุณากดเลือกหัวข้อในการสอบถาม",
+                            "size": "xxs"
+                        }
+                    ],
+                    "action": {
+                        "type": "uri",
+                        "uri": "https://linecorp.com",
+                        "label": "Action"
+                    },
+                    "type": "box",
+                    "layout": "vertical",
+                    "spacing": "md"
+                },
+                "type": "bubble"
+            },
+            "altText": "ระยะเวลาการศึกษา ป.ตรี"
+
+
+        };
+
+        //ประกาศตัวแปร payload เพื่อแสดงออกหน้าจอ
+        let payload่json = new Payload(`LINE`, payload, { sendAsMessage: true });
+
+
+        agent.add(payload่json); //แสดง paylaod
+
+
+    }
+
+
+    //University_Calender ปฏิทิน
+    function University_Calender(agent) {
+        let payload = {
+
+            "altText": "ปฏิทินการศึกษา",
+            "type": "flex",
+            "contents": {
+                "type": "bubble",
+                "footer": {
+                    "type": "box",
+                    "layout": "vertical",
+                    "contents": [
+                        {
+                            "type": "spacer",
+                            "size": "sm"
+                        },
+                        {
+                            "action": {
+                                "label": "ภาคการศึกษาปกติ",
+                                "type": "message",
+                                "text": "ภาคการศึกษาปกติ"
+                            },
+                            "type": "button",
+                            "style": "primary",
+                            "color": "#0E9407",
+                            "height": "sm",
+                            "margin": "none"
+                        },
+                        {
+                            "type": "button",
+                            "style": "primary",
+                            "color": "#0E9407",
+                            "height": "sm",
+                            "margin": "sm",
+                            "action": {
+                                "type": "message",
+                                "text": "ภาคการศึกษาพิเศษ",
+                                "label": "ภาคการศึกษาพิเศษ"
+                            }
+                        },
+                        {
+                            "color": "#0E9407",
+                            "height": "sm",
+                            "margin": "sm",
+                            "action": {
+                                "type": "message",
+                                "text": "ภาคการศึกษาฤดูร้อน",
+                                "label": "ภาคการศึกษาฤดูร้อน"
+                            },
+                            "type": "button",
+                            "style": "primary"
+                        }
+                    ]
+                },
+                "hero": {
+                    "aspectMode": "cover",
+                    "url": "https://sv1.picz.in.th/images/2019/11/18/gXscUu.jpg",
+                    "action": {
+                        "label": "Action",
+                        "type": "uri",
+                        "uri": "https://linecorp.com"
+                    },
+                    "type": "image",
+                    "aspectRatio": "20:13",
+                    "size": "full"
+                },
+                "body": {
+                    "type": "box",
+                    "layout": "vertical",
+                    "spacing": "md",
+                    "contents": [
+                        {
+                            "type": "text",
+                            "text": "ปฎิทินการศึกษา",
+                            "weight": "bold",
+                            "size": "xl"
+                        },
+                        {
+                            "size": "xxs",
+                            "color": "#AAAAAA",
+                            "margin": "none",
+                            "type": "text",
+                            "text": "กรุณากดเลือกหัวข้อในการสอบถาม"
+                        }
+                    ],
+                    "action": {
+                        "label": "Action",
+                        "type": "uri",
+                        "uri": "https://linecorp.com"
+                    }
+                }
+            }
+
+        };
+
+        //ประกาศตัวแปร payload เพื่อแสดงออกหน้าจอ
+        let payload่json = new Payload(`LINE`, payload, { sendAsMessage: true });
+
+
+        agent.add(payload่json); //แสดง paylaod
+
+
+    }
+
+
+    //Student_Retirement การพ้นสภาพ
+    function Student_Retirement(agent) {
+        let payload = {
+
+            "altText": "การพ้นสภาพการเป็นนักศึกษา",
+            "type": "flex",
+            "contents": {
+                "hero": {
+                    "type": "image",
+                    "aspectRatio": "20:13",
+                    "size": "full",
+                    "aspectMode": "cover",
+                    "url": "https://sv1.picz.in.th/images/2019/11/18/gXuR79.jpg",
+                    "action": {
+                        "type": "uri",
+                        "uri": "https://linecorp.com",
+                        "label": "Action"
+                    }
+                },
+                "body": {
+                    "contents": [
+                        {
+                            "type": "text",
+                            "text": "การพ้นสภาพการเป็นนักศึกษา",
+                            "weight": "bold",
+                            "size": "xl"
+                        },
+                        {
+                            "color": "#AAAAAA",
+                            "margin": "none",
+                            "type": "text",
+                            "text": "กรุณากดเลือกหัวข้อในการสอบถาม",
+                            "size": "xxs"
+                        }
+                    ],
+                    "action": {
+                        "type": "uri",
+                        "uri": "https://linecorp.com",
+                        "label": "Action"
+                    },
+                    "type": "box",
+                    "layout": "vertical",
+                    "spacing": "md"
+                },
+                "type": "bubble",
+                "footer": {
+                    "type": "box",
+                    "layout": "vertical",
+                    "contents": [
+                        {
+                            "type": "spacer",
+                            "size": "sm"
+                        },
+                        {
+                            "color": "#0E9407",
+                            "height": "sm",
+                            "margin": "none",
+                            "action": {
+                                "type": "message",
+                                "text": "เกรดเฉลี่ยขั้นต่ำ",
+                                "label": "เกรดเฉลี่ยขั้นต่ำ"
+                            },
+                            "type": "button",
+                            "style": "primary"
+                        },
+                        {
+                            "color": "#0E9407",
+                            "height": "sm",
+                            "margin": "sm",
+                            "action": {
+                                "label": "กรณีการพ้นสภาพการเป็นนักศึกษา",
+                                "type": "message",
+                                "text": "กรณีการพ้นสภาพการเป็นนักศึกษา"
+                            },
+                            "type": "button",
+                            "style": "primary"
+                        },
+                        {
+                            "color": "#0E9407",
+                            "height": "sm",
+                            "margin": "sm",
+                            "action": {
+                                "type": "message",
+                                "text": "การดำเนินการเมื่อพ้นสภาพการเป็นนักศึกษา",
+                                "label": "การดำเนินการเมื่อพ้นสภาพการเป็นนักศึกษา"
+                            },
+                            "type": "button",
+                            "style": "primary"
+                        }
+                    ]
+                }
+            }
+
+        };
+
+        //ประกาศตัวแปร payload เพื่อแสดงออกหน้าจอ
+        let payload่json = new Payload(`LINE`, payload, { sendAsMessage: true });
+
+
+        agent.add(payload่json); //แสดง paylaod
+
+
+    }
+
+    //Graduation การสำเร็จการศึกษา
+    function Graduation(agent) {
+        let payload = {
+
+            "type": "flex",
+            "contents": {
+                "hero": {
+                    "aspectMode": "cover",
+                    "url": "https://sv1.picz.in.th/images/2019/11/18/gXuYvk.jpg",
+                    "action": {
+                        "type": "uri",
+                        "uri": "https://linecorp.com",
+                        "label": "Action"
+                    },
+                    "type": "image",
+                    "aspectRatio": "20:13",
+                    "size": "full"
+                },
+                "body": {
+                    "action": {
+                        "type": "uri",
+                        "uri": "https://linecorp.com",
+                        "label": "Action"
+                    },
+                    "type": "box",
+                    "layout": "vertical",
+                    "spacing": "md",
+                    "contents": [
+                        {
+                            "type": "text",
+                            "text": "การสำเร็จการศึกษา",
+                            "weight": "bold",
+                            "size": "xl"
+                        },
+                        {
+                            "color": "#AAAAAA",
+                            "margin": "none",
+                            "type": "text",
+                            "text": "กรุณากดเลือกหัวข้อในการสอบถาม",
+                            "size": "xxs"
+                        }
+                    ]
+                },
+                "type": "bubble",
+                "footer": {
+                    "type": "box",
+                    "layout": "vertical",
+                    "contents": [
+                        {
+                            "type": "spacer",
+                            "size": "sm"
+                        },
+                        {
+                            "color": "#0E9407",
+                            "height": "sm",
+                            "margin": "none",
+                            "action": {
+                                "type": "message",
+                                "text": "เกรดเฉลี่ยสะสมตลอดหลักสูตร",
+                                "label": "เกรดเฉลี่ยสะสมตลอดหลักสูตร"
+                            },
+                            "type": "button",
+                            "style": "primary"
+                        },
+                        {
+                            "type": "button",
+                            "style": "primary",
+                            "color": "#0E9407",
+                            "height": "sm",
+                            "margin": "sm",
+                            "action": {
+                                "type": "message",
+                                "text": "การแจ้งขอสำเร็จการศึกษา",
+                                "label": "การแจ้งขอสำเร็จการศึกษา"
+                            }
+                        },
+                        {
+                            "action": {
+                                "type": "message",
+                                "text": "การขอแก้ไขข้อมูลเอกสารจบ",
+                                "label": "การขอแก้ไขข้อมูลเอกสารจบ"
+                            },
+                            "type": "button",
+                            "style": "primary",
+                            "color": "#0E9407",
+                            "height": "sm",
+                            "margin": "sm"
+                        },
+                        {
+                            "action": {
+                                "type": "message",
+                                "text": "การได้รับเกียรตินิยม",
+                                "label": "การได้รับเกียรตินิยม"
+                            },
+                            "type": "button",
+                            "style": "primary",
+                            "color": "#0E9407",
+                            "height": "sm",
+                            "margin": "sm"
+                        },
+                        {
+                            "type": "button",
+                            "style": "primary",
+                            "color": "#0E9407",
+                            "height": "sm",
+                            "margin": "sm",
+                            "action": {
+                                "type": "message",
+                                "text": "การอนุมัติจบ",
+                                "label": "การอนุมัติจบ"
+                            }
+                        }
+                    ]
+                }
+            },
+            "altText": "การสำเร็จการศึกษา"
+
+
+        };
+
+        //ประกาศตัวแปร payload เพื่อแสดงออกหน้าจอ
+        let payload่json = new Payload(`LINE`, payload, { sendAsMessage: true });
+
+
+        agent.add(payload่json); //แสดง paylaod
+
+
+    }
+
+    //leave การลา
+    function leave(agent) {
+        let payload = {
+            "contents": {
+                "type": "bubble",
+                "footer": {
+                    "type": "box",
+                    "layout": "vertical",
+                    "contents": [
+                        {
+                            "type": "spacer",
+                            "size": "sm"
+                        },
+                        {
+                            "action": {
+                                "label": "การลาป่วย",
+                                "type": "message",
+                                "text": "การลาป่วย"
+                            },
+                            "type": "button",
+                            "style": "primary",
+                            "color": "#0E9407",
+                            "height": "sm",
+                            "margin": "none"
+                        },
+                        {
+                            "color": "#0E9407",
+                            "height": "sm",
+                            "margin": "sm",
+                            "action": {
+                                "type": "message",
+                                "text": "การลากิจ",
+                                "label": "การลากิจ"
+                            },
+                            "type": "button",
+                            "style": "primary"
+                        }
+                    ]
+                },
+                "hero": {
+                    "action": {
+                        "type": "uri",
+                        "uri": "https://linecorp.com",
+                        "label": "Action"
+                    },
+                    "aspectRatio": "20:13",
+                    "type": "image",
+                    "size": "full",
+                    "aspectMode": "cover",
+                    "url": "https://sv1.picz.in.th/images/2019/11/18/gXuR79.jpg"
+                },
+                "body": {
+                    "spacing": "md",
+                    "contents": [
+                        {
+                            "size": "xl",
+                            "type": "text",
+                            "text": "การลา",
+                            "weight": "bold"
+                        },
+                        {
+                            "color": "#AAAAAA",
+                            "margin": "none",
+                            "type": "text",
+                            "text": "กรุณากดเลือกหัวข้อในการสอบถาม",
+                            "size": "xxs"
+                        }
+                    ],
+                    "action": {
+                        "type": "uri",
+                        "uri": "https://linecorp.com",
+                        "label": "Action"
+                    },
+                    "type": "box",
+                    "layout": "vertical"
+                }
+            },
+            "altText": "การลา",
+            "type": "flex"
+
+
+        };
+
+        //ประกาศตัวแปร payload เพื่อแสดงออกหน้าจอ
+        let payload่json = new Payload(`LINE`, payload, { sendAsMessage: true });
+
+
+        agent.add(payload่json); //แสดง paylaod
+
+
+    }
+
+
+    //leave การลา
+    function Taking_leave_from_studies(agent) {
+        let payload = {
+            "type": "flex",
+            "contents": {
+                "body": {
+                    "action": {
+                        "type": "uri",
+                        "uri": "https://linecorp.com",
+                        "label": "Action"
+                    },
+                    "type": "box",
+                    "layout": "vertical",
+                    "spacing": "md",
+                    "contents": [
+                        {
+                            "type": "text",
+                            "text": "การลาพักการศึกษา",
+                            "weight": "bold",
+                            "size": "xl"
+                        },
+                        {
+                            "color": "#AAAAAA",
+                            "margin": "none",
+                            "type": "text",
+                            "text": "กรุณากดเลือกหัวข้อในการสอบถาม",
+                            "size": "xxs"
+                        }
+                    ]
+                },
+                "type": "bubble",
+                "footer": {
+                    "contents": [
+                        {
+                            "type": "spacer",
+                            "size": "sm"
+                        },
+                        {
+                            "action": {
+                                "type": "message",
+                                "text": "การยื่นคำร้องลาพักการศึกษา",
+                                "label": "การยื่นคำร้องลาพักการศึกษา"
+                            },
+                            "type": "button",
+                            "style": "primary",
+                            "color": "#0E9407",
+                            "height": "sm",
+                            "margin": "none"
+                        },
+                        {
+                            "color": "#0E9407",
+                            "height": "sm",
+                            "margin": "sm",
+                            "action": {
+                                "type": "message",
+                                "text": "ระเบียบการลาพักการศึกษา",
+                                "label": "ระเบียบการลาพักการศึกษา"
+                            },
+                            "type": "button",
+                            "style": "primary"
+                        },
+                        {
+                            "style": "primary",
+                            "color": "#0E9407",
+                            "height": "sm",
+                            "margin": "sm",
+                            "action": {
+                                "type": "message",
+                                "text": "ค่าธรรมเนียมการลาพักการศึกษา",
+                                "label": "ค่าธรรมเนียมการลาพักการศึกษา"
+                            },
+                            "type": "button"
+                        }
+                    ],
+                    "type": "box",
+                    "layout": "vertical"
+                },
+                "hero": {
+                    "action": {
+                        "type": "uri",
+                        "uri": "https://linecorp.com",
+                        "label": "Action"
+                    },
+                    "type": "image",
+                    "aspectRatio": "20:13",
+                    "size": "full",
+                    "aspectMode": "cover",
+                    "url": "https://sv1.picz.in.th/images/2019/11/18/gXuR79.jpg"
+                }
+            },
+            "altText": "การลาพักการศึกษา"
+
+        };
+
+        //ประกาศตัวแปร payload เพื่อแสดงออกหน้าจอ
+        let payload่json = new Payload(`LINE`, payload, { sendAsMessage: true });
+
+
+        agent.add(payload่json); //แสดง paylaod
+
+
+    }
+
+
+    //Resignation การลาออก
+    function Resignation(agent) {
+        let payload = {
+            "altText": "การลาออก",
+            "type": "flex",
+            "contents": {
+                "body": {
+                    "type": "box",
+                    "layout": "vertical",
+                    "spacing": "md",
+                    "contents": [
+                        {
+                            "type": "text",
+                            "text": "การลาออก",
+                            "weight": "bold",
+                            "size": "xl"
+                        },
+                        {
+                            "type": "text",
+                            "text": "กรุณากดเลือกหัวข้อในการสอบถาม",
+                            "size": "xxs",
+                            "color": "#AAAAAA",
+                            "margin": "none"
+                        }
+                    ],
+                    "action": {
+                        "type": "uri",
+                        "uri": "https://linecorp.com",
+                        "label": "Action"
+                    }
+                },
+                "type": "bubble",
+                "footer": {
+                    "contents": [
+                        {
+                            "type": "spacer",
+                            "size": "sm"
+                        },
+                        {
+                            "action": {
+                                "type": "message",
+                                "text": "ขั้นตอนการลาออก",
+                                "label": "ขั้นตอนการลาออก"
+                            },
+                            "type": "button",
+                            "style": "primary",
+                            "color": "#0E9407",
+                            "height": "sm",
+                            "margin": "none"
+                        },
+                        {
+                            "style": "primary",
+                            "color": "#0E9407",
+                            "height": "sm",
+                            "margin": "sm",
+                            "action": {
+                                "type": "message",
+                                "text": "การยกเลิกการลาออก",
+                                "label": "การยกเลิกการลาออก"
+                            },
+                            "type": "button"
+                        },
+                        {
+                            "type": "button",
+                            "style": "primary",
+                            "color": "#0E9407",
+                            "height": "sm",
+                            "margin": "sm",
+                            "action": {
+                                "type": "message",
+                                "text": "การขอย้ายสถานศึกษา",
+                                "label": "การขอย้ายสถานศึกษา"
+                            }
+                        }
+                    ],
+                    "type": "box",
+                    "layout": "vertical"
+                },
+                "hero": {
+                    "size": "full",
+                    "aspectMode": "cover",
+                    "url": "https://sv1.picz.in.th/images/2019/11/18/gXuR79.jpg",
+                    "action": {
+                        "label": "Action",
+                        "type": "uri",
+                        "uri": "https://linecorp.com"
+                    },
+                    "type": "image",
+                    "aspectRatio": "20:13"
+                }
+            }
+
+        };
+
+        //ประกาศตัวแปร payload เพื่อแสดงออกหน้าจอ
+        let payload่json = new Payload(`LINE`, payload, { sendAsMessage: true });
+
+
+        agent.add(payload่json); //แสดง paylaod
+
+
+    }
+
+    //Student_Card บัตรนักศึกษา
+    function Student_Card(agent) {
+        let payload = {
+            "type": "flex",
+            "altText": "บัตรนักศึกษา",
+            "contents": {
+                "type": "bubble",
+                "hero": {
+                    "type": "image",
+                    "url": "https://www.img.in.th/images/bf871ae84f4f2474b5e48ed79838b92a.png",
+                    "size": "full",
+                    "aspectRatio": "20:13",
+                    "aspectMode": "cover",
+                    "action": {
+                        "type": "uri",
+                        "label": "Action",
+                        "uri": "https://linecorp.com"
+                    }
+                },
+                "body": {
+                    "type": "box",
+                    "layout": "vertical",
+                    "spacing": "md",
+                    "action": {
+                        "type": "uri",
+                        "label": "Action",
+                        "uri": "https://linecorp.com"
+                    },
+                    "contents": [
+                        {
+                            "type": "text",
+                            "text": "บัตรนักศึกษา",
+                            "size": "xl",
+                            "weight": "bold"
+                        },
+                        {
+                            "type": "text",
+                            "text": "กรุณากดเลือกหัวข้อในการสอบถาม",
+                            "margin": "none",
+                            "size": "xxs",
+                            "color": "#AAAAAA"
+                        }
+                    ]
+                },
+                "footer": {
+                    "type": "box",
+                    "layout": "vertical",
+                    "contents": [
+                        {
+                            "type": "spacer",
+                            "size": "sm"
+                        },
+                        {
+                            "type": "button",
+                            "action": {
+                                "type": "message",
+                                "label": "บัตรหายหรือชำรุด",
+                                "text": "บัตรหายหรือชำรุด"
+                            },
+                            "color": "#0E9407",
+                            "margin": "none",
+                            "height": "sm",
+                            "style": "primary"
+                        },
+                        {
+                            "type": "button",
+                            "action": {
+                                "type": "message",
+                                "label": "เปลี่ยนแปลงข้อมูลในบัตร",
+                                "text": "เปลี่ยนแปลงข้อมูลในบัตร"
+                            },
+                            "color": "#0E9407",
+                            "margin": "sm",
+                            "height": "sm",
+                            "style": "primary"
+                        }
+                    ]
+                }
+            }
+
+        };
+
+        //ประกาศตัวแปร payload เพื่อแสดงออกหน้าจอ
+        let payload่json = new Payload(`LINE`, payload, { sendAsMessage: true });
+
+
+        agent.add(payload่json); //แสดง paylaod
+
+
+    }
+
+    //Education_Documentary การขอรับเอกสารการศึกษา
+    function Education_Documentary(agent) {
+        let payload = {
+            "type": "flex",
+            "altText": "การขอรับเอกสารการศึกษา",
+            "contents": {
+                "type": "bubble",
+                "hero": {
+                    "type": "image",
+                    "url": "https://sv1.picz.in.th/images/2019/11/18/gXCJp8.jpg",
+                    "size": "full",
+                    "aspectRatio": "20:13",
+                    "aspectMode": "cover",
+                    "action": {
+                        "type": "uri",
+                        "label": "Action",
+                        "uri": "https://linecorp.com"
+                    }
+                },
+                "body": {
+                    "type": "box",
+                    "layout": "vertical",
+                    "spacing": "md",
+                    "action": {
+                        "type": "uri",
+                        "label": "Action",
+                        "uri": "https://linecorp.com"
+                    },
+                    "contents": [
+                        {
+                            "type": "text",
+                            "text": "การขอรับเอกสารการศึกษา",
+                            "size": "xl",
+                            "weight": "bold"
+                        },
+                        {
+                            "type": "text",
+                            "text": "กรุณากดเลือกหัวข้อในการสอบถาม",
+                            "margin": "none",
+                            "size": "xxs",
+                            "color": "#AAAAAA"
+                        }
+                    ]
+                },
+                "footer": {
+                    "type": "box",
+                    "layout": "vertical",
+                    "contents": [
+                        {
+                            "type": "spacer",
+                            "size": "sm"
+                        },
+                        {
+                            "type": "button",
+                            "action": {
+                                "type": "message",
+                                "label": "ใบรับรองการเป็นนักศึกษา",
+                                "text": "ใบรับรองการเป็นนักศึกษา"
+                            },
+                            "color": "#0E9407",
+                            "margin": "none",
+                            "height": "sm",
+                            "style": "primary"
+                        },
+                        {
+                            "type": "button",
+                            "action": {
+                                "type": "message",
+                                "label": "ใบรับรองผลการเรียน",
+                                "text": "ใบรับรองผลการเรียน"
+                            },
+                            "color": "#0E9407",
+                            "margin": "sm",
+                            "height": "sm",
+                            "style": "primary"
+                        },
+                        {
+                            "type": "button",
+                            "action": {
+                                "type": "message",
+                                "label": "ระยะเวลาการขอเอกสาร",
+                                "text": "ระยะเวลาการขอเอกสาร"
+                            },
+                            "color": "#0E9407",
+                            "margin": "sm",
+                            "height": "sm",
+                            "style": "primary"
+                        },
+                        {
+                            "type": "button",
+                            "action": {
+                                "type": "message",
+                                "label": "ปัญหาการรับเอกสาร",
+                                "text": "ปัญหาการรับเอกสาร"
+                            },
+                            "color": "#0E9407",
+                            "margin": "sm",
+                            "height": "sm",
+                            "style": "primary"
+                        }
+                    ]
+                }
+            }
+
+        };
+
+        //ประกาศตัวแปร payload เพื่อแสดงออกหน้าจอ
+        let payload่json = new Payload(`LINE`, payload, { sendAsMessage: true });
+
+
+        agent.add(payload่json); //แสดง paylaod
+
+
+    }
+
+    //Measurement การวัดและการประเมินผล
+    function Measurement(agent) {
+        let payload = {
+            "type": "flex",
+            "altText": "การวัดและการประเมินผล",
+            "contents": {
+                "type": "bubble",
+                "hero": {
+                    "type": "image",
+                    "url": "https://sv1.picz.in.th/images/2019/11/18/gXukcQ.jpg",
+                    "size": "full",
+                    "aspectRatio": "20:13",
+                    "aspectMode": "cover",
+                    "action": {
+                        "type": "uri",
+                        "label": "Action",
+                        "uri": "https://linecorp.com"
+                    }
+                },
+                "body": {
+                    "type": "box",
+                    "layout": "vertical",
+                    "spacing": "md",
+                    "action": {
+                        "type": "uri",
+                        "label": "Action",
+                        "uri": "https://linecorp.com"
+                    },
+                    "contents": [
+                        {
+                            "type": "text",
+                            "text": "การวัดและการประเมินผล",
+                            "size": "xl",
+                            "weight": "bold"
+                        },
+                        {
+                            "type": "text",
+                            "text": "กรุณากดเลือกหัวข้อในการสอบถาม",
+                            "margin": "none",
+                            "size": "xxs",
+                            "color": "#AAAAAA"
+                        }
+                    ]
+                },
+                "footer": {
+                    "type": "box",
+                    "layout": "vertical",
+                    "contents": [
+                        {
+                            "type": "spacer",
+                            "size": "sm"
+                        },
+                        {
+                            "type": "button",
+                            "action": {
+                                "type": "message",
+                                "label": "เกรดเฉลี่ย",
+                                "text": "เกรดเฉลี่ย"
+                            },
+                            "color": "#0E9407",
+                            "margin": "none",
+                            "height": "sm",
+                            "style": "primary"
+                        },
+                        {
+                            "type": "button",
+                            "action": {
+                                "type": "message",
+                                "label": "การแก้ I",
+                                "text": "การแก้ I"
+                            },
+                            "color": "#0E9407",
+                            "margin": "sm",
+                            "height": "sm",
+                            "style": "primary"
+                        }
+                    ]
+                }
+            }
+
+        };
+
+        //ประกาศตัวแปร payload เพื่อแสดงออกหน้าจอ
+        let payload่json = new Payload(`LINE`, payload, { sendAsMessage: true });
+
+
+        agent.add(payload่json); //แสดง paylaod
+
+
+    }
+
+    //Application_study การสมัครเรียน
+    function Application_study(agent) {
+        let payload = {
+            "type": "flex",
+            "altText": "การสมัครเรียน",
+            "contents": {
+                "type": "bubble",
+                "hero": {
+                    "type": "image",
+                    "url": "https://sv1.picz.in.th/images/2019/11/18/gXukcQ.jpg",
+                    "size": "full",
+                    "aspectRatio": "20:13",
+                    "aspectMode": "cover",
+                    "action": {
+                        "type": "uri",
+                        "label": "Action",
+                        "uri": "https://linecorp.com"
+                    }
+                },
+                "body": {
+                    "type": "box",
+                    "layout": "vertical",
+                    "spacing": "md",
+                    "action": {
+                        "type": "uri",
+                        "label": "Action",
+                        "uri": "https://linecorp.com"
+                    },
+                    "contents": [
+                        {
+                            "type": "text",
+                            "text": "การสมัครเรียน",
+                            "size": "xl",
+                            "weight": "bold"
+                        },
+                        {
+                            "type": "text",
+                            "text": "กรุณากดเลือกหัวข้อในการสอบถาม",
+                            "margin": "none",
+                            "size": "xxs",
+                            "color": "#AAAAAA"
+                        }
+                    ]
+                },
+                "footer": {
+                    "type": "box",
+                    "layout": "vertical",
+                    "contents": [
+                        {
+                            "type": "spacer",
+                            "size": "sm"
+                        },
+                        {
+                            "type": "button",
+                            "action": {
+                                "type": "message",
+                                "label": "ภาคการศึกษาปกติ",
+                                "text": "สมัครเรียนภาคการศึกษาปกติ"
+                            },
+                            "color": "#0E9407",
+                            "margin": "none",
+                            "height": "sm",
+                            "style": "primary"
+                        },
+                        {
+                            "type": "button",
+                            "action": {
+                                "type": "message",
+                                "label": "ภาคการศึกษาพิเศษ",
+                                "text": "สมัครเรียนภาคการศึกษาพิเศษ"
+                            },
+                            "color": "#0E9407",
+                            "margin": "sm",
+                            "height": "sm",
+                            "style": "primary"
+                        },
+                        {
+                            "type": "button",
+                            "action": {
+                                "type": "message",
+                                "label": "ภาคการศึกษาฤดูร้อน",
+                                "text": "สมัครเรียนภาคการศึกษาฤดูร้อน"
+                            },
+                            "color": "#0E9407",
+                            "margin": "sm",
+                            "height": "sm",
+                            "style": "primary"
+                        }
+                    ]
+                }
+            }
+
+        };
+
+        //ประกาศตัวแปร payload เพื่อแสดงออกหน้าจอ
+        let payload่json = new Payload(`LINE`, payload, { sendAsMessage: true });
+
+
+        agent.add(payload่json); //แสดง paylaod
+
+
+    }
+
+    //Tuition_fee ค่าธรรมเนียมการศึกษา
+    function Tuition_fee(agent) {
+        let payload = {
+            "type": "flex",
+            "altText": "ค่าธรรมเนียมการศึกษา",
+            "contents": {
+                "type": "bubble",
+                "hero": {
+                    "type": "image",
+                    "url": "https://sv1.picz.in.th/images/2019/11/18/gXu1v2.jpg",
+                    "size": "full",
+                    "aspectRatio": "20:13",
+                    "aspectMode": "cover",
+                    "action": {
+                        "type": "uri",
+                        "label": "Action",
+                        "uri": "https://linecorp.com"
+                    }
+                },
+                "body": {
+                    "type": "box",
+                    "layout": "vertical",
+                    "spacing": "md",
+                    "action": {
+                        "type": "uri",
+                        "label": "Action",
+                        "uri": "https://linecorp.com"
+                    },
+                    "contents": [
+                        {
+                            "type": "text",
+                            "text": "ค่าธรรมเนียมการศึกษา",
+                            "size": "xl",
+                            "weight": "bold"
+                        },
+                        {
+                            "type": "text",
+                            "text": "กรุณากดเลือกหัวข้อในการสอบถาม",
+                            "margin": "none",
+                            "size": "xxs",
+                            "color": "#AAAAAA"
+                        }
+                    ]
+                },
+                "footer": {
+                    "type": "box",
+                    "layout": "vertical",
+                    "contents": [
+                        {
+                            "type": "spacer",
+                            "size": "sm"
+                        },
+                        {
+                            "type": "button",
+                            "action": {
+                                "type": "message",
+                                "label": "คณะครุศาสตร์",
+                                "text": "คณะครุศาสตร์"
+                            },
+                            "color": "#0E9407",
+                            "margin": "none",
+                            "height": "sm",
+                            "style": "primary"
+                        },
+                        {
+                            "type": "button",
+                            "action": {
+                                "type": "message",
+                                "label": "คณะเทคโนโลยีอุตสาหกรรม",
+                                "text": "คณะเทคโนโลยีอุตสาหกรรม"
+                            },
+                            "color": "#0E9407",
+                            "margin": "sm",
+                            "height": "sm",
+                            "style": "primary"
+                        },
+                        {
+                            "type": "button",
+                            "action": {
+                                "type": "message",
+                                "label": "คณะมนุษยศาสตร์และสังคมศาสตร์",
+                                "text": "คณะมนุษยศาสตร์และสังคมศาสตร์"
+                            },
+                            "color": "#0E9407",
+                            "margin": "sm",
+                            "height": "sm",
+                            "style": "primary"
+                        },
+                        {
+                            "type": "button",
+                            "action": {
+                                "type": "message",
+                                "label": "คณะวิทยาการจัดการ",
+                                "text": "คณะวิทยาการจัดการ"
+                            },
+                            "color": "#0E9407",
+                            "margin": "sm",
+                            "height": "sm",
+                            "style": "primary"
+                        },
+                        {
+                            "type": "button",
+                            "action": {
+                                "type": "message",
+                                "label": "คณะวิทยาศาสตร์และเทคโนโลยี",
+                                "text": "คณะวิทยาศาสตร์และเทคโนโลยี"
+                            },
+                            "color": "#0E9407",
+                            "margin": "sm",
+                            "height": "sm",
+                            "style": "primary"
+                        }
+                    ]
+                }
+            }
+
+        };
+
+        //ประกาศตัวแปร payload เพื่อแสดงออกหน้าจอ
+        let payload่json = new Payload(`LINE`, payload, { sendAsMessage: true });
+
+
+        agent.add(payload่json); //แสดง paylaod
+
+
+    }
+
+
+    //Faculty_of_Humanities_and_Social_Sciences มนุษย์
+    function Faculty_of_Humanities(agent) {
+        let payload = {
+            "type": "flex",
+            "contents": {
+                "footer": {
+                    "type": "box",
+                    "layout": "vertical",
+                    "contents": [
+                        {
+                            "type": "spacer",
+                            "size": "sm"
+                        },
+                        {
+                            "color": "#0E9407",
+                            "height": "sm",
+                            "margin": "none",
+                            "action": {
+                                "type": "message",
+                                "text": "สาขาการพัฒนาสังคม",
+                                "label": "สาขาการพัฒนาสังคม"
+                            },
+                            "type": "button",
+                            "style": "primary"
+                        },
+                        {
+                            "action": {
+                                "type": "message",
+                                "text": "สาขาภาษาอังกฤษ",
+                                "label": "สาขาภาษาอังกฤษ"
+                            },
+                            "type": "button",
+                            "style": "primary",
+                            "color": "#0E9407",
+                            "height": "sm",
+                            "margin": "sm"
+                        },
+                        {
+                            "action": {
+                                "type": "message",
+                                "text": "สาขาดนตรีสากล",
+                                "label": "สาขาดนตรีสากล"
+                            },
+                            "type": "button",
+                            "style": "primary",
+                            "color": "#0E9407",
+                            "height": "sm",
+                            "margin": "sm"
+                        },
+                        {
+                            "action": {
+                                "type": "message",
+                                "text": "สาขาทัศนศิลป์",
+                                "label": "สาขาทัศนศิลป์"
+                            },
+                            "type": "button",
+                            "style": "primary",
+                            "color": "#0E9407",
+                            "height": "sm",
+                            "margin": "sm"
+                        },
+                        {
+                            "height": "sm",
+                            "color": "#0E9407",
+                            "margin": "sm",
+                            "action": {
+                                "type": "message",
+                                "text": "สาขารัฐศาสตร์",
+                                "label": "สาขารัฐศาสตร์"
+                            },
+                            "type": "button",
+                            "style": "primary"
+                        },
+                        {
+                            "action": {
+                                "type": "message",
+                                "text": "สาขารัฐประศาสนศาสตร์",
+                                "label": "สาขารัฐประศาสนศาสตร์"
+                            },
+                            "type": "button",
+                            "style": "primary",
+                            "color": "#0E9407",
+                            "height": "sm",
+                            "margin": "sm"
+                        },
+                        {
+                            "action": {
+                                "type": "message",
+                                "text": "สาขานิติศาสตร์บัณฑิต",
+                                "label": "สาขานิติศาสตร์บัณฑิต"
+                            },
+                            "type": "button",
+                            "style": "primary",
+                            "color": "#0E9407",
+                            "height": "sm",
+                            "margin": "sm"
+                        },
+                        {
+                            "style": "primary",
+                            "color": "#0E9407",
+                            "height": "sm",
+                            "margin": "sm",
+                            "action": {
+                                "type": "message",
+                                "text": "สาขาภาษาญี่ปุ่น",
+                                "label": "สาขาภาษาญี่ปุ่น"
+                            },
+                            "type": "button"
+                        },
+                        {
+                            "color": "#0E9407",
+                            "height": "sm",
+                            "margin": "sm",
+                            "action": {
+                                "label": "สาขาศิลปกรรม",
+                                "type": "message",
+                                "text": "สาขาศิลปกรรม"
+                            },
+                            "type": "button",
+                            "style": "primary"
+                        },
+                        {
+                            "margin": "sm",
+                            "action": {
+                                "type": "message",
+                                "text": "สาขาสารสนเทศศาสตร์และบรรณารักษศาสตร์",
+                                "label": "สาขาสารสนเทศศาสตร์และบรรณารักษศาสตร์"
+                            },
+                            "type": "button",
+                            "style": "primary",
+                            "color": "#0E9407",
+                            "height": "sm"
+                        },
+                        {
+                            "action": {
+                                "type": "message",
+                                "text": "สาขานาฎดุริยางคศิลป์ไทย",
+                                "label": "สาขานาฎดุริยางคศิลป์ไทย"
+                            },
+                            "type": "button",
+                            "style": "primary",
+                            "color": "#0E9407",
+                            "height": "sm",
+                            "margin": "sm"
+                        }
+                    ]
+                },
+                "hero": {
+                    "url": "https://sv1.picz.in.th/images/2019/11/18/gXu1v2.jpg",
+                    "action": {
+                        "type": "uri",
+                        "uri": "https://linecorp.com",
+                        "label": "Action"
+                    },
+                    "aspectRatio": "20:13",
+                    "type": "image",
+                    "size": "full",
+                    "aspectMode": "cover"
+                },
+                "body": {
+                    "spacing": "md",
+                    "contents": [
+                        {
+                            "size": "xl",
+                            "type": "text",
+                            "text": "คณะมนุษยศาสตร์และสังคมศาสตร์",
+                            "weight": "bold"
+                        },
+                        {
+                            "margin": "none",
+                            "type": "text",
+                            "text": "กรุณากดเลือกหัวข้อในการสอบถาม",
+                            "size": "xxs",
+                            "color": "#AAAAAA"
+                        }
+                    ],
+                    "action": {
+                        "type": "uri",
+                        "uri": "https://linecorp.com",
+                        "label": "Action"
+                    },
+                    "type": "box",
+                    "layout": "vertical"
+                },
+                "type": "bubble"
+            },
+            "altText": "คณะมนุษยศาสตร์และสังคมศาสตร์"
+
+        };
+
+        //ประกาศตัวแปร payload เพื่อแสดงออกหน้าจอ
+        let payload่json = new Payload(`LINE`, payload, { sendAsMessage: true });
+
+
+        agent.add(payload่json); //แสดง paylaod
+
+
+    }
+
+    function Faculty_of_Industrial(agent) {
+        let payload = {
+            "altText": "คณะเทคโนโลยีอุตสาหกรรม",
+            "type": "flex",
+            "contents": {
+              "body": {
+                "type": "box",
+                "layout": "vertical",
+                "spacing": "md",
+                "contents": [
+                  {
+                    "type": "text",
+                    "text": "คณะเทคโนโลยีอุตสาหกรรม",
+                    "weight": "bold",
+                    "size": "xl"
+                  },
+                  {
+                    "color": "#AAAAAA",
+                    "margin": "none",
+                    "type": "text",
+                    "text": "กรุณากดเลือกหัวข้อในการสอบถาม",
+                    "size": "xxs"
+                  }
+                ],
+                "action": {
+                  "type": "uri",
+                  "uri": "https://linecorp.com",
+                  "label": "Action"
+                }
+              },
+              "type": "bubble",
+              "footer": {
+                "type": "box",
+                "layout": "vertical",
+                "contents": [
+                  {
+                    "type": "spacer",
+                    "size": "sm"
+                  },
+                  {
+                    "action": {
+                      "type": "message",
+                      "text": "สาขาเทคโนโลยีอุตสาหกรรม",
+                      "label": "สาขาเทคโนโลยีอุตสาหกรรม"
+                    },
+                    "type": "button",
+                    "style": "primary",
+                    "color": "#0E9407",
+                    "height": "sm",
+                    "margin": "none"
+                  },
+                  {
+                    "action": {
+                      "label": "สาขาวิศวกรรมการจัดการอุตสาหกรรม",
+                      "type": "message",
+                      "text": "สาขาวิศวกรรมการจัดการอุตสาหกรรม"
+                    },
+                    "type": "button",
+                    "style": "primary",
+                    "color": "#0E9407",
+                    "height": "sm",
+                    "margin": "sm"
+                  },
+                  {
+                    "style": "primary",
+                    "color": "#0E9407",
+                    "height": "sm",
+                    "margin": "sm",
+                    "action": {
+                      "type": "message",
+                      "text": "สาขาวิศวกรรมเครื่องกลยานยนต์",
+                      "label": "สาขาวิศวกรรมเครื่องกลยานยนต์"
+                    },
+                    "type": "button"
+                  },
+                  {
+                    "style": "primary",
+                    "color": "#0E9407",
+                    "height": "sm",
+                    "margin": "sm",
+                    "action": {
+                      "label": "สาขาวิศวกรรมไฟฟ้า",
+                      "type": "message",
+                      "text": "สาขาวิศวกรรมไฟฟ้า"
+                    },
+                    "type": "button"
+                  },
+                  {
+                    "action": {
+                      "type": "message",
+                      "text": "สาขาออกแบบผลิตภัณฑ์",
+                      "label": "สาขาออกแบบผลิตภัณฑ์"
+                    },
+                    "type": "button",
+                    "style": "primary",
+                    "color": "#0E9407",
+                    "height": "sm",
+                    "margin": "sm"
+                  }
+                ]
+              },
+              "hero": {
+                "action": {
+                  "type": "uri",
+                  "uri": "https://linecorp.com",
+                  "label": "Action"
+                },
+                "type": "image",
+                "aspectRatio": "20:13",
+                "size": "full",
+                "aspectMode": "cover",
+                "url": "https://sv1.picz.in.th/images/2019/11/18/gXu1v2.jpg"
+              }
+            }
+          };
+        //ประกาศตัวแปร payload เพื่อแสดงออกหน้าจอ
+        let payload่json = new Payload(`LINE`, payload, { sendAsMessage: true });
+
+
+        agent.add(payload่json); //แสดง paylaod
+
+
+    }
+
+
+    function Faculty_of_ScienceTechnology(agent) {
+        let payload = {
+            "type": "flex",
+            "contents": {
+              "type": "bubble",
+              "footer": {
+                "type": "box",
+                "layout": "vertical",
+                "contents": [
+                  {
+                    "type": "spacer",
+                    "size": "sm"
+                  },
+                  {
+                    "action": {
+                      "label": "สาขาอาชีวอนามัยและความปลอดภัย",
+                      "type": "message",
+                      "text": "สาขาอาชีวอนามัยและความปลอดภัย"
+                    },
+                    "type": "button",
+                    "style": "primary",
+                    "color": "#0E9407",
+                    "height": "sm",
+                    "margin": "none"
+                  },
+                  {
+                    "color": "#0E9407",
+                    "height": "sm",
+                    "margin": "sm",
+                    "action": {
+                      "type": "message",
+                      "text": "สาขาวิทยาศาสตร์สิ่งแวดล้อม",
+                      "label": "สาขาวิทยาศาสตร์สิ่งแวดล้อม"
+                    },
+                    "type": "button",
+                    "style": "primary"
+                  },
+                  {
+                    "style": "primary",
+                    "color": "#0E9407",
+                    "height": "sm",
+                    "margin": "sm",
+                    "action": {
+                      "type": "message",
+                      "text": "สาขาเทคโนโลยีสารสนเทศ",
+                      "label": "สาขาเทคโนโลยีสารสนเทศ"
+                    },
+                    "type": "button"
+                  },
+                  {
+                    "type": "button",
+                    "style": "primary",
+                    "color": "#0E9407",
+                    "height": "sm",
+                    "margin": "sm",
+                    "action": {
+                      "type": "message",
+                      "text": "สาขาการอาหารและธุรกิจบริการ",
+                      "label": "สาขาการอาหารและธุรกิจบริการ"
+                    }
+                  },
+                  {
+                    "type": "button",
+                    "style": "primary",
+                    "color": "#0E9407",
+                    "height": "sm",
+                    "margin": "sm",
+                    "action": {
+                      "type": "message",
+                      "text": "สาขาเทคโนโลยีการเกษตร",
+                      "label": "สาขาเทคโนโลยีการเกษตร"
+                    }
+                  },
+                  {
+                    "action": {
+                      "label": "สาขาวิชาเคมี",
+                      "type": "message",
+                      "text": "สาขาวิชาเคมี"
+                    },
+                    "type": "button",
+                    "style": "primary",
+                    "color": "#0E9407",
+                    "height": "sm",
+                    "margin": "sm"
+                  },
+                  {
+                    "color": "#0E9407",
+                    "height": "sm",
+                    "margin": "sm",
+                    "action": {
+                      "type": "message",
+                      "text": "สาขาชีววิทยาประยุกต์",
+                      "label": "สาขาชีววิทยาประยุกต์"
+                    },
+                    "type": "button",
+                    "style": "primary"
+                  },
+                  {
+                    "action": {
+                      "label": "สาขาฟิสิกส์ประยุกต์",
+                      "type": "message",
+                      "text": "สาขาฟิสิกส์ประยุกต์"
+                    },
+                    "type": "button",
+                    "style": "primary",
+                    "color": "#0E9407",
+                    "height": "sm",
+                    "margin": "sm"
+                  },
+                  {
+                    "color": "#0E9407",
+                    "height": "sm",
+                    "margin": "sm",
+                    "action": {
+                      "type": "message",
+                      "text": "สาขาวิทยาการคอมพิวเตอร์",
+                      "label": "สาขาวิทยาการคอมพิวเตอร์"
+                    },
+                    "type": "button",
+                    "style": "primary"
+                  },
+                  {
+                    "style": "primary",
+                    "color": "#0E9407",
+                    "height": "sm",
+                    "margin": "sm",
+                    "action": {
+                      "type": "message",
+                      "text": "สาขาสาธารณสุขศาสตร์",
+                      "label": "สาขาสาธารณสุขศาสตร์"
+                    },
+                    "type": "button"
+                  },
+                  {
+                    "style": "primary",
+                    "color": "#0E9407",
+                    "height": "sm",
+                    "margin": "sm",
+                    "action": {
+                      "type": "message",
+                      "text": "สาขาคณิตศาสตร์และสถิติประยุกต์",
+                      "label": "สาขาคณิตศาสตร์และสถิติประยุกต์"
+                    },
+                    "type": "button"
+                  }
+                ]
+              },
+              "hero": {
+                "size": "full",
+                "aspectMode": "cover",
+                "url": "https://sv1.picz.in.th/images/2019/11/18/gXu1v2.jpg",
+                "action": {
+                  "type": "uri",
+                  "uri": "https://linecorp.com",
+                  "label": "Action"
+                },
+                "type": "image",
+                "aspectRatio": "20:13"
+              },
+              "body": {
+                "type": "box",
+                "layout": "vertical",
+                "spacing": "md",
+                "contents": [
+                  {
+                    "size": "xl",
+                    "type": "text",
+                    "text": "คณะวิทยาศาสตร์และเทคโนโลยี",
+                    "weight": "bold"
+                  },
+                  {
+                    "size": "xxs",
+                    "color": "#AAAAAA",
+                    "margin": "none",
+                    "type": "text",
+                    "text": "กรุณากดเลือกหัวข้อในการสอบถาม"
+                  }
+                ],
+                "action": {
+                  "type": "uri",
+                  "uri": "https://linecorp.com",
+                  "label": "Action"
+                }
+              }
+            },
+            "altText": "คณะวิทยาศาสตร์และเทคโนโลยี"
+          };
+        //ประกาศตัวแปร payload เพื่อแสดงออกหน้าจอ
+        let payload่json = new Payload(`LINE`, payload, { sendAsMessage: true });
+
+
+        agent.add(payload่json); //แสดง paylaod
+
+
+    }
+
+    //ครุศาสตร์
+    function Faculty_of_Education(agent) {
+        let payload = {
+            "type": "flex",
+            "contents": {
+              "body": {
+                "type": "box",
+                "layout": "vertical",
+                "spacing": "md",
+                "contents": [
+                  {
+                    "size": "xl",
+                    "type": "text",
+                    "text": "คณะครุศาสตร์",
+                    "weight": "bold"
+                  },
+                  {
+                    "size": "xxs",
+                    "color": "#AAAAAA",
+                    "margin": "none",
+                    "type": "text",
+                    "text": "กรุณากดเลือกหัวข้อในการสอบถาม"
+                  }
+                ],
+                "action": {
+                  "type": "uri",
+                  "uri": "https://linecorp.com",
+                  "label": "Action"
+                }
+              },
+              "type": "bubble",
+              "footer": {
+                "contents": [
+                  {
+                    "type": "spacer",
+                    "size": "sm"
+                  },
+                  {
+                    "color": "#0E9407",
+                    "height": "sm",
+                    "margin": "none",
+                    "action": {
+                      "type": "message",
+                      "text": "สาขาคณิตศาสตร์",
+                      "label": "สาขาคณิตศาสตร์"
+                    },
+                    "type": "button",
+                    "style": "primary"
+                  },
+                  {
+                    "style": "primary",
+                    "color": "#0E9407",
+                    "height": "sm",
+                    "margin": "sm",
+                    "action": {
+                      "type": "message",
+                      "text": "สาขาการสอนวิทยาศาสตร์ทั่วไป",
+                      "label": "สาขาการสอนวิทยาศาสตร์ทั่วไป"
+                    },
+                    "type": "button"
+                  },
+                  {
+                    "style": "primary",
+                    "color": "#0E9407",
+                    "height": "sm",
+                    "margin": "sm",
+                    "action": {
+                      "type": "message",
+                      "text": "สาขาคอมพิวเตอร์ศึกษา",
+                      "label": "สาขาคอมพิวเตอร์ศึกษา"
+                    },
+                    "type": "button"
+                  },
+                  {
+                    "action": {
+                      "type": "message",
+                      "text": "สาขาการสอนภาษาไทย",
+                      "label": "สาขาการสอนภาษาไทย"
+                    },
+                    "type": "button",
+                    "style": "primary",
+                    "color": "#0E9407",
+                    "height": "sm",
+                    "margin": "sm"
+                  },
+                  {
+                    "color": "#0E9407",
+                    "height": "sm",
+                    "margin": "sm",
+                    "action": {
+                      "type": "message",
+                      "text": "สาขาการสอนภาษาอังกฤษ",
+                      "label": "สาขาการสอนภาษาอังกฤษ"
+                    },
+                    "type": "button",
+                    "style": "primary"
+                  },
+                  {
+                    "type": "button",
+                    "style": "primary",
+                    "color": "#0E9407",
+                    "height": "sm",
+                    "margin": "sm",
+                    "action": {
+                      "type": "message",
+                      "text": "สาขาการศึกษาปฐมวัย",
+                      "label": "สาขาการศึกษาปฐมวัย"
+                    }
+                  },
+                  {
+                    "color": "#0E9407",
+                    "height": "sm",
+                    "margin": "sm",
+                    "action": {
+                      "type": "message",
+                      "text": "สาขาการสอนภาษาจีน",
+                      "label": "สาขาการสอนภาษาจีน"
+                    },
+                    "type": "button",
+                    "style": "primary"
+                  },
+                  {
+                    "type": "button",
+                    "style": "primary",
+                    "color": "#0E9407",
+                    "height": "sm",
+                    "margin": "sm",
+                    "action": {
+                      "label": "สาขาจิตวิทยาการปรึกษาและแนะแนว",
+                      "type": "message",
+                      "text": "สาขาจิตวิทยาการปรึกษาและแนะแนว"
+                    }
+                  },
+                  {
+                    "color": "#0E9407",
+                    "height": "sm",
+                    "margin": "sm",
+                    "action": {
+                      "type": "message",
+                      "text": "สาขาเทคโนโลยีสารสนเทศทางการศึกษา",
+                      "label": "สาขาเทคโนโลยีสารสนเทศทางการศึกษา"
+                    },
+                    "type": "button",
+                    "style": "primary"
+                  },
+                  {
+                    "color": "#0E9407",
+                    "height": "sm",
+                    "margin": "sm",
+                    "action": {
+                      "type": "message",
+                      "text": "สาขาการสอนสังคมศึกษา",
+                      "label": "สาขาการสอนสังคมศึกษา"
+                    },
+                    "type": "button",
+                    "style": "primary"
+                  }
+                ],
+                "type": "box",
+                "layout": "vertical"
+              },
+              "hero": {
+                "url": "https://sv1.picz.in.th/images/2019/11/18/gXu1v2.jpg",
+                "action": {
+                  "type": "uri",
+                  "uri": "https://linecorp.com",
+                  "label": "Action"
+                },
+                "aspectRatio": "20:13",
+                "type": "image",
+                "size": "full",
+                "aspectMode": "cover"
+              }
+            },
+            "altText": "คณะครุศาสตร์"
+          };
+        //ประกาศตัวแปร payload เพื่อแสดงออกหน้าจอ
+        let payload่json = new Payload(`LINE`, payload, { sendAsMessage: true });
+
+
+        agent.add(payload่json); //แสดง paylaod
+
+
+    }
+
+
+    //วิทยาการจัดการ
+    function Faculty_of_ManagementScience(agent) {
+        let payload = {
+            "type": "flex",
+            "contents": {
+              "type": "bubble",
+              "footer": {
+                "contents": [
+                  {
+                    "type": "spacer",
+                    "size": "sm"
+                  },
+                  {
+                    "style": "primary",
+                    "color": "#0E9407",
+                    "height": "sm",
+                    "margin": "none",
+                    "action": {
+                      "label": "สาขาการบัญชี",
+                      "type": "message",
+                      "text": "สาขาการบัญชี"
+                    },
+                    "type": "button"
+                  },
+                  {
+                    "color": "#0E9407",
+                    "height": "sm",
+                    "margin": "sm",
+                    "action": {
+                      "type": "message",
+                      "text": "สาขาการจัดการทรัพยากรมนุษย์",
+                      "label": "สาขาการจัดการทรัพยากรมนุษย์"
+                    },
+                    "type": "button",
+                    "style": "primary"
+                  },
+                  {
+                    "action": {
+                      "type": "message",
+                      "text": "สาขาการตลาด",
+                      "label": "สาขาการตลาด"
+                    },
+                    "type": "button",
+                    "style": "primary",
+                    "color": "#0E9407",
+                    "height": "sm",
+                    "margin": "sm"
+                  },
+                  {
+                    "color": "#0E9407",
+                    "height": "sm",
+                    "margin": "sm",
+                    "action": {
+                      "label": "สาขาคอมพิวเตอร์ธุรกิจ",
+                      "type": "message",
+                      "text": "สาขาคอมพิวเตอร์ธุรกิจ"
+                    },
+                    "type": "button",
+                    "style": "primary"
+                  },
+                  {
+                    "color": "#0E9407",
+                    "height": "sm",
+                    "margin": "sm",
+                    "action": {
+                      "label": "สาขาการจัดการ",
+                      "type": "message",
+                      "text": "สาขาการจัดการ"
+                    },
+                    "type": "button",
+                    "style": "primary"
+                  },
+                  {
+                    "color": "#0E9407",
+                    "height": "sm",
+                    "margin": "sm",
+                    "action": {
+                      "type": "message",
+                      "text": "สาขานิเทศศาสตร์",
+                      "label": "สาขานิเทศศาสตร์"
+                    },
+                    "type": "button",
+                    "style": "primary"
+                  },
+                  {
+                    "color": "#0E9407",
+                    "height": "sm",
+                    "margin": "sm",
+                    "action": {
+                      "type": "message",
+                      "text": "สาขาการท่องเที่ยว",
+                      "label": "สาขาการท่องเที่ยว"
+                    },
+                    "type": "button",
+                    "style": "primary"
+                  }
+                ],
+                "type": "box",
+                "layout": "vertical"
+              },
+              "hero": {
+                "aspectRatio": "20:13",
+                "type": "image",
+                "size": "full",
+                "aspectMode": "cover",
+                "url": "https://sv1.picz.in.th/images/2019/11/18/gXu1v2.jpg",
+                "action": {
+                  "label": "Action",
+                  "type": "uri",
+                  "uri": "https://linecorp.com"
+                }
+              },
+              "body": {
+                "contents": [
+                  {
+                    "type": "text",
+                    "text": "คณะวิทยาการจัดการ",
+                    "weight": "bold",
+                    "size": "xl"
+                  },
+                  {
+                    "type": "text",
+                    "text": "กรุณากดเลือกหัวข้อในการสอบถาม",
+                    "size": "xxs",
+                    "color": "#AAAAAA",
+                    "margin": "none"
+                  }
+                ],
+                "action": {
+                  "type": "uri",
+                  "uri": "https://linecorp.com",
+                  "label": "Action"
+                },
+                "type": "box",
+                "layout": "vertical",
+                "spacing": "md"
+              }
+            },
+            "altText": "คณะวิทยาการจัดการ"
+          };
+        //ประกาศตัวแปร payload เพื่อแสดงออกหน้าจอ
+        let payload่json = new Payload(`LINE`, payload, { sendAsMessage: true });
+
+
+        agent.add(payload่json); //แสดง paylaod
+
+
+    }
+
+        //ประเมินความพึงพอใจ
+        function Rate(agent) {
+             
+            let Rate = admin.firestore().collection("Rate").doc(date.toLocaleDateString());
+            Rate.get().then(function (docs) {
+                if (!docs.exists) {
+                    Rate.set({
+                        น้อยที่สุด: 0,
+                        น้อย: 0,
+                        ปานกลาง: 0,
+                        มาก: 0,
+                        มากที่สุด: 0
+                    
+                    });
+                }
+            });
+          
+            let text = request.body.queryResult.queryText;
+            if(text === "มีความพึงพอใจต่อระบบน้อยที่สุด"){
+                let transaction = db.runTransaction(t => {
+                    return t.get(Rate).then(doc => {
+                            let newcount = doc.data().น้อยที่สุด+ 1;
+                            t.update(Rate, {
+                                น้อยที่สุด: newcount,
+                            });                 
+                    });
+                });
+
+            }
+            else if(text === "มีความพึงพอใจต่อระบบน้อย"){
+                let transaction = db.runTransaction(t => {
+                    return t.get(Rate).then(doc => {
+                            let newcount = doc.data().น้อย+ 1;
+                            t.update(Rate, {
+                                น้อย: newcount,
+                            });                 
+                    });
+                });
+
+            }
+            else if(text === "มีความพึงพอใจต่อระบบปานกลาง"){
+                let transaction = db.runTransaction(t => {
+                    return t.get(Rate).then(doc => {
+                            let newcount = doc.data().ปานกลาง+ 1;
+                            t.update(Rate, {
+                                ปานกลาง: newcount,
+                            });                 
+                    });
+                });
+
+            }
+            else if(text === "มีความพึงพอใจต่อระบบมาก"){
+                let transaction = db.runTransaction(t => {
+                    return t.get(Rate).then(doc => {
+                            let newcount = doc.data().มาก+ 1;
+                            t.update(Rate, {
+                                มาก: newcount,
+                            });                 
+                    });
+                });
+
+            }
+            else if(text === "มีความพึงพอใจต่อระบบมากที่สุด"){
+              
+                let transaction = db.runTransaction(t => {
+                    return t.get(Rate).then(doc => {
+                            let newcount = doc.data().มากที่สุด+ 1;
+                            t.update(Rate, {
+                                มากที่สุด: newcount,
+                            });                 
+                    });
+                });
+            }
+            
+            agent.add("ขอบคุณค่ะ");
+            
+    
+        }
+
+    
 
 
 
-    let intentMap = new Map();
 
 
-    //การลงทะเบียน
-    intentMap.set("Additional_Credit_Registration", Additional_Credit_Registration);//การเพิ่ม
-    intentMap.set("Withdraw_credit_registration", Withdraw_credit_registration); //การถอน
-    intentMap.set("Course_termination", Course_termination); //การยกเลิกรายวิชา
-    intentMap.set("Forgot_Password", Forgot_Password); //การลืมรหัสผ่าน
-    intentMap.set("Unable_to_register", Unable_to_register); //ลงทะเบียนไม่ได้
-    intentMap.set("To_Increase_the_new_crouse", To_Increase_the_new_crouse); //การขอเปิดรายวิชาเพิ่ม
-    intentMap.set("Duplicate_registrations", Duplicate_registrations); //การลงทะเบียนซ้ำ
-    intentMap.set("Cumulative_credits", Cumulative_credits); //หน่วยกิตที่ต้องสะสม
-    intentMap.set("4_Year_undergraduate_program", Year4_undergraduate_program); //ระยะเวลาในการศึกษา 4 ปี
-    intentMap.set("5_Year_undergraduate_program", Year5_undergraduate_program); //ระยะเวลาในการศึกษา 5 ปี
-    intentMap.set("Continuing_undergraduate_program", Continuing_undergraduate_program); //ศึกษาปริญญาต่อเนื่อง
-    intentMap.set("Enroll_in", Enroll_in); //การลงทะเบียนเรียน
-    intentMap.set("Default Fallback Intent", Default_Fallback_Intent); //กรณีอื่นๆ
+    //ติดต่อเจ้าหน้าที่
+
+    admin.firestore().collection('Notify').doc(user_id).get().then(function (doc) {
+        if (!doc.exists) {
+            let intentMap = new Map();
 
 
 
-    //การลา 
-    intentMap.set("Private_leave", Private_leave); //การลากิจ
-    intentMap.set("Sick_Leave", Sick_Leave); //การลาป่วย
-
-    // บัตรนักศึกษา
-    intentMap.set("Lost_or_Breakdown", Lost_or_Breakdown); //บัตรหายหรือชำรุด
-    intentMap.set("Change_Information", Change_Information); //เปลี่ยนแปลงข้อมูลในบัตร
-
-    //การสำเร็จการศึกษา**
-    intentMap.set("GPA", GPA); //เกรดเฉลี่ยสะสม
-    intentMap.set("Graduation_Informing", Graduation_Informing); //การแจ้งขอสำเร็จการศึกษา
-    intentMap.set("Editing_information", Editing_information); //การขอแก้ไขข้อมูลเอกสารจบ
-    intentMap.set("honor", honor); //การได้รับเกียรตินิยม
-    intentMap.set("Approval", Approval); //การอนุมัติจบ
-
-    //การลาออก
-    intentMap.set("Resignation_Procedure", Resignation_Procedure); //ขั้นตอนการลาออก
-    intentMap.set("Resignation_Cancle", Resignation_Cancle); //การยกเลิกการลาออก
-    intentMap.set("University_Transfer", University_Transfer); //การขอย้ายสถานศึกษา
+            //การลงทะเบียน
+            intentMap.set("Additional_Credit_Registration", Additional_Credit_Registration);//การเพิ่ม
+            intentMap.set("Withdraw_credit_registration", Withdraw_credit_registration); //การถอน
+            intentMap.set("Course_termination", Course_termination); //การยกเลิกรายวิชา
+            intentMap.set("Forgot_Password", Forgot_Password); //การลืมรหัสผ่าน
+            intentMap.set("Unable_to_register", Unable_to_register); //ลงทะเบียนไม่ได้
+            intentMap.set("To_Increase_the_new_crouse", To_Increase_the_new_crouse); //การขอเปิดรายวิชาเพิ่ม
+            intentMap.set("Duplicate_registrations", Duplicate_registrations); //การลงทะเบียนซ้ำ
+            intentMap.set("Cumulative_credits", Cumulative_credits); //หน่วยกิตที่ต้องสะสม
+            intentMap.set("4_Year_undergraduate_program", Year4_undergraduate_program); //ระยะเวลาในการศึกษา 4 ปี
+            intentMap.set("5_Year_undergraduate_program", Year5_undergraduate_program); //ระยะเวลาในการศึกษา 5 ปี
+            intentMap.set("Continuing_undergraduate_program", Continuing_undergraduate_program); //ศึกษาปริญญาต่อเนื่อง
+            intentMap.set("Enroll_in", Enroll_in); //การลงทะเบียนเรียน
 
 
-    //การพ้นสภาพการเป็นนักศึกษา
-    intentMap.set("In_case_Student_Retirement", In_case_Student_Retirement); //กรณีการพ้นสภาพการเป็นนักศึกษา
-    intentMap.set("Procession_Student_Retirement", Procession_Student_Retirement); //การดำเนินการเมื่อพ้นสภาพการเป็นนักศึกษา
-    intentMap.set("Regular_session", Regular_session); //เกรดเฉลี่ยขั้นต่ำ ภาคปกติ
-    intentMap.set("Spacial_session", Spacial_session); //เกรดเฉลี่ยขั้นต่ำ ภาคพิเศษ
 
 
-    //การวัดและการประเมินผล
-    intentMap.set("Grade", Grade); //เกรดออกช้า
-    intentMap.set("Fix_Incomplete_Grade", Fix_Incomplete_Grade); //การแก้ I
+            //การลา 
+            intentMap.set("Private_leave", Private_leave); //การลากิจ
+            intentMap.set("Sick_Leave", Sick_Leave); //การลาป่วย
+
+            // บัตรนักศึกษา
+            intentMap.set("Lost_or_Breakdown", Lost_or_Breakdown); //บัตรหายหรือชำรุด
+            intentMap.set("Change_Information", Change_Information); //เปลี่ยนแปลงข้อมูลในบัตร
+
+            //การสำเร็จการศึกษา**
+            intentMap.set("GPA", GPA); //เกรดเฉลี่ยสะสม
+            intentMap.set("Graduation_Informing", Graduation_Informing); //การแจ้งขอสำเร็จการศึกษา
+            intentMap.set("Editing_information", Editing_information); //การขอแก้ไขข้อมูลเอกสารจบ
+            intentMap.set("honor", honor); //การได้รับเกียรตินิยม
+            intentMap.set("Approval", Approval); //การอนุมัติจบ
+
+            //การลาออก
+            intentMap.set("Resignation_Procedure", Resignation_Procedure); //ขั้นตอนการลาออก
+            intentMap.set("Resignation_Cancle", Resignation_Cancle); //การยกเลิกการลาออก
+            intentMap.set("University_Transfer", University_Transfer); //การขอย้ายสถานศึกษา
 
 
-    //การลาพักการศึกษา Taking_leave_from_studies
-    intentMap.set("Presenting_a_Petition", Presenting_a_Petition); //การยื่นคำร้องลาพักการศึกษา
-    intentMap.set("Taking_leave_from_studies_Regulation", Taking_leave_from_studies_Regulation); //ระเบียบการลาพักการศึกษา
-    intentMap.set("Taking_leave_from_studies_Fee", Taking_leave_from_studies_Fee); //ค่าธรรมเนียมการลาพักการศึกษา
+            //การพ้นสภาพการเป็นนักศึกษา
+            intentMap.set("In_case_Student_Retirement", In_case_Student_Retirement); //กรณีการพ้นสภาพการเป็นนักศึกษา
+            intentMap.set("Procession_Student_Retirement", Procession_Student_Retirement); //การดำเนินการเมื่อพ้นสภาพการเป็นนักศึกษา
+            intentMap.set("Regular_session", Regular_session); //เกรดเฉลี่ยขั้นต่ำ ภาคปกติ
+            intentMap.set("Spacial_session", Spacial_session); //เกรดเฉลี่ยขั้นต่ำ ภาคพิเศษ
 
 
-    //การขอรับเอกสารการศึกษา
-    intentMap.set("Certificate_of_Student_Status", Certificate_of_Student_Status); //ใบรับรองการเป็นนักศึกษา
-    intentMap.set("Transcript", Transcript); //ใบรับรองผลการเรียน
-    intentMap.set("Recovery_Diploma", Recovery_Diploma); //ใบขอรับปริญญาย้อนหลัง
-    intentMap.set("Period_of_Documentary", Period_of_Documentary); //ระยะเวลาการขอเอกสาร
-    intentMap.set("Receiving_documentary", Receiving_documentary); //ปัญหาการรับเอกสาร
+            //การวัดและการประเมินผล
+            intentMap.set("Grade", Grade); //เกรดออกช้า
+            intentMap.set("Fix_Incomplete_Grade", Fix_Incomplete_Grade); //การแก้ I
 
 
-    //ปฏิทินการศึกษา
-    intentMap.set("Regular_calendar", Regular_calendar); //ภาคการศึกษาปกติ
-    intentMap.set("Spacial_calendar", Spacial_calendar); //ภาคการศึกษาพิเศษ
-    intentMap.set("Summer", Summer); //ภาคการศึกษาฤดูร้อน
+            //การลาพักการศึกษา Taking_leave_from_studies
+            intentMap.set("Presenting_a_Petition", Presenting_a_Petition); //การยื่นคำร้องลาพักการศึกษา
+            intentMap.set("Taking_leave_from_studies_Regulation", Taking_leave_from_studies_Regulation); //ระเบียบการลาพักการศึกษา
+            intentMap.set("Taking_leave_from_studies_Fee", Taking_leave_from_studies_Fee); //ค่าธรรมเนียมการลาพักการศึกษา
 
 
-    //การสมัครเรียน
-    intentMap.set("Regular_application", Regular_application); //ภาคการศึกษาปกติ
-    intentMap.set("Spacial_application", Spacial_application); //ภาคการศึกษาพิเศษ
-    intentMap.set("Summer_application", Summer_application); //ภาคการศึกษาฤดูร้อน
-
-    //ค่าธรรมเนียมการศึกษา Tuition_fee
-    //คณะครุศาสตร์
-    intentMap.set("Mathematics", Mathematics);  //คณิตศาสตร์
-    intentMap.set("Teaching_General_Science", Teaching_General_Science); //การสอนวิทยาศาสตร์ทั่วไป
-    intentMap.set("Computer_Education", Computer_Education); //คอมพิวเตอร์ศึกษา
-    intentMap.set("Thai_Teaching", Thai_Teaching); //การสอนภาษาไทย
-    intentMap.set("English_Teaching", English_Teaching); //การสอนภาษาอังกฤษ
-    intentMap.set("Early_Childhood_Education", Early_Childhood_Education); //การศึกษาปฐมวัย
-    intentMap.set("Chinese_Teaching", Chinese_Teaching); //การสอนภาษาจีน
-    intentMap.set("Counseling_Psychology_and_Guidance_and_Thai_Teaching", Counseling_Psychology_and_Guidance_and_Thai_Teaching); //จิตวิทยาการปรึกษาและแนะแนว-การสอนภาษาไทย
-    intentMap.set("Educational_Information_Technology", Educational_Information_Technology); //เทคโนโลยีสารสนเทศทางการศึกษา-การสอนภาษาไทย
-    intentMap.set("Social_Studies_Teaching", Social_Studies_Teaching); //การสอนสังคมศึกษา
-
-    //คณะเทคโนโลยีอุตสาหกรรม 
-    intentMap.set("Industrial_Technology", Industrial_Technology);  //เทคโนโลยีอุตสาหกรรม
-    intentMap.set("Industrial_Management_Engineering", Industrial_Management_Engineering); //วิศวกรรมการจัดการอุตสาหกรรม
-    intentMap.set("Automotive_Mechanical_Engineering", Automotive_Mechanical_Engineering); //วิศวกรรมเครื่องกลยานยนต์
-    intentMap.set("Electonic_Engineering", Electonic_Engineering); //วิศวกรรมไฟฟ้า
-    intentMap.set("Product_Design", Product_Design); //ออกแบบผลิตภัณฑ์
+            //การขอรับเอกสารการศึกษา
+            intentMap.set("Certificate_of_Student_Status", Certificate_of_Student_Status); //ใบรับรองการเป็นนักศึกษา
+            intentMap.set("Transcript", Transcript); //ใบรับรองผลการเรียน
+            intentMap.set("Recovery_Diploma", Recovery_Diploma); //ใบขอรับปริญญาย้อนหลัง
+            intentMap.set("Period_of_Documentary", Period_of_Documentary); //ระยะเวลาการขอเอกสาร
+            intentMap.set("Receiving_documentary", Receiving_documentary); //ปัญหาการรับเอกสาร
 
 
-    //คณะมนุษยศาสตร์และสังคมศาสตร์ 
-    intentMap.set("Social_development", Social_development);  //การพัฒนาสังคม
-    intentMap.set("English", English); //ภาษาอังกฤษ
-    intentMap.set("Western_Music", Western_Music); //ดนตรีสากล
-    intentMap.set("Visual_Arts", Visual_Arts); //ทัศนศิลป์
-    intentMap.set("Political_Science", Political_Science); //รัฐศาสตร์
-    intentMap.set("Public_Adminstration", Public_Adminstration); //รัฐประศาสนศาสตร์
-    intentMap.set("Laws_Program", Laws_Program); //นิติศาสตร์บัณฑิต
-    intentMap.set("Japanese", Japanese); //ภาษาญี่ปุ่น
-    intentMap.set("Fine_and_Applied_Arts", Fine_and_Applied_Arts); //ศิลปกรรม
-    intentMap.set("Information_and_Library_Science", Information_and_Library_Science); //สารสนเทศศาสตร์และบรรณารักษศาสตร์
-    intentMap.set("Thai_Music_Education", Thai_Music_Education); //นาฎดุริยางคศิลป์ไทย
+            //ปฏิทินการศึกษา
+            intentMap.set("Regular_calendar", Regular_calendar); //ภาคการศึกษาปกติ
+            intentMap.set("Spacial_calendar", Spacial_calendar); //ภาคการศึกษาพิเศษ
+            intentMap.set("Summer", Summer); //ภาคการศึกษาฤดูร้อน
 
 
-    //คณะวิทยาการจัดการ 
-    intentMap.set("Accounting", Accounting);  //การบัญชี
-    intentMap.set("Human_Resource_Management", Human_Resource_Management); //การจัดการทรัพยากรมนุษย์
-    intentMap.set("Marketing", Marketing); //การตลาด
-    intentMap.set("Business_Computer", Business_Computer); //คอมพิวเตอร์ธุรกิจ
-    intentMap.set("Management", Management); //การจัดการ
-    intentMap.set("Communication_Arts", Communication_Arts); //นิเทศศาสตร์
-    intentMap.set("Tourism", Tourism); //การท่องเที่ยว
+            //การสมัครเรียน
+            intentMap.set("Regular_application", Regular_application); //ภาคการศึกษาปกติ
+            intentMap.set("Spacial_application", Spacial_application); //ภาคการศึกษาพิเศษ
+            intentMap.set("Summer_application", Summer_application); //ภาคการศึกษาฤดูร้อน
 
-    //คณะวิทยาศาสตร์และเทคโนโลยี
-    intentMap.set("Occupational_Safety_and_Health", Occupational_Safety_and_Health);  //อาชีวอนามัยและความปลอดภัย
-    intentMap.set("Environmental_Science", Environmental_Science); //วิทยาศาสตร์สิ่งแวดล้อม
-    intentMap.set("Information_Technology", Information_Technology); //เทคโนโลยีสารสนเทศ
-    intentMap.set("Food_and_Service", Food_and_Service); //การอาหารและธุรกิจบริการ
-    intentMap.set("Agricultural_Technology", Agricultural_Technology); //เทคโนโลยีการเกษตร
-    intentMap.set("Chemistry", Chemistry); //วิชาเคมี
-    intentMap.set("Biology", Biology); //ชีววิทยาประยุกต์
-    intentMap.set("Physics", Physics); //ฟิสิกส์ประยุกต์
-    intentMap.set("Computer_Science", Computer_Science); //วิทยาการคอมพิวเตอร์
-    intentMap.set("Public_Health", Public_Health); //สาธารณสุขศาสตร์
-    intentMap.set("Mathematics_and_Applied_Statistics", Mathematics_and_Applied_Statistics); //คณิตศาสตร์และสถิติประยุกต์
-	
-  
-  	//Contact_staff - fallback
-  	 intentMap.set("Contact_staff - fallback", Contact_staff);
-  
-  
-    agent.handleRequest(intentMap);
+            //ค่าธรรมเนียมการศึกษา Tuition_fee
+            //คณะครุศาสตร์
+            intentMap.set("Mathematics", Mathematics);  //คณิตศาสตร์
+            intentMap.set("Teaching_General_Science", Teaching_General_Science); //การสอนวิทยาศาสตร์ทั่วไป
+            intentMap.set("Computer_Education", Computer_Education); //คอมพิวเตอร์ศึกษา
+            intentMap.set("Thai_Teaching", Thai_Teaching); //การสอนภาษาไทย
+            intentMap.set("English_Teaching", English_Teaching); //การสอนภาษาอังกฤษ
+            intentMap.set("Early_Childhood_Education", Early_Childhood_Education); //การศึกษาปฐมวัย
+            intentMap.set("Chinese_Teaching", Chinese_Teaching); //การสอนภาษาจีน
+            intentMap.set("Counseling_Psychology_and_Guidance_and_Thai_Teaching", Counseling_Psychology_and_Guidance_and_Thai_Teaching); //จิตวิทยาการปรึกษาและแนะแนว-การสอนภาษาไทย
+            intentMap.set("Educational_Information_Technology", Educational_Information_Technology); //เทคโนโลยีสารสนเทศทางการศึกษา-การสอนภาษาไทย
+            intentMap.set("Social_Studies_Teaching", Social_Studies_Teaching); //การสอนสังคมศึกษา
+
+            //คณะเทคโนโลยีอุตสาหกรรม 
+            intentMap.set("Industrial_Technology", Industrial_Technology);  //เทคโนโลยีอุตสาหกรรม
+            intentMap.set("Industrial_Management_Engineering", Industrial_Management_Engineering); //วิศวกรรมการจัดการอุตสาหกรรม
+            intentMap.set("Automotive_Mechanical_Engineering", Automotive_Mechanical_Engineering); //วิศวกรรมเครื่องกลยานยนต์
+            intentMap.set("Electonic_Engineering", Electonic_Engineering); //วิศวกรรมไฟฟ้า
+            intentMap.set("Product_Design", Product_Design); //ออกแบบผลิตภัณฑ์
+
+
+            //คณะมนุษยศาสตร์และสังคมศาสตร์ 
+            intentMap.set("Social_development", Social_development);  //การพัฒนาสังคม
+            intentMap.set("English", English); //ภาษาอังกฤษ
+            intentMap.set("Western_Music", Western_Music); //ดนตรีสากล
+            intentMap.set("Visual_Arts", Visual_Arts); //ทัศนศิลป์
+            intentMap.set("Political_Science", Political_Science); //รัฐศาสตร์
+            intentMap.set("Public_Adminstration", Public_Adminstration); //รัฐประศาสนศาสตร์
+            intentMap.set("Laws_Program", Laws_Program); //นิติศาสตร์บัณฑิต
+            intentMap.set("Japanese", Japanese); //ภาษาญี่ปุ่น
+            intentMap.set("Fine_and_Applied_Arts", Fine_and_Applied_Arts); //ศิลปกรรม
+            intentMap.set("Information_and_Library_Science", Information_and_Library_Science); //สารสนเทศศาสตร์และบรรณารักษศาสตร์
+            intentMap.set("Thai_Music_Education", Thai_Music_Education); //นาฎดุริยางคศิลป์ไทย
+
+
+            //คณะวิทยาการจัดการ 
+            intentMap.set("Accounting", Accounting);  //การบัญชี
+            intentMap.set("Human_Resource_Management", Human_Resource_Management); //การจัดการทรัพยากรมนุษย์
+            intentMap.set("Marketing", Marketing); //การตลาด
+            intentMap.set("Business_Computer", Business_Computer); //คอมพิวเตอร์ธุรกิจ
+            intentMap.set("Management", Management); //การจัดการ
+            intentMap.set("Communication_Arts", Communication_Arts); //นิเทศศาสตร์
+            intentMap.set("Tourism", Tourism); //การท่องเที่ยว
+
+            //คณะวิทยาศาสตร์และเทคโนโลยี
+            intentMap.set("Occupational_Safety_and_Health", Occupational_Safety_and_Health);  //อาชีวอนามัยและความปลอดภัย
+            intentMap.set("Environmental_Science", Environmental_Science); //วิทยาศาสตร์สิ่งแวดล้อม
+            intentMap.set("Information_Technology", Information_Technology); //เทคโนโลยีสารสนเทศ
+            intentMap.set("Food_and_Service", Food_and_Service); //การอาหารและธุรกิจบริการ
+            intentMap.set("Agricultural_Technology", Agricultural_Technology); //เทคโนโลยีการเกษตร
+            intentMap.set("Chemistry", Chemistry); //วิชาเคมี
+            intentMap.set("Biology", Biology); //ชีววิทยาประยุกต์
+            intentMap.set("Physics", Physics); //ฟิสิกส์ประยุกต์
+            intentMap.set("Computer_Science", Computer_Science); //วิทยาการคอมพิวเตอร์
+            intentMap.set("Public_Health", Public_Health); //สาธารณสุขศาสตร์
+            intentMap.set("Mathematics_and_Applied_Statistics", Mathematics_and_Applied_Statistics); //คณิตศาสตร์และสถิติประยุกต์
+
+            intentMap.set("Contact_staff", Contact_staff);
+            intentMap.set("Registration", Registration);
+            intentMap.set("Undergraduate_Study_Period", Undergraduate_Study_Period);
+            intentMap.set("University_Calender", University_Calender);
+            intentMap.set("Student_Retirement", Student_Retirement);
+            intentMap.set("Graduation", Graduation);
+            intentMap.set("leave", leave);
+            intentMap.set("Taking_leave_from_studies", Taking_leave_from_studies);
+            intentMap.set("Resignation", Resignation);
+            intentMap.set("Student_Card", Student_Card);
+            intentMap.set("Education_Documentary", Education_Documentary);
+            intentMap.set("Measurement", Measurement);
+            intentMap.set("Application_study", Application_study);
+            intentMap.set("Tuition_fee", Tuition_fee);
+            intentMap.set("Faculty_of_Humanities", Faculty_of_Humanities);
+            intentMap.set("Faculty_of_Industrial", Faculty_of_Industrial);
+            intentMap.set("Faculty_of_ScienceTechnology", Faculty_of_ScienceTechnology);
+            intentMap.set("Faculty_of_Education", Faculty_of_Education);
+            intentMap.set("Faculty_of_ManagementScience", Faculty_of_ManagementScience);
+            intentMap.set("Menu", Menu);
+            intentMap.set("Default Fallback Intent", Default_Fallback_Intent); //กรณีอื่นๆ
+            intentMap.set("Rate", Rate);
+            agent.handleRequest(intentMap);
+        } else {
+            let intentMap = new Map();
+            //Contact_staff
+            intentMap.set("Contact_staff", Contact_staff);
+            intentMap.set("Default Fallback Intent", Default_Fallback_Intent); //กรณีอื่นๆ
+            intentMap.set("Menu", Menu);
+
+            agent.handleRequest(intentMap);
+
+        }
+    });
+
+
+
+
+
+
+
 }
 );

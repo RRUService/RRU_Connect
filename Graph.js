@@ -300,7 +300,7 @@ function graph(report_month, raw_data) {
     colors: ['#fff']
   },
   title: {
-    text: 'จำนวนการช่วยตอบคำถามของแช็ตบ็อต'
+    text: 'จำนวนความสำเร็จของการให้คำตอบของแช็ตบ็อต'
   },
   xaxis: {
     categories: report_month,
