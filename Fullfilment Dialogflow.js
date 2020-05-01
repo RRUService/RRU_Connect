@@ -134,8 +134,6 @@ exports.dialogflowFirebaseFulfillment = functions.https.onRequest((request, resp
         if (text === c) {
             agent.add("กรุณากดดาวเพื่อประเมินความพึงพอใจหลังการใช้ระบบ")
             agent.add(pay1);
-            agent.add("กรุณากดดาวเพื่อประเมินความพึงพอใจหลังการใช้ระบบ")
-            agent.add(pay1);
             db.runTransaction(t => {
                 return t.get(Count_Accuracy).then(doc => {
                     let newcount = doc.data().ใช่ + 1;
@@ -10894,10 +10892,8 @@ exports.dialogflowFirebaseFulfillment = functions.https.onRequest((request, resp
     function Contact_staff(agent) {
         let text = request.body.queryResult.queryText;
         let user_id = request.body.originalDetectIntentRequest.payload.data.source.userId;
-
-        db.collection("Notify").doc(user_id).set({
-            count: 1
-        });
+        db.collection("ID_user").doc(user_id).set({});
+        db.collection("Notify").doc(user_id).set({});
         agent.add("กำลังติดต่อเจ้าหน้าที่ให้นะคะกรุณาทิ้งคำถามที่ต้องการสอบถามไว้เลยค่ะ");
 
     }
@@ -10916,7 +10912,7 @@ exports.dialogflowFirebaseFulfillment = functions.https.onRequest((request, resp
         //  agent.add(user_id);
         //}
 
-        admin.firestore().collection('Default_Fallback').doc('user_id').collection(user_id).add({
+        admin.firestore().collection('Default_Fallback').add({
             response: text
         });
 
@@ -11326,7 +11322,7 @@ exports.dialogflowFirebaseFulfillment = functions.https.onRequest((request, resp
 
 
         };
-        db.collection("Notify").doc(user_id).delete().then(function () {
+        db.collection("ID_user").doc(user_id).delete().then(function () {
 
         });
 
@@ -13554,7 +13550,7 @@ exports.dialogflowFirebaseFulfillment = functions.https.onRequest((request, resp
 
     //ติดต่อเจ้าหน้าที่
 
-    admin.firestore().collection('Notify').doc(user_id).get().then(function (doc) {
+    admin.firestore().collection('ID_user').doc(user_id).get().then(function (doc) {
         if (!doc.exists) {
             let intentMap = new Map();
 

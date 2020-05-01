@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <title>ระบบจัดการข้อมูลแช็ตบ็อตสำหรับสนับสนุนงานวิชาการและงานทะเบียน</title>
+  <meta charset="UTF-8">
+
+  <!--===============================================================================================-->
+  <link rel="icon" type="image/png" href="images/icons/favicon.ico" />
+
+  <link rel="stylesheet" type="text/css" href="css/util.css">
+  <link rel="stylesheet" type="text/css" href="css/main.css">
+
+  <link rel="stylesheet" href="tablecaa.css">
+
+  <link rel="stylesheet" href="https://www.w3schools.com/w3css/4/w3.css">
+  <link href='https://fonts.googleapis.com/css?family=Kanit&subset=thai,latin' rel='stylesheet' type='text/css'>
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.0/jquery.min.js"></script>
+  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+
+
+  <!--===============================================================================================-->
+
+</head>
+<style>
+  .button-bt {
+    background-color: #28a745;
+    border: none;
+    color: white;
+    padding: 10px 67px;
+    text-align: center;
+    text-decoration: none;
+    display: inline-block;
+    font-size: 16px;
+    margin: 4px 2px;
+    cursor: pointer;
+    margin-left: 10%;
+   
+  }
+  input[type=text] {
+    width: 20%;
+    padding: 12px 20px;
+    margin: 8px 0;
+    box-sizing: border-box;
+    border: 1px solid #555;
+
+  }
+
+  input[type=text]:focus {
+    background-color: lightblue;
+  }
+  .select{
+  margin: 0px;
+  height: 48px;
+  width: 198px;
+  padding: 8px 15px;
+  font-size: 17px;
+
+  }
+  .select_yyyy{
+  margin: 0px;
+  height: 48px;
+  width: 103px;
+  padding: 8px 15px;
+  font-size: 17px;
+
+  }
+</style>
+<script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
+<script src="https://cdn.jsdelivr.net/npm/vue-apexcharts"></script>
+
+<body>
+  <div id="select_div">
+  <select name="select_m" id="select_m" class="select">
+    <option value="">กรุณาเลือกเดือน</option>
+    <option value="1">มกราคม</option>
+    <option value="2">กุมภาพันธ์</option>
+    <option value="3">มีนาคม</option>
+    <option value="4">เมษายน</option>
+    <option value="5">พฤษภาคม</option>
+    <option value="6">มิถุนายน</option>
+    <option value="7">กรกฎาคม</option>
+    <option value="8">สิงหาคม</option>
+    <option value="9">กันยายน</option>
+    <option value="10">ตุลาคม</option>
+    <option value="11">พฤศจิกายน</option>
+    <option value="12">ธันวาคม</option>
+  </select>
+
+ </div>
+ 
+
+  <div id="chart" style="height: 370px; max-width: 920px; margin: 0px auto;"></div>
+  <div id="ps"></div>
+</body>
+
+
+
+
+
+
+
+
+
+
+
+<script>
+
+  window.onscroll = function () { myFunction() };
+
+  var navbar = document.getElementById("myHeader");
+  var sticky = navbar.offsetTop - 80;
+
+  function myFunction() {
+    if (window.pageYOffset > sticky) {
+      navbar.classList.add("sticky");
+    } else {
+      navbar.classList.remove("sticky");
+    }
+  }
+</script>
+</script>
+</script>
+<!-- TODO: Add SDKs for Firebase products that you want to use
+     https://firebase.google.com/docs/web/setup#available-libraries -->
+
+<script src="https://www.gstatic.com/firebasejs/7.7.0/firebase-app.js"></script>
+<script src="https://www.gstatic.com/firebasejs/7.7.0/firebase-auth.js"></script>
+<script src="https://www.gstatic.com/firebasejs/7.7.0/firebase-firestore.js"></script>
+<script>
+  // Your web app's Firebase configuration
+  var firebaseConfig = {
+    apiKey: "AIzaSyA5KFIcemUtm1_i64TUyifV0WfKjbm9irk",
+    authDomain: "rru-connect-epeevr.firebaseapp.com",
+    databaseURL: "https://rru-connect-epeevr.firebaseio.com",
+    projectId: "rru-connect-epeevr",
+    storageBucket: "rru-connect-epeevr.appspot.com",
+    messagingSenderId: "898597223567",
+    appId: "1:898597223567:web:8cd2b5064e8edbaf20c4fa"
+  };
+  // Initialize Firebase
+  firebase.initializeApp(firebaseConfig);
+
+
+
+
+
+</script>
+<script src="test.js" charset="utf-8"></script>
+
+</html>

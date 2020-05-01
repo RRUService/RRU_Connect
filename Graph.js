@@ -3,6 +3,7 @@
 
 
 const db = firebase.firestore();//สร้าตัวแปร object สำหรับอ้างอิง firestore
+       
 
 
 //เฉพาะค่าธรรมเนียมการศึกษา
