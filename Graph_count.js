@@ -4,10 +4,18 @@ const db = firebase.firestore();//สร้าตัวแปร object สำ�
 var intent = new Array("การลงทะเบียน", "ปฏิทินการศึกษา", "การพ้นสภาพการเป็นนักศึกษา", "บัตรนักศึกษา", "การขอรับเอกสารการศึกษา", "การสมัครเรียน", "การลาพักการศึกษา", "การสำเร็จการศึกษา", "การลาออก", "การลา", "ค่าธรรมเนียมการศึกษา", "การวัดและประเมินผล")
 
 function myFunction_1() {
+  document.getElementById("submit1").style.backgroundColor = "#736060";
+  document.getElementById("submit2").style.backgroundColor = "#145a9d";
+  document.getElementById("submit3").style.backgroundColor = "#145a9d";
+ 
   document.getElementById('select_1').style.display = 'none';
   var element1 = document.getElementById("content");
   if (element1 != null) {
     element1.parentNode.removeChild(element1);
+  }
+  var element2 = document.getElementById("pp");
+  if (element2 != null) {
+    element2.parentNode.removeChild(element2);
   }
 
   var element_chart1 = document.getElementById("chart1");
@@ -28,11 +36,19 @@ function myFunction_1() {
 
 
 function myFunction_2() {
+  document.getElementById("submit1").style.backgroundColor = "#145a9d";
+  document.getElementById("submit2").style.backgroundColor = "#145a9d";
+  document.getElementById("submit3").style.backgroundColor = "#736060";
   document.getElementById('select_1').style.display = 'block';
   var element_chart1 = document.getElementById("chart1");
 
   if (element_chart1 != null) {
     element_chart1.parentNode.removeChild(element_chart1);
+  }
+
+  var element2 = document.getElementById("pp");
+  if (element2 != null) {
+    element2.parentNode.removeChild(element2);
   }
 
   var element = document.getElementById("chart");
@@ -756,6 +772,9 @@ function myFunction() {
 }
 
 function myFunction_3() {
+  document.getElementById("submit1").style.backgroundColor = "#145a9d";
+  document.getElementById("submit2").style.backgroundColor = "#736060";
+  document.getElementById("submit3").style.backgroundColor = "#145a9d";
   document.getElementById('select_1').style.display = 'none';
   var element_chart1 = document.getElementById("chart1");
 
@@ -806,6 +825,46 @@ function myFunction_3() {
     var next100day = newDayAdd(date, i);
     list_d.push(next100day);
   }
+  
+  var min = list_d.reduce(function (a, b) { return a < b ? a : b; }); 
+  var max = list_d.reduce(function (a, b) { return a > b ? a : b; });
+  list_text = [min , max];
+  list_t = [];
+  for(var i=0 ;i<list_text.length;i++){
+    var today = new Date(list_text[i]);
+    var dd = today.getDate();
+    var mm = today.getMonth() + 1; //January is 0!
+    var yyyy = today.getFullYear(); // ต้องรับค่า จาก input
+    var date = dd + "/" + mm + "/" + yyyy;
+    list_t.push(date);
+
+  }
+  
+
+
+  var element2 = document.getElementById("pp");
+  if (element2 != null) {
+    element2.parentNode.removeChild(element2);
+  }
+
+  var iDiv4 = document.createElement('div');
+  iDiv4.id = 'pp';
+  iDiv4.className = 'block2';
+  document.getElementById('div1').appendChild(iDiv4);
+
+ 
+  var para = document.createElement("h4");
+  var node = document.createTextNode("ข้อมูลระหว่างวันที่  " + list_t[0] + " ถึง " + list_t[1]);
+  var para1 = document.createElement("p");
+  var node1 = document.createTextNode("หมายเหตุ : เป็นการเก็บข้อมูล 7 วัน");
+  para.appendChild(node);
+  para1.appendChild(node1);
+  var element = document.getElementById("pp");
+  element.appendChild(para);
+  element.appendChild(para1);
+
+
+ 
 
   var list_registration = [];// การลงทะเบียน
   var list_Calender = [];//ปฏิทินการศึกษา
@@ -837,12 +896,43 @@ function myFunction_3() {
     .get()
     .then(function (querySnapshot) {
       querySnapshot.forEach(function (doc) {
+        
         if (list_d.includes(doc.id) === true) {
           if (doc.data().การลงทะเบียน !== undefined) {
             list_registration.push({ "การลงทะเบียน": doc.data().การลงทะเบียน });
           }
           if (doc.data().ปฎิทินการศึกษา !== undefined) {
             list_Calender.push({ "ปฎิทินการศึกษา": doc.data().ปฎิทินการศึกษา });
+          }
+          if (doc.data().การพ้นสภาพการเป็นนักศึกษา !== undefined) {
+            list_Student_Retirement.push({"การพ้นสภาพการเป็นนักศึกษา": doc.data().การพ้นสภาพการเป็นนักศึกษา });
+          }
+          if (doc.data().บัตรนักศึกษา !== undefined) {
+            list_Student_Card.push({"บัตรนักศึกษา": doc.data().บัตรนักศึกษา });
+          }
+          if (doc.data().การสำเร็จการศึกษา !== undefined) {
+            list_Graduation.push({"การสำเร็จการศึกษา": doc.data().การสำเร็จการศึกษา });
+          }
+          if (doc.data().การลาออก !== undefined) {
+            list_Resignation.push({"การลาออก": doc.data().การลาออก });
+          }
+          if (doc.data().การลา !== undefined) {
+            list_Leave.push({"การลา": doc.data().การลา });
+          }
+          if (doc.data().ค่าธรรมเนียมการศึกษา !== undefined) {
+            list_Tuition_fee.push({"ค่าธรรมเนียมการศึกษา": doc.data().ค่าธรรมเนียมการศึกษา });
+          }
+          if (doc.data().การลาพักการศึกษา !== undefined) {
+            list_Taking_leave_from_studies.push({"การลาพักการศึกษา": doc.data().การลาพักการศึกษา });
+          }
+          if (doc.data().การขอรับเอกสารการศึกษา !== undefined) {
+            list_Education_Documentary.push({"การขอรับเอกสารการศึกษา": doc.data().การขอรับเอกสารการศึกษา });
+          }
+          if (doc.data().การสมัครเรียน !== undefined) {
+            list_Application_study.push({"การสมัครเรียน": doc.data().การสมัครเรียน });
+          }
+          if (doc.data().การวัดและการประเมินผล !== undefined) {
+            list_Measurement.push({"การวัดและการประเมินผล": doc.data().การวัดและการประเมินผล });
           }
         }
       });
