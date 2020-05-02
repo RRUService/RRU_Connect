@@ -37,7 +37,7 @@ body {
 
 
 
-.button {
+.button-bt {
     background-color: #28a745;
     border: none;
     color: white;
@@ -51,6 +51,18 @@ body {
     margin-left: 10%;
    
   }
+  .button-bt1 {
+  background-color: #145a9d; /* Green */
+  border: none;
+  color: white;
+  text-align: center;
+  text-decoration: none;
+  display: inline-block;
+  font-size: 16px;
+  margin: 4px 2px;
+  cursor: pointer;
+  padding: 14px 60px;
+}
 
 .bs-example{
       margin: 20px;
@@ -58,17 +70,22 @@ body {
     }
 
 
+#chart1 {
+  
+  float:left;
+  padding: 20px;
+
+}
 #chart {
   
-    float:left;
-    padding: 20px;
-    margin: 0 40px;
+  float:left;
+  padding: 20px;
 
 }
 #content {
   padding: 20px;
   margin: 60px;
-    float:left;
+  float: left;
 
 }
 
@@ -175,7 +192,22 @@ hr.new5 {
   div.col4 {
  
     width: 100%;
-}
+}  .select{
+  margin: 0px;
+  height: 48px;
+  width: 198px;
+  padding: 8px 15px;
+  font-size: 17px;
+
+  }
+  .select_yyyy{
+  margin: 0px;
+  height: 48px;
+  width: 103px;
+  padding: 8px 15px;
+  font-size: 17px;
+
+  }
 
 
 
@@ -243,28 +275,56 @@ height: 100%;">
 
 <div class="col4" style="margin-top: 5%;">
 
-   
-  
+  <h4 style="margin-top: -2%; margin-left: 6%;">ประเมินความพึงพอใจหลังการใช้งานระบบ</h4>
+<center>
+<div style="margin-top: 3%;">
+<input class="button-bt1" type="button" value="รายวัน" id="submit1" onclick="myFunction_1()">
+<input class="button-bt1" type="button" value="รายสัปดาห์" id="submit2" onclick="myFunction_3()">
+<input class="button-bt1" type="button" value="รายเดือน" id="submit3" onclick="myFunction_2()">
+
+</div>
+</center>
    <center>
-    <h5 style="margin-left: -14%;">กรุณากดเลือกวันที่</h5>
+    <div id="div1" style="margin-top: 3%;"></div>
+    <div id="day" style="display:none;">
+    <h5 style="margin-left: -14.5%;margin-top: 3%;">กรุณากดเลือกวันที่</h5>
     <br>
   <input type="date" id="start" name="trip-start"  style="height: 48px;width: 282px;font-size: 18px;padding: 16px;background: #ccc;"
   value="yyyy-mm-dd"
   min="2020-01-01" max="3000-12-31" > 
   <br>
   <br>
-  <input class="button button5" type="button" value="แสดง" id="submit" onclick="myFunction()">
+  <input class="button-bt button5" type="button" value="แสดง" id="submit" onclick="myFunction()">
 </div>
-
-
 </center>
-
-
-  
-
+<!-- <div id="chart"></div> -->
+<!-- <div id="chart1" style="display:none;"></div> -->
+<center>
+<div id="select_1" style="display:none;margin-top: 3%;">
+<div id="select_div">
+  <select name="select_m" id="select_m" class="select">
+    <option value="">กรุณาเลือกเดือน</option>
+    <option value="1">มกราคม</option>
+    <option value="2">กุมภาพันธ์</option>
+    <option value="3">มีนาคม</option>
+    <option value="4">เมษายน</option>
+    <option value="5">พฤษภาคม</option>
+    <option value="6">มิถุนายน</option>
+    <option value="7">กรกฎาคม</option>
+    <option value="8">สิงหาคม</option>
+    <option value="9">กันยายน</option>
+    <option value="10">ตุลาคม</option>
+    <option value="11">พฤศจิกายน</option>
+    <option value="12">ธันวาคม</option>
+  </select>
+ </div>
+  <input class="button-bt button5" type="button" value="แสดง" id="submit" onclick="month() "style="
+  margin-left: 11.5%;
+  margin-top: 2%;
+">
+</div>
+</center>
  <div id="ps" style="margin-top: 8%;"></div>
-
-
 </div>
 </div>
   </div>
@@ -290,6 +350,38 @@ height: 100%;">
   };
   // Initialize Firebase
   firebase.initializeApp(firebaseConfig);
+
+  var today1 = new Date();
+  var yyyy = today1.getFullYear();
+  list_yyyy = [yyyy];
+
+  //สร้าง select
+  firebase.firestore().collection("Count_Intent").get().then((querySnapshot) => {
+    querySnapshot.forEach(doc => {
+      var today = new Date(doc.id);
+      var dd = today.getDate();
+      var mm = today.getMonth() + 1; //January is 0!
+      var yyyy = today.getFullYear(); // ต้องรับค่า จาก input
+      list_yyyy.push(yyyy);
+    });
+    let array = [...new Set(list_yyyy)];
+    // สร้าง select
+    var myDiv1 = document.getElementById("select_div");
+
+    //Create and append select list
+    var selectList = document.createElement("select");
+    selectList.setAttribute("id", "mySelect");
+    selectList.className = 'select_yyyy';
+    myDiv1.appendChild(selectList);
+
+    //Create and append the options
+    for (var i = 0; i < array.length; i++) {
+      var option = document.createElement("option");
+      option.setAttribute("value", array[i]);
+      option.text = array[i];
+      selectList.appendChild(option);
+    }
+  });
 </script>
 <!-- <script src="Graph.js" charset="utf-8"></script> -->
 
