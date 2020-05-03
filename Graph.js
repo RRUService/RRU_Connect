@@ -3,7 +3,7 @@
 
 
 const db = firebase.firestore();//สร้าตัวแปร object สำหรับอ้างอิง firestore
-       
+
 
 
 //เฉพาะค่าธรรมเนียมการศึกษา
@@ -23,7 +23,7 @@ function ChangeSelectList() {
   // document.getElementById('chart').style.display = 'none';
   // document.getElementById("retable").deleteRow(1);//
 
- 
+
   var DataCategory = DataList.options[DataList.selectedIndex].value; //ดึงค่าของ value หมวดหมู
 
 
@@ -54,31 +54,40 @@ function ChangeSelectList() {
   } else {
 
     document.getElementById('display').style.display = 'none';
-    
+
 
   }
 
-  
+
 
 
 }
+
+
+
+
+
+
+
+
+
 
 function myFunction() {
 
   var username = document.getElementById("start").value; //วันที่ document
   var DataList = document.getElementById("category").value;// get id value
 
- 
+
   var element = document.getElementById("chart");
 
-  if(element != null){
+  if (element != null) {
     element.parentNode.removeChild(element);
   }
   var element1 = document.getElementById("content");
-  if(element1 != null){
+  if (element1 != null) {
     element1.parentNode.removeChild(element1);
   }
-  
+
 
 
 
@@ -92,10 +101,10 @@ function myFunction() {
   var today = yyyy + '-' + mm + '-' + dd;
   console.log(today);
 
-  if(today === "NaN-NaN-NaN"){
+  if (today === "NaN-NaN-NaN") {
     window.alert("กรุณาเลือกวันที่ด้วยค่ะ");
   }
-  else if(DataList === "กรุณาเลือกหมวดหมู่"){
+  else if (DataList === "กรุณาเลือกหมวดหมู่") {
     window.alert("กรุณาเลือกหมวดหมู่ด้วยค่ะ");
   }
 
@@ -107,13 +116,13 @@ function myFunction() {
   if (DataList === "ค่าธรรมเนียมการศึกษา") {
     var y = document.getElementById("subcategory");//get id
 
-    
+
     var Index_Subcategoy = y.selectedIndex;
     Value_SubCategory = y.options[Index_Subcategoy].value;
     var Subject = TopicData[DataList][Value_SubCategory];
     console.log(TopicData[DataList][Value_SubCategory] + "23"); //คณะ
     console.log(DataList);//หมวดหมู่ค่าธรรมเนียม
-    if(Subject === "กรุณาเลือกคณะ"){
+    if (Subject === "กรุณาเลือกคณะ") {
       window.alert("กรุณาเลือกคณะด้วยค่ะ");
     }
 
@@ -126,15 +135,15 @@ function myFunction() {
       var raw_data = [];
 
 
-    
+
 
       data.forEach(function (doc) {
-       
+
         report_month.push(doc.id);//เก็บเดือนของรายงานไว้ในตัวแปร report_month //doc.id
         report.push(doc.data());//เก็บยอดขายของสินค้าแต่ละอันไว้ในตัวแปร report
 
       });
-     
+
       report.forEach(function (report_item) {
 
         Object.keys(report_item).forEach(function (key) {
@@ -186,7 +195,7 @@ function myFunction() {
       var report = [];
       var key_array = [];
       var raw_data = [];
-    
+
 
 
       data.forEach(function (doc) {
@@ -250,18 +259,18 @@ function myFunction() {
 }
 
 function graph(report_month, raw_data) {
-    //สร้างกราฟ
-    var iDiv = document.createElement('div');
-    iDiv.id = 'chart';
-    iDiv.className = 'block1';
-    document.getElementById('ps').appendChild(iDiv);
-  
-  
-    //สร้างตาราง
-    var iDiv1 = document.createElement('div');
-    iDiv1.id = 'content';
-    iDiv1.className = 'block2';
-    document.getElementById('ps').appendChild(iDiv1);
+  //สร้างกราฟ
+  var iDiv = document.createElement('div');
+  iDiv.id = 'chart';
+  iDiv.className = 'block1';
+  document.getElementById('ps').appendChild(iDiv);
+
+
+  //สร้างตาราง
+  var iDiv1 = document.createElement('div');
+  iDiv1.id = 'content';
+  iDiv1.className = 'block2';
+  document.getElementById('ps').appendChild(iDiv1);
   var data = [];
   var number = [];
 
@@ -278,49 +287,49 @@ function graph(report_month, raw_data) {
 
   var options = {
     series: [{
-      name: 'ไม่ช่วย',
+      name: 'ช่วย',
       data: number[0]
     }, {
-      name: 'ช่วย',
+      name: 'ไม่ช่วย',
       data: number[1]
     }],
     chart: {
-    type: 'bar',
-    height: 350,
-    width:550,
-    stacked: true,
-    stackType: '100%'
-  },
-  plotOptions: {
-    bar: {
-      horizontal: true,
+      type: 'bar',
+      height: 350,
+      width: 650,
+      stacked: true,
+      stackType: '100%'
     },
-  },
-  stroke: {
-    width: 1,
-    colors: ['#fff']
-  },
-  title: {
-    text: 'จำนวนความสำเร็จของการให้คำตอบของแช็ตบ็อต'
-  },
-  xaxis: {
-    categories: report_month,
- 
-  },
-  yaxis: {
+    plotOptions: {
+      bar: {
+        horizontal: true,
+      },
+    },
+    stroke: {
+      width: 1,
+      colors: ['#fff']
+    },
     title: {
-      text: undefined
+      text: 'จำนวนความสำเร็จของการให้คำตอบของแช็ตบ็อต'
     },
-  },
- 
-  fill: {
-    opacity: 1
-  },
-  legend: {
-    position: 'top',
-    horizontalAlign: 'center',
-    offsetX: 40
-  }
+    xaxis: {
+      categories: report_month,
+
+    },
+    yaxis: {
+      title: {
+        text: undefined
+      },
+    },
+
+    fill: {
+      opacity: 1
+    },
+    legend: {
+      position: 'top',
+      horizontalAlign: 'center',
+      offsetX: 40
+    }
   };
 
 
@@ -337,18 +346,18 @@ function graph(report_month, raw_data) {
 
 function showData(report_month, number) {
 
-  
+
 
   var MOUNTAINS = [];
   // เตรียมข้อมูล
   for (var i = 0; i < report_month.length; i++) {
 
-    MOUNTAINS.push({ "name": report_month[i], "ช่วย": number[0][i], "ไม่ช่วย": number[1][i]})
+    MOUNTAINS.push({ "name": report_month[i], "ช่วย": number[0][i], "ไม่ช่วย": number[1][i] })
 
   }
 
 
-  
+
   //draw table
   var table = document.createElement("table");
   table.className = "gridtable";
@@ -365,7 +374,7 @@ function showData(report_month, number) {
   MOUNTAINS.forEach(function (el) {
     var tr = document.createElement("tr");
     for (var o in el) {
-      
+
       var td = document.createElement("td");
       td.appendChild(document.createTextNode(el[o]))
       tr.appendChild(td);
