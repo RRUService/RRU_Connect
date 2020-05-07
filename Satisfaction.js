@@ -72,18 +72,36 @@ function myFunction() {
 
             console.log("Document data:", doc.data());
             let key = Object.keys(doc.data());
-            let data = Object.values(doc.data()).sort(function(a, b){return b - a});
+            let data = Object.values(doc.data());
 
             console.log("key = " + key)
             console.log("data =" + data )
            graph(key,data);
-   
+         
             // report.push(doc.data());//เก็บ ข้อมูล key และ ค่าของข้อมูล 
             
-        
+            
     });
+    
  
     function graph(key,data){
+
+      var MOUNTAINS = []; //
+  
+      for(var i=0 ; i<key.length;i++){
+        MOUNTAINS.push({"ชื่อ": key[i], "จำนวน": data[i]});
+      }
+      MOUNTAINS.sort((a, b) => (a.จำนวน > b.จำนวน) ? -1 : 1)
+      list_name = [];
+      list_num = [];
+      MOUNTAINS.filter((docs) => {
+        list_name.push(docs.ชื่อ);
+        list_num.push(docs.จำนวน);
+  
+      });
+      console.log(key_array)
+
+
 
        //สร้างกราฟ
     var iDiv = document.createElement('div');
@@ -100,7 +118,7 @@ function myFunction() {
         var options = {
             series: [{
             name:"จำนวน",
-            data: data,
+            data: list_num,
            
           }],
             chart: {
@@ -121,7 +139,7 @@ function myFunction() {
           colors: ['#FF4560'
           ],
           xaxis: {
-            categories: key
+            categories: list_name
           },
           title: {
             text: 'แบบประเมินความพึงพอใจหลังการใช้งาน'
@@ -132,25 +150,14 @@ function myFunction() {
           var chart = new ApexCharts(document.querySelector("#chart"), options);
           chart.render();
           chart.resetSeries()
-        showData(key,data);
+          showData(MOUNTAINS);
 
     }
 
 
-    function showData(report_month, number) {
+    function showData(MOUNTAINS) {
 
-  
-  
-      var MOUNTAINS = [];
-      // เตรียมข้อมูล
-      for (var i = 0; i < report_month.length; i++) {
-    
-        MOUNTAINS.push({ "name": report_month[i], "ถูก": number[i]});
-        
-    
-      }
-      
-    
+
       //draw table
       var table = document.createElement("table");
       table.className = "gridtable";

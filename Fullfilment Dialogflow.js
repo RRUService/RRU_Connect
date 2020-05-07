@@ -6177,7 +6177,7 @@ exports.dialogflowFirebaseFulfillment = functions.https.onRequest((request, resp
                     let newcount = doc.data().ใช่ + 1;
 
                     t.update(Count_Accuracy, {
-                        ใช่: newcount,
+                        ใช���: newcount,
 
                     });
                 });
@@ -10897,7 +10897,7 @@ exports.dialogflowFirebaseFulfillment = functions.https.onRequest((request, resp
         let user_id = request.body.originalDetectIntentRequest.payload.data.source.userId;
         db.collection("ID_user").doc(user_id).set({});
         db.collection("Notify").doc(user_id).set({});
-        agent.add("กำลังติดต่อเจ้าหน้าที่ให้นะคะกรุณาทิ้งคำถามที่ต้องการสอบถามไว้เลยค่ะ");
+        agent.add("กำลังติดต่อเจ้าหน้าที่ให้นะคะกรุณาทิ้งคำถามที่ต้องการสอบถามไว้เลยค่ะ  แต่ถ้าคุณต้องการใช้งานน้องบ๊อต กรุณา กด เมนูหลัก");
 
     }
 
@@ -10923,7 +10923,7 @@ exports.dialogflowFirebaseFulfillment = functions.https.onRequest((request, resp
         //return ข้อมูลคำตอบ 
         return admin.firestore().collection('Notify').doc(user_id).get().then(function (doc) {
             if (doc.exists) {
-                agent.add("รอเจ้าหน้าที่สักครู่นะคะ    ถ้าคุณต้องการที่จะใช้งานน้องบ๊อตกรุณา กด เมนูหลัก");
+                agent.add("รอเจ้าหน้าที่สักครู่นะคะ");
             } else {
                 agent.add("ขอโทษค่ะ น้องบ็อตไม่สามารถตอบคำถามนี้ได้ กรุณากดปุ่มติดต่อเจ้าหน้าที่ด้านล่างด้วยนะคะ");
             }
@@ -13465,6 +13465,9 @@ exports.dialogflowFirebaseFulfillment = functions.https.onRequest((request, resp
 
 
     }
+    function Default_Welcome_Intent(agent){
+        agent.add("สวัสดีค่ะ น้องบ็อตกำลังให้บริการ / ท่านสามารถดูหัวข้อที่สอบถามได้ โดยกดเมนู  ที่ชื่อว่า เมนูหลัก");
+    }
 
         //ประเมินความพึงพอใจ
         function Rate(agent) {
@@ -13713,6 +13716,7 @@ exports.dialogflowFirebaseFulfillment = functions.https.onRequest((request, resp
             intentMap.set("Menu", Menu);
             intentMap.set("Default Fallback Intent", Default_Fallback_Intent); //กรณีอื่นๆ
             intentMap.set("Rate", Rate);
+            intentMap.set("Default Welcome Intent",Default_Welcome_Intent);
             agent.handleRequest(intentMap);
         } else {
             let intentMap = new Map();
